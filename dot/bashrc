@@ -1,0 +1,10 @@
+[[ -s "$HOME/.dcp/initrc" ]] &&
+  source "$HOME/.dcp/initrc"
+[[ -s "$HOME/.rvm/scripts/rvm" ]] &&
+  source "$HOME/.rvm/scripts/rvm"
+
+export PATH="$PATH:$HOME/.dcp/bin"
+export PS1="$(parse_identity)$(git_branch_colors) $ "
+
+[[ -s "$HOME/.dcp/private" ]] &&
+  source "$HOME/.dcp/private"
