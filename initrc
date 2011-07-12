@@ -74,7 +74,7 @@ parse_identity() {
   else
     printf "$GREEN\u"
   fi
-  printf "$WHITE@$CYAN\h$PURPLE:\w$WHITE"
+  printf "$WHITE@$CYAN\h$WHITE:$PURPLE\w$WHITE"
 }
 
 parse_git_branch() {
