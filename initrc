@@ -39,23 +39,11 @@ alias ll="ls -la"
 alias la="ls -a"
 alias h="history | tail -32"
 
-# Find functions
+# Find function
 
 find_in_files() {
   if [ "$1" ]; then
-    xargs grep "$1" -sli
-  fi
-}
-
-find_in_folder() {
-  if [ "$1" ]; then
-    find . | find_in_files "$1"
-  fi
-}
-
-find_in_specific_files() {
-  if [[ "$1" && "$2" ]]; then
-    find . | grep "$1" | find_in_files "$2"
+    find . | grep -v ^\.\/\.git\/ | xargs grep -sli "$1"
   fi
 }
 
