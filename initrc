@@ -41,9 +41,17 @@ alias h="history | tail -32"
 
 # Find function
 
-find_in_files() {
+find_stub() {
   if [ "$1" ]; then
-    find . | grep -v ^\.\/\.git\/ | xargs grep -sli "$1"
+    grep -v \.git\/ | xargs grep -sli "$1"
+  fi
+}
+
+find_in_files() {
+  if [[ "$1" && "$2" ]]; then
+    find "$1" | find_stub "$2"
+  elif [ "$1" ]; then
+    find . | find_stub "$1"
   fi
 }
 
