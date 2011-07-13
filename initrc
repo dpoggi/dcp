@@ -124,8 +124,10 @@ update_dcp() {
   cd "$HOME/.dcp"
   git checkout master
   git pull origin master
+  git fetch origin
   cd "$HOME/.vim"
   git checkout master
   git pull origin master
+  git fetch origin
   cd "$wd"
 }
