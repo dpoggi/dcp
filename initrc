@@ -12,18 +12,18 @@ DARKGRAY="\[\033[1;30m\]"
 WHITE="\[\033[1;37m\]"
 
 # Mac specifics
-if [ `uname` == "Darwin" ]; then
+if [[ `uname` == "Darwin" ]]; then
   alias ls="ls -G"
   alias fcache="dscacheutil -flushcache"
 fi
 
 # Linux specifics
-if [ `uname` == "Linux" ]; then
+if [[ `uname` == "Linux" ]]; then
   alias ifconfig="/sbin/ifconfig"
 fi
 
 # Mac + Linux stuff
-if [ `uname` != "SunOS" ]; then
+if [[ `uname` != "SunOS" ]]; then
   alias grep="grep --color=auto"
   alias egrep="egrep --color=auto"
   alias fgrep="fgrep --color=auto"
@@ -48,7 +48,7 @@ find_stub() {
 }
 
 find_in_files() {
-  if [[ "$1" && "$2" ]]; then
+  if [[ -n "$1" && -n "$2" ]]; then
     find "$1" | find_stub "$2"
   elif [ "$1" ]; then
     find . | find_stub "$1"
@@ -65,7 +65,7 @@ cse() {
 # PS1 Functions
 
 parse_identity() {
-  if [ `whoami` == "root" ]; then
+  if [[ `whoami` == "root" ]]; then
     printf "$RED\u"
   else
     printf "$GREEN\u"
