@@ -1,11 +1,16 @@
 #!/usr/bin/env ruby
 require 'fileutils'
 
-Dir.glob File.join(File.expand_path('~/.dcp/dot'), '*') do |file|
-  original = File.expand_path file
-  link = File.join File.expand_path('~'), ".#{File.basename file}"
-  puts "#{link} => #{original}"
-  if not File.exists? link
-    FileUtils.ln_s original, link
+[
+  File.join(File.expand_path('~/.dcp/dot'), '*'),
+  File.join(File.expand_path('~/.vim'), '*rc')
+].each do |glob|
+  Dir.glob glob  do |file|
+    original = File.expand_path file
+    link = File.join File.expand_path('~'), ".#{File.basename file}"
+    if not File.exists? link
+      puts "#{link} => #{original}"
+      FileUtils.ln_s original, link
+    end
   end
 end
