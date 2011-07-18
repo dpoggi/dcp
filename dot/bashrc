@@ -9,3 +9,4 @@
 
 export PATH="$PATH:$HOME/.dcp/bin"
 export PS1="$(parse_identity)$(git_branch_colors)$(uid_symbol)"
+export EDITOR="vim"

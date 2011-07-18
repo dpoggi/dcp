@@ -14,3 +14,4 @@ plugins=(mysql-macports node npm osx pip rails rails3 rvm)
   source "$HOME/.rvm/scripts/rvm"
 
 export PATH="$PATH:$HOME/.dcp/bin"
+export EDITOR="vim"
