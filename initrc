@@ -81,6 +81,14 @@ git_branch_colors() {
   printf "$YELLOW\$(parse_git_branch)$WHITE"
 }
 
+uid_symbol() {
+  if [[ `whoami` == "root" ]]; then
+    printf " $RED#$WHITE "
+  else
+    printf " $RED%s$WHITE " "$"
+  fi
+}
+
 # Ruby
 alias pru="rvm ruby-1.9.2-p180 exec pru"
 alias r="touch tmp/restart.txt"

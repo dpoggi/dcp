@@ -1,10 +1,11 @@
 [[ -s "$HOME/.dcp/initrc" ]] &&
   source "$HOME/.dcp/initrc"
+[[ -s "$HOME/.tmuxinator/scripts/tmuxinator" ]] &&
+  source "$HOME/.tmuxinator/scripts/tmuxinator"
+[[ -s "$HOME/.dcp/private" ]] &&
+  source "$HOME/.dcp/private"
 [[ -s "$HOME/.rvm/scripts/rvm" ]] &&
   source "$HOME/.rvm/scripts/rvm"
 
 export PATH="$PATH:$HOME/.dcp/bin"
-export PS1="$(parse_identity)$(git_branch_colors) $ "
-
-[[ -s "$HOME/.dcp/private" ]] &&
-  source "$HOME/.dcp/private"
+export PS1="$(parse_identity)$(git_branch_colors)$(uid_symbol)"

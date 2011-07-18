@@ -1,11 +1,13 @@
 export ZSH="$HOME/.oh-my-zsh"
 export ZSH_THEME="dpoggi"
 plugins=(mysql-macports node npm osx pip rails rails3 rvm)
-
 [[ -s "$ZSH/oh-my-zsh.sh" ]] &&
   source "$ZSH/oh-my-zsh.sh"
+
 [[ -s "$HOME/.dcp/initrc" ]] &&
   source "$HOME/.dcp/initrc"
+[[ -s "$HOME/.tmuxinator/scripts/tmuxinator" ]] &&
+  source "$HOME/.tmuxinator/scripts/tmuxinator"
 [[ -s "$HOME/.dcp/private" ]] &&
   source "$HOME/.dcp/private"
 [[ -s "$HOME/.rvm/scripts/rvm" ]] &&
