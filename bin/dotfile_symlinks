@@ -5,7 +5,7 @@ require 'fileutils'
   File.join(File.expand_path('~/.dcp/dot'), '*'),
   File.join(File.expand_path('~/.vim'), '*rc')
 ].each do |glob|
-  Dir.glob glob  do |file|
+  Dir.glob glob do |file|
     original = File.expand_path file
     link = File.join File.expand_path('~'), ".#{File.basename file}"
     if not File.exists? link
