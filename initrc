@@ -92,6 +92,9 @@ uid_symbol() {
 # Ruby
 alias r="touch tmp/restart.txt"
 
+# CoffeeScript
+alias growlee="coffee -r coffeescript-growl --watch --compile"
+
 # Git
 
 gitpub() {
