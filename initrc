@@ -90,7 +90,6 @@ uid_symbol() {
 }
 
 # Ruby
-alias pru="rvm ruby-1.9.2-p180 exec pru"
 alias r="touch tmp/restart.txt"
 
 # Git
