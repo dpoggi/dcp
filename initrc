@@ -58,7 +58,7 @@ find_in_files() {
 # </3 MSU CSE
 cse() {
   if [ "$CSE_USER" ]; then
-    ssh $CSE_USER@$1.cse.msu.edu
+    ssh "$CSE_USER@$1.cse.msu.edu"
   fi
 }
 
@@ -99,11 +99,11 @@ alias growlee="coffee -r coffeescript-growl --watch --compile"
 
 gitpub() {
   if [ "$1" ]; then
-    git push origin $1:refs/heads/$1
+    git push origin "${1}:refs/heads/$1"
     git fetch origin
-    git config branch.$1.remote origin
-    git config branch.$1.merge refs/heads/$1
-    git checkout $1
+    git config "branch.$1.remote" origin
+    git config "branch.$1.merge" "refs/heads/$1"
+    git checkout "$1"
   fi
 }
 
