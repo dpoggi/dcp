@@ -133,11 +133,13 @@ update_dcp() {
   local wd=`pwd`
   cd "$HOME/.dcp"
   git checkout master
-  git pull origin master
   git fetch origin
+  git pull origin master
   cd "$HOME/.vim"
   git checkout master
-  git pull origin master
   git fetch origin
+  git pull origin master
+  git submodule update --init
+  git submodule foreach git pull origin master
   cd "$wd"
 }
