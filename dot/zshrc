@@ -1,6 +1,6 @@
 export ZSH="$HOME/.oh-my-zsh"
 export ZSH_THEME="dpoggi"
-plugins=(mysql-macports node npm osx pip rails rails3 rvm)
+plugins=(mysql-macports node npm osx pip rails rails3 rvm textmate)
 [[ -s "$ZSH/oh-my-zsh.sh" ]] &&
   source "$ZSH/oh-my-zsh.sh"
 
