@@ -1,0 +1,2 @@
+export rvm_path="$HOME/.rvm"
+export rvm_pretty_print_flag="1"
