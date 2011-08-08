@@ -1,0 +1,11 @@
+[[ -s "$HOME/.dcp/initrc" ]] &&
+  source "$HOME/.dcp/initrc"
+[[ -s "$HOME/.dcp/private" ]] &&
+  source "$HOME/.dcp/private"
+[[ -s "$HOME/.rvm/scripts/rvm" ]] &&
+  source "$HOME/.rvm/scripts/rvm"
+[[ -s "$HOME/.pythonbrew/etc/bashrc" ]] &&
+  source "$HOME/.pythonbrew/etc/bashrc"
+
+export PATH="$PATH:$HOME/.dcp/bin"
+export EDITOR="vim"

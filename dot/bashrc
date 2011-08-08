@@ -1,12 +1,2 @@
-[[ -s "$HOME/.dcp/initrc" ]] &&
-  source "$HOME/.dcp/initrc"
-[[ -s "$HOME/.dcp/private" ]] &&
-  source "$HOME/.dcp/private"
-[[ -s "$HOME/.rvm/scripts/rvm" ]] &&
-  source "$HOME/.rvm/scripts/rvm"
-[[ -s "$HOME/.pythonbrew/etc/bashrc" ]] &&
-  source "$HOME/.pythonbrew/etc/bashrc"
-
-export PATH="$PATH:$HOME/.dcp/bin"
+[[ -s "$HOME/.dcp/common" ]] && source "$HOME/.dcp/common"
 export PS1="$(parse_identity)$(git_branch_colors)$(uid_symbol)"
-export EDITOR="vim"
