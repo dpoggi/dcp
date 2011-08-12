@@ -8,3 +8,5 @@ for FILE in $HOME/.dcp/dot/* $HOME/.vim/*rc; do
     ln -s "$FILE" "$HOME/.$(basename $FILE)"
   fi
 done
+
+hash git 2>&- && { git config --global core.editor vim; git config --global color.ui true; }
