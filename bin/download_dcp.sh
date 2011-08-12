@@ -37,7 +37,7 @@ git submodule update --init
 cd "$HOME"
 
 # Install the symlinks
-$HOME/.dcp/bin/install_dcp
+$HOME/.dcp/bin/install_dcp.sh
 
 # Get back to where we were
 cd "$wd"
