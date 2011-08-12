@@ -22,13 +22,7 @@ else
 fi
 
 # Install RVM and pythonbrew:
-curl -skL -o rvm-installer.sh https://rvm.beginrescueend.com/install/rvm
-chmod +x rvm-installer.sh
-rvm_bin_path="$HOME/.rvm/bin"
-rvm_man_path="$HOME/.rvm/share/man"
-./rvm-installer.sh --version latest
-rm -f rvm-installer.sh .rvmrc
-
+curl -skL http://files.danpoggi.com/install_rvm.sh | sh
 curl -skL http://xrl.us/pythonbrewinstall | bash
 
 # Get Vim rockin'
