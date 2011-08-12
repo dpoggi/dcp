@@ -1,10 +1,10 @@
 #!/bin/sh
 
-for file in $HOME/.dcp/dot/* $HOME/.vim/*rc; do
-  if [ -s "$HOME/.$(basename $file)" ]; then
-    echo "$HOME/.$(basename $file) already exists, not linking."
+for FILE in $HOME/.dcp/dot/* $HOME/.vim/*rc; do
+  if [ -s "$HOME/.$(basename $FILE)" ]; then
+    echo "$HOME/.$(basename $FILE) already exists, not linking."
   else
-    echo "Linking $HOME/.$(basename $file) => $file"
-    ln -s "$file" "$HOME/.$(basename $file)"
+    echo "Linking $HOME/.$(basename $FILE) => $FILE"
+    ln -s "$FILE" "$HOME/.$(basename $FILE)"
   fi
 done

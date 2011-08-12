@@ -1,12 +1,12 @@
 #!/bin/sh
 
-# Save the whales! I mean working directory!
-wd=`pwd`
-cd "$HOME"
-
 # Freak out and quit if we don't have Git and/or cURL.
-hash git 2>&- || { echo >&2 "We need Git first, cap'n!"; cd "$wd"; exit 1; }
-hash curl 2>&- || { echo >&2 "Also cURL. cURL would be good."; cd "$wd"; exit 1; }
+hash git 2>&- || { echo >&2 "We need Git first, cap'n!"; exit 1; }
+hash curl 2>&- || { echo >&2 "Also cURL. cURL would be good."; exit 1; }
+
+# Save the whales! I mean working directory!
+OLD_WD=`pwd`
+cd "$HOME"
 
 # Clone oh-my-zsh regardless, not a single fuck is given this day.
 git clone git://github.com/robbyrussell/oh-my-zsh.git .oh-my-zsh
@@ -22,12 +22,12 @@ else
 fi
 
 # Install RVM and pythonbrew:
-curl -skL -o rvm-installer https://rvm.beginrescueend.com/install/rvm
-chmod +x rvm-installer
+curl -skL -o rvm-installer.sh https://rvm.beginrescueend.com/install/rvm
+chmod +x rvm-installer.sh
 rvm_bin_path="$HOME/.rvm/bin"
 rvm_man_path="$HOME/.rvm/share/man"
-./rvm-installer --version latest
-rm -f rvm-installer .rvmrc
+./rvm-installer.sh --version latest
+rm -f rvm-installer.sh .rvmrc
 
 curl -skL http://xrl.us/pythonbrewinstall | bash
 
@@ -40,7 +40,7 @@ cd "$HOME"
 $HOME/.dcp/bin/install_dcp.sh
 
 # Get back to where we were
-cd "$wd"
+cd "$OLD_WD"
 
 # Report.
 echo
