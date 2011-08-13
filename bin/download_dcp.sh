@@ -21,8 +21,13 @@ else
   git clone git://github.com/dpoggi/dotvim.git .vim
 fi
 
-# Install RVM and pythonbrew:
+# Install RVM, NVM, and pythonbrew:
 curl -skL http://files.danpoggi.com/install_rvm.sh | sh
+if [ "$ITS_ME" ]; then
+  git clone git@github.com:dpoggi/nvm.git .nvm
+else
+  git clone git://github.com/dpoggi/nvm.git .nvm
+fi
 curl -skL http://xrl.us/pythonbrewinstall | bash
 
 # Get Vim rockin'
