@@ -3,3 +3,4 @@ export ZSH_THEME="dpoggi"
 plugins=(rvm)
 [[ -s "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 [[ -s "$HOME/.dcp/common" ]] && source "$HOME/.dcp/common"
+[ "$rvm_loaded_flag" ] && __rvm_project_rvmrc
