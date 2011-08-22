@@ -23,7 +23,8 @@ test -d ".dcp" || git clone "$GIT_PREFIX/dcp.git" ".dcp"
 test -d ".vim" || git clone "$GIT_PREFIX/dotvim.git" ".vim"
 
 # Install RVM, NVM, and pythonbrew:
-test -d ".rvm" || ($DCP_GET "http://files.danpoggi.com/install_rvm.sh" | sh)
+sh "$HOME/.dcp/bin/install_rvm.sh"
+rm -f "$HOME/.rvmrc"
 test -d ".nvm" || git clone "$GIT_PREFIX/nvm.git" ".nvm"
 test -d ".pythonbrew" || ($DCP_GET "http://xrl.us/pythonbrewinstall" | bash)
 
