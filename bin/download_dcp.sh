@@ -2,7 +2,9 @@
 
 # Freak out and quit if we don't have Git and/or cURL.
 hash git 2>&- || { echo >&2 "We need Git first, cap'n!"; exit 1; }
-hash curl 2>&- || { echo >&2 "Also cURL. cURL would be good."; exit 1; }
+hash wget 2>&- && DCP_GET="wget --no-check-certificate --content-disposition -qO -"
+hash curl 2>&- && DCP_GET="curl -skLJ"
+test "$DCP_GET" || { echo >&2 "Error! Couldn't find cURL or Wget!"; exit 1; }
 
 # Save the whales! I mean working directory!
 OLD_WD=`pwd`
@@ -21,9 +23,9 @@ test -d ".dcp" || git clone "$GIT_PREFIX/dcp.git" ".dcp"
 test -d ".vim" || git clone "$GIT_PREFIX/dotvim.git" ".vim"
 
 # Install RVM, NVM, and pythonbrew:
-test -d ".rvm" || (curl -skL "http://files.danpoggi.com/install_rvm.sh" | sh)
+test -d ".rvm" || ($DCP_GET "http://files.danpoggi.com/install_rvm.sh" | sh)
 test -d ".nvm" || git clone "$GIT_PREFIX/nvm.git" ".nvm"
-test -d ".pythonbrew" || (curl -skL "http://xrl.us/pythonbrewinstall" | bash)
+test -d ".pythonbrew" || ($DCP_GET "http://xrl.us/pythonbrewinstall" | bash)
 
 # Get Vim rockin'
 cd "$HOME/.vim"
