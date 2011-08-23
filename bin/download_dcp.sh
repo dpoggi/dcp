@@ -11,7 +11,7 @@ OLD_WD=`pwd`
 cd "$HOME"
 
 # Clone oh-my-zsh regardless, not a single fuck is given this day.
-test -d ".oh-my-zsh" || git clone "git://github.com/robbyrussell/oh-my-zsh.git" ".oh-my-zsh"
+test -d ".oh-my-zsh" || (hash zsh 2>&- && git clone "git://github.com/robbyrussell/oh-my-zsh.git" ".oh-my-zsh")
 
 # If it's me, I want to be able to change my dotfiles,
 # otherwise clone the public repos.
@@ -23,10 +23,10 @@ test -d ".dcp" || git clone "$GIT_PREFIX/dcp.git" ".dcp"
 test -d ".vim" || git clone "$GIT_PREFIX/dotvim.git" ".vim"
 
 # Install RVM, NVM, and pythonbrew:
-sh "$HOME/.dcp/bin/install_rvm.sh"
+hash curl 2>&- && sh "$HOME/.dcp/bin/install_rvm.sh"
 rm -f "$HOME/.rvmrc"
-test -d ".nvm" || git clone "$GIT_PREFIX/nvm.git" ".nvm"
-test -d ".pythonbrew" || ($DCP_GET "http://xrl.us/pythonbrewinstall" | bash)
+#test -d ".nvm" || git clone "$GIT_PREFIX/nvm.git" ".nvm"
+test -d ".pythonbrew" || (hash curl 2>&- && ($DCP_GET "http://xrl.us/pythonbrewinstall" | bash))
 
 # Get Vim rockin'
 cd "$HOME/.vim"
