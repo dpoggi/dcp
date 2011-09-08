@@ -55,13 +55,6 @@ find_in_files() {
   fi
 }
 
-# </3 MSU CSE
-cse() {
-  if [ "$CSE_USER" ]; then
-    ssh "$CSE_USER@$1.cse.msu.edu"
-  fi
-}
-
 # PS1 Functions
 
 parse_identity() {
