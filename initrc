@@ -133,4 +133,5 @@ update_dcp() {
   git submodule update --init
   git submodule foreach git pull origin master
   cd "$wd"
+  sh "$HOME/.dcp/bin/install_dcp.sh"
 }
