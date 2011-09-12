@@ -102,7 +102,7 @@ gitpub() {
 
 alias ga="git add"
 alias gp="git push"
-alias gl="git log --stat"
+alias gl="git log --stat --oneline --decorate"
 alias gs="git status"
 alias gc="git commit"
 alias gcm="git commit -m"
