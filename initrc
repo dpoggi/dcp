@@ -125,11 +125,11 @@ update_dcp() {
   cd "$HOME/.dcp"
   git checkout master
   git fetch origin
-  git pull origin master
+  git rebase origin/master
   cd "$HOME/.vim"
   git checkout master
   git fetch origin
-  git pull origin master
+  git rebase origin/master
   git submodule update --init
   git submodule foreach git pull origin master
   cd "$wd"
