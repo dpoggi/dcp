@@ -1,7 +1,7 @@
 #!/bin/sh
 
 hash wget 2>&- && DCP_GET="wget --no-check-certificate --content-disposition -qO"
-hash curl 2>&- && DCP_GET="curl -skLJ -o"
+hash curl 2>&- && DCP_GET="curl -skL -o"
 test "$DCP_GET" || { echo >&2 "Error! Couldn't find cURL or Wget!"; exit 1; }
 
 OLD_WD=`pwd`

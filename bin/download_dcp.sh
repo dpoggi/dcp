@@ -3,7 +3,7 @@
 # Freak out and quit if we don't have Git and/or cURL.
 hash git 2>&- || { echo >&2 "We need Git first, cap'n!"; exit 1; }
 hash wget 2>&- && DCP_GET="wget --no-check-certificate --content-disposition -qO -"
-hash curl 2>&- && DCP_GET="curl -skLJ"
+hash curl 2>&- && DCP_GET="curl -skL"
 test "$DCP_GET" || { echo >&2 "Error! Couldn't find cURL or Wget!"; exit 1; }
 
 # Save the whales! I mean working directory!
