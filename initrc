@@ -112,6 +112,9 @@ alias gco="git checkout"
 alias gf="git fetch"
 alias gpl="git pull"
 alias gn="git init && git add . && git commit -m 'Initial commit.'"
+gro() {
+  git rebase origin/$1
+}
 
 alias top_committers="git log --pretty=format:%aN | sort | uniq -c | sort -rn"
 alias cmp_origin_to_master="git log origin/master..master"
