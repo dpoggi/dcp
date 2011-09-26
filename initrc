@@ -132,7 +132,8 @@ update_dcp() {
   git fetch origin
   git rebase origin/master
   git submodule update --init
-  git submodule foreach git pull origin master
+  git submodule foreach git fetch
+  git submodule foreach git rebase origin/master
   cd "$wd"
   sh "$HOME/.dcp/bin/install_dcp.sh"
 }
