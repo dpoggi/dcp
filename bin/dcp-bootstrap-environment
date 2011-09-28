@@ -29,7 +29,8 @@ test -d ".pythonbrew" || (hash curl 2>&- && ($DCP_GET "http://xrl.us/pythonbrewi
 # Get Vim rockin'
 cd "$HOME/.vim"
 git submodule update --init
-git submodule foreach git pull origin master
+git submodule foreach git fetch origin
+git submodule foreach git rebase origin/master
 cd "$HOME"
 
 # Install the symlinks
