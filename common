@@ -2,10 +2,6 @@
   source "$HOME/.dcp/initrc"
 [[ -s "$HOME/.dcp/private" ]] &&
   source "$HOME/.dcp/private"
-[[ -s "$HOME/.rvm/scripts/rvm" ]] &&
-  source "$HOME/.rvm/scripts/rvm"
-[[ -s "$HOME/.nvm/nvm.sh" ]] &&
-  source "$HOME/.nvm/nvm.sh"
 [[ -s "$HOME/.pythonbrew/etc/bashrc" ]] &&
   source "$HOME/.pythonbrew/etc/bashrc"
 

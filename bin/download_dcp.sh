@@ -22,10 +22,7 @@ test "$ITS_ME" && GIT_PREFIX="git@github.com:dpoggi"
 test -d ".dcp" || git clone "$GIT_PREFIX/dcp.git" ".dcp"
 test -d ".vim" || git clone "$GIT_PREFIX/dotvim.git" ".vim"
 
-# Install RVM, NVM, and pythonbrew:
-hash curl 2>&- && sh "$HOME/.dcp/bin/install_rvm.sh"
-rm -f "$HOME/.rvmrc"
-#test -d ".nvm" || git clone "$GIT_PREFIX/nvm.git" ".nvm"
+# Install rbenv, ruby-build, and pythonbrew
 test -d ".pythonbrew" || (hash curl 2>&- && ($DCP_GET "http://xrl.us/pythonbrewinstall" | bash))
 
 # Get Vim rockin'

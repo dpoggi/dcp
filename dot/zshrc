@@ -1,6 +1,5 @@
 export ZSH="$HOME/.oh-my-zsh"
 export ZSH_THEME="dpoggi"
-plugins=(rvm)
+plugins=(heroku pip powder)
 [[ -s "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 [[ -s "$HOME/.dcp/common" ]] && source "$HOME/.dcp/common"
-[ "$rvm_loaded_flag" ] && __rvm_project_rvmrc
