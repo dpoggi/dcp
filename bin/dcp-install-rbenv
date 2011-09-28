@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 hash git 2>&- || { echo >&2 "Error: couldn't find Git!"; exit 1; }
 OLD_WD=`pwd`
