@@ -39,22 +39,6 @@ alias ll="ls -la"
 alias la="ls -a"
 alias h="history | tail -32"
 
-# Find function
-
-find_stub() {
-  if [ "$1" ]; then
-    grep -v \.git\/ | xargs grep -sli "$1"
-  fi
-}
-
-find_in_files() {
-  if [[ -n "$1" && -n "$2" ]]; then
-    find "$1" | find_stub "$2"
-  elif [ "$1" ]; then
-    find . | find_stub "$1"
-  fi
-}
-
 # PS1 Functions
 
 parse_identity() {
@@ -82,12 +66,6 @@ uid_symbol() {
   fi
 }
 
-# Ruby
-alias r="touch tmp/restart.txt"
-
-# CoffeeScript
-alias growlee="coffee -r coffeescript-growl --watch --compile"
-
 # Git
 
 gitpub() {
@@ -114,14 +92,8 @@ alias gr="git rebase"
 alias gpl="git pull"
 alias gn="git init && git add . && git commit -m 'Initial commit.'"
 
-alias top_committers="git log --pretty=format:%aN | sort | uniq -c | sort -rn"
-alias cmp_origin_to_master="git log origin/master..master"
-alias cmp_master_to_origin="git log master..origin/master"
-alias cmp_head_to_master="git log HEAD..master"
-alias cmp_master_to_head="git log master..HEAD"
-
 # Update script
-update_dcp() {
+dcp-update() {
   local wd=`pwd`
   cd "$HOME/.dcp"
   git checkout master
@@ -135,5 +107,5 @@ update_dcp() {
   git submodule foreach git fetch
   git submodule foreach git rebase origin/master
   cd "$wd"
-  sh "$HOME/.dcp/bin/install_dcp.sh"
+  "$HOME/.dcp/bin/dcp-install-links"
 }

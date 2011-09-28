@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+hash git 2>&- || { echo >&2 "Error: couldn't find Git!"; exit 1; }
+OLD_WD=`pwd`
+cd "$HOME"
+
+git clone git://github.com/sstephenson/rbenv.git .rbenv
+export PATH="$HOME/.rbenv/bin:$PATH"
+eval "$(rbenv init -)"
+
+rm -rf /tmp/ruby-build
+git clone git://github.com/sstephenson/ruby-build.git /tmp/ruby-build
+cd /tmp/ruby-build
+echo
+sudo ./install.sh
+echo
+
+cd "$OLD_WD"

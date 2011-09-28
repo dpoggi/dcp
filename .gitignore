@@ -1,6 +1,4 @@
 .DS_Store
 private
 bin/*
-!bin/install_dcp.sh
-!bin/install_rvm.sh
-!bin/download_dcp.sh
+!bin/dcp-*

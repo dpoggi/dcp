@@ -22,7 +22,8 @@ test "$ITS_ME" && GIT_PREFIX="git@github.com:dpoggi"
 test -d ".dcp" || git clone "$GIT_PREFIX/dcp.git" ".dcp"
 test -d ".vim" || git clone "$GIT_PREFIX/dotvim.git" ".vim"
 
-# Install rbenv, ruby-build, and pythonbrew
+# Install rbenv and pythonbrew
+test -d ".rbenv" || "$HOME/.dcp/bin/dcp-install-rbenv"
 test -d ".pythonbrew" || (hash curl 2>&- && ($DCP_GET "http://xrl.us/pythonbrewinstall" | bash))
 
 # Get Vim rockin'
@@ -32,7 +33,7 @@ git submodule foreach git pull origin master
 cd "$HOME"
 
 # Install the symlinks
-sh "$HOME/.dcp/bin/install_dcp.sh"
+"$HOME/.dcp/bin/dcp-install-links"
 
 # Get back to where we were
 cd "$OLD_WD"
