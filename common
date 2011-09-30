@@ -2,12 +2,15 @@
   source "$HOME/.dcp/initrc"
 [[ -s "$HOME/.dcp/private" ]] &&
   source "$HOME/.dcp/private"
-[[ -s "$HOME/.rvm/scripts/rvm" ]] &&
-  source "$HOME/.rvm/scripts/rvm"
 [[ -s "$HOME/.pythonbrew/etc/bashrc" ]] &&
   source "$HOME/.pythonbrew/etc/bashrc"
 
-export PATH="$HOME/.rbenv/bin:$PATH:$HOME/.dcp/bin"
-[[ -s "$HOME/.rbenv/bin/rbenv" ]] &&
+if [[ -s "$HOME/.rbenv/bin/rbenv" ]]; then
+  export PATH="$HOME/.rbenv/bin:$PATH"
   eval "$(rbenv init -)"
+elif [[ -s "$HOME/.rvm/scripts/rvm" ]]; then
+  source "$HOME/.rvm/scripts/rvm"
+fi
+
+export PATH="$PATH:$HOME/.dcp/bin"
 export EDITOR="vim"
