@@ -9,4 +9,5 @@ for FILE in $HOME/.dcp/dot/* $HOME/.vim/*rc; do
   fi
 done
 
-hash git 2>&- && { git config --global core.editor vim; git config --global color.ui true; }
+hash git 2>&- &&
+  { git config --global core.editor vim; git config --global color.ui true; }

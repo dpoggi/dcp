@@ -11,7 +11,8 @@ OLD_WD=`pwd`
 cd "$HOME"
 
 # Clone oh-my-zsh regardless, not a single fuck is given this day.
-test -d ".oh-my-zsh" || (hash zsh 2>&- && git clone "git://github.com/robbyrussell/oh-my-zsh.git" ".oh-my-zsh")
+test -d ".oh-my-zsh" ||
+  (hash zsh 2>&- && git clone "git://github.com/robbyrussell/oh-my-zsh.git" ".oh-my-zsh")
 
 # If it's me, I want to be able to change my dotfiles,
 # otherwise clone the public repos.
@@ -24,14 +25,12 @@ test -d ".vim" || git clone "$GIT_PREFIX/dotvim.git" ".vim"
 
 # Install rbenv and pythonbrew
 test -d ".rbenv" || "$HOME/.dcp/bin/dcp-install-rbenv"
-test -d ".pythonbrew" || (hash curl 2>&- && ($DCP_GET "http://xrl.us/pythonbrewinstall" | bash))
+test -d ".pythonbrew" ||
+  (hash curl 2>&- && ($DCP_GET "http://xrl.us/pythonbrewinstall" | bash))
 
 # Get Vim rockin'
 cd "$HOME/.vim"
 git submodule update --init
-git submodule foreach git fetch origin
-git submodule foreach git rebase origin/master
-cd "$HOME"
 
 # Install the symlinks
 "$HOME/.dcp/bin/dcp-install-links"
