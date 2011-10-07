@@ -1,3 +1,2 @@
 set completion-ignore-case on
-Control-j: menu-complete
 set show-all-if-ambiguous on
