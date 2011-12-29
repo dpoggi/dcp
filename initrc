@@ -40,7 +40,7 @@ alias h="history | tail -32"
 # PS1 Functions
 
 parse_identity() {
-  if [[ `whoami` == "root" ]]; then
+  if [[ $UID == 0 ]]; then
     printf "$RED\u"
   else
     printf "$GREEN\u"
