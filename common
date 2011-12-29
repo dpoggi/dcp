@@ -2,8 +2,6 @@
   source "$HOME/.dcp/initrc"
 [[ -s "$HOME/.dcp/private" ]] &&
   source "$HOME/.dcp/private"
-[[ -s "$HOME/.pythonbrew/etc/bashrc" ]] &&
-  source "$HOME/.pythonbrew/etc/bashrc"
 
 if [[ -s "$HOME/.rbenv/bin/rbenv" ]]; then
   export PATH="$HOME/.rbenv/bin:$PATH"
