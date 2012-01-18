@@ -18,7 +18,6 @@ fi
 # Linux specifics
 if [[ `uname` == "Linux" ]]; then
   alias ifconfig="/sbin/ifconfig"
-  alias ls="ls --color=auto"
 fi
 
 # Mac + Linux stuff
@@ -31,6 +30,7 @@ fi
 # Linux + Solaris stuff
 if [[ `uname` != "Darwin" ]]; then
   alias sshclients="ps -A | grep sshd | wc -l"
+  alias ls="ls --color=auto"
 fi
 
 alias ll="ls -la"
