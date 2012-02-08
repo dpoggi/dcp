@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 hash curl 2>&- || { echo >&2 "Error! Couldn't find cURL or Wget!"; exit 1; }
 OLD_WD=`pwd`
