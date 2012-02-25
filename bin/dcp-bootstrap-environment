@@ -24,9 +24,10 @@ test -d ".dcp" || git clone "$GIT_PREFIX/dcp.git" ".dcp"
 test -d ".vim" || git clone "$GIT_PREFIX/dotvim.git" ".vim"
 
 # Install rbenv and pythonbrew
-test -d ".rbenv" || "$HOME/.dcp/bin/dcp-install-rbenv"
-test -d ".pythonbrew" ||
-  (hash curl 2>&- && ($DCP_GET "http://xrl.us/pythonbrewinstall" | bash))
+#test -d ".rbenv" || "$HOME/.dcp/bin/dcp-install-rbenv"
+test -d ".rvm" || "$HOME/.dcp/bin/dcp-install-rvm"
+#test -d ".pythonbrew" ||
+#  (hash curl 2>&- && ($DCP_GET "http://xrl.us/pythonbrewinstall" | bash))
 
 # Get Vim rockin'
 cd "$HOME/.vim"
