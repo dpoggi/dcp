@@ -9,5 +9,8 @@ for FILE in $HOME/.dcp/dot/* $HOME/.vim/*rc; do
   fi
 done
 
-hash git 2>&- &&
-  { git config --global core.editor vim; git config --global color.ui true; }
+if hash git 2>&-; then
+  git config --global core.editor vim
+  git config --global color.ui true
+  git config --global core.excludesfile ~/.gitignore_global
+fi
