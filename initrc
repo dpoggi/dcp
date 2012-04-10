@@ -102,8 +102,6 @@ dcp-update() {
   git fetch origin
   git rebase origin/master
   git submodule update --init
-  git submodule foreach git fetch origin
-  git submodule foreach git rebase origin/master
   cd "$wd"
   "$HOME/.dcp/bin/dcp-install-links"
 }
