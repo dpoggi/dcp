@@ -2,15 +2,13 @@
 
 # Freak out and quit if we don't have Git and/or cURL.
 hash git 2>&- || { echo >&2 "We need Git first, cap'n!"; exit 1; }
-hash wget 2>&- && DCP_GET="wget --no-check-certificate --content-disposition -qO -"
-hash curl 2>&- && DCP_GET="curl -skL"
-test "$DCP_GET" || { echo >&2 "Error! Couldn't find cURL or Wget!"; exit 1; }
+hash curl 2>&- || { echo >&2 "We need cURL first, cap'n!"; exit 1; }
 
-# Save the whales! I mean working directory!
+# Save the working directory
 OLD_WD=`pwd`
 cd "$HOME"
 
-# Clone oh-my-zsh regardless, not a single fuck is given this day.
+# Clone oh-my-zsh if we have zsh
 test -d ".oh-my-zsh" ||
   (hash zsh 2>&- && git clone "git://github.com/robbyrussell/oh-my-zsh.git" ".oh-my-zsh")
 
@@ -23,17 +21,15 @@ test "$ITS_ME" && GIT_PREFIX="git@github.com:dpoggi"
 test -d ".dcp" || git clone "$GIT_PREFIX/dcp.git" ".dcp"
 test -d ".vim" || git clone "$GIT_PREFIX/dotvim.git" ".vim"
 
-# Install rbenv and pythonbrew
-#test -d ".rbenv" || "$HOME/.dcp/bin/dcp-install-rbenv"
-test -d ".rvm" || "$HOME/.dcp/bin/dcp-install-rvm"
-#test -d ".pythonbrew" ||
-#  (hash curl 2>&- && ($DCP_GET "http://xrl.us/pythonbrewinstall" | bash))
+# Install RVM if it doesn't already exist
+test -d ".rvm" ||
+  (test "$NO_RVM" || "$HOME/.dcp/bin/dcp-install-rvm")
 
-# Get Vim rockin'
+# Clone Vim submodules
 cd "$HOME/.vim"
 git submodule update --init
 
-# Install the symlinks
+# Install symlinks to dotfiles
 "$HOME/.dcp/bin/dcp-install-links"
 
 # Get back to where we were
