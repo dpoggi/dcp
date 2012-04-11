@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Freak out and quit if we don't have Git and/or cURL.
 hash git 2>&- || { echo >&2 "We need Git first, cap'n!"; exit 1; }
