@@ -12,5 +12,5 @@ if [[ `uname` != "SunOS" ]]; then
   fi
 fi
 
-export PATH="$PATH:$HOME/.dcp/bin"
+export PATH="$PATH:$HOME/.rvm/bin:$HOME/.dcp/bin"
 export EDITOR="vim"
