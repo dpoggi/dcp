@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
 
-dcp-update() {
-  local wd=`pwd`
-  cd "$HOME/.dcp"
-  git checkout master
-  git fetch origin
-  git rebase origin/master
-  cd "$HOME/.vim"
-  git checkout master
-  git fetch origin
-  git rebase origin/master
-  git submodule update --init
-  cd "$wd"
-  "$HOME/.dcp/bin/dcp-install-links"
-}
+local wd=`pwd`
+cd "$HOME/.dcp"
+git checkout master
+git fetch origin
+git rebase origin/master
+cd "$HOME/.vim"
+git checkout master
+git fetch origin
+git rebase origin/master
+git submodule update --init
+cd "$wd"
+"$HOME/.dcp/bin/dcp-install-links"
