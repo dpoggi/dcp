@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 hash curl 2>&- || { echo >&2 "Error! Couldn't find cURL or Wget!"; exit 1; }
-OLD_WD=`pwd`
-cd "$HOME"
 bash -s stable < <(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)
-cd "$OLD_WD"
+if [[ -d "$HOME/.dcp" ]]; then
+  rm -f "$HOME/.bash_login" "$HOME/.zlogin"
+  cd "$HOME/.dcp"
+  git checkout "dot/zshrc" "dot/bashrc"
+fi
