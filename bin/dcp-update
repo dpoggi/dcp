@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-WD=`pwd`
 cd "$HOME/.dcp"
 git checkout master
 git fetch origin
@@ -10,5 +9,4 @@ git checkout master
 git fetch origin
 git rebase origin/master
 git submodule update --init
-cd "$WD"
 "$HOME/.dcp/bin/dcp-install-links"

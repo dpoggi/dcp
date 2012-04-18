@@ -4,11 +4,8 @@
 hash git 2>&- || { echo >&2 "We need Git first, cap'n!"; exit 1; }
 hash curl 2>&- || { echo >&2 "We need cURL first, cap'n!"; exit 1; }
 
-# Save the working directory
-OLD_WD=`pwd`
-cd "$HOME"
-
 # Clone oh-my-zsh if we have zsh
+cd "$HOME"
 test -d ".oh-my-zsh" ||
   (hash zsh 2>&- && git clone "git://github.com/robbyrussell/oh-my-zsh.git" ".oh-my-zsh")
 
@@ -31,9 +28,6 @@ git submodule update --init
 
 # Install symlinks to dotfiles
 "$HOME/.dcp/bin/dcp-install-links"
-
-# Get back to where we were
-cd "$OLD_WD"
 
 # Report.
 echo
