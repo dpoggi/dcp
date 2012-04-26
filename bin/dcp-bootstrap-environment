@@ -19,8 +19,9 @@ test -d ".dcp" || git clone "$GIT_PREFIX/dcp.git" ".dcp"
 test -d ".vim" || git clone "$GIT_PREFIX/dotvim.git" ".vim"
 
 # Install RVM if it doesn't already exist
-test -d ".rvm" ||
-  (test "$NO_RVM" || "$HOME/.dcp/bin/dcp-install-rvm")
+# Currently commented out - we don't always want RVM
+#test -d ".rvm" ||
+#  (test "$NO_RVM" || "$HOME/.dcp/bin/dcp-install-rvm")
 
 # Clone Vim submodules
 cd "$HOME/.vim"
