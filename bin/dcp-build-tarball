@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+if [[ $# -ne 1 ]]; then
+  echo >&2 "Usage: $(basename $0) <output>"
+  exit 1
+fi
+if [[ -e "tmp" ]]; then
+  echo >&2 "Pick a different folder!"
+  exit 1
+fi
+
+mkdir -p "tmp"
+git clone git://github.com/dpoggi/dcp.git tmp/.dcp
+git clone git://github.com/dpoggi/dotvim.git tmp/.vim
+cd "tmp/.vim"
+git submodule update --init
+
+cd ".."
+tar czf "../$1" ".dcp" ".vim"
+cd ".."
+rm -rf "tmp"
