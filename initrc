@@ -101,7 +101,8 @@ gitpub() {
 
 alias ga="git add"
 alias gp="git push"
-alias gl="git log --stat --oneline --decorate"
+alias gl="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --"
+alias gll="git log --stat --oneline --decorate"
 alias gs="git status"
 alias gc="git commit"
 alias gcm="git commit -m"
