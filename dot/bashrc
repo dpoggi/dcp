@@ -1,2 +1,3 @@
 [[ -s "$HOME/.dcp/common" ]] && source "$HOME/.dcp/common"
 export PS1="$(parse_identity)$(git_branch_colors)$(uid_symbol)"
+[[ "$TWOLINE" = "true" ]] && twoline
