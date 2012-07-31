@@ -33,6 +33,7 @@ if [[ `uname` != "Darwin" ]]; then
   alias ls="ls --color=auto"
 fi
 
+alias c="clear"
 alias ll="ls -la"
 alias la="ls -a"
 alias h="history | tail -32"
