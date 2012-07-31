@@ -4,3 +4,4 @@ export DISABLE_AUTO_UPDATE="true"
 plugins=(gem heroku npm nyan pip powder)
 [[ -s "$HOME/.dcp/common" ]] && source "$HOME/.dcp/common"
 [[ -s "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
+[[ "$TWOLINE" = "true" ]] && twoline
