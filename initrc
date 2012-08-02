@@ -29,7 +29,6 @@ fi
 
 # Linux + Solaris stuff
 if [[ `uname` != "Darwin" ]]; then
-  alias sshclients="ps -A | grep sshd | wc -l"
   alias ls="ls --color=auto"
 fi
 
