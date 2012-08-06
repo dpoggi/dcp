@@ -9,26 +9,28 @@ LIGHTGRAY="\[\033[0;37m\]"
 DARKGRAY="\[\033[1;30m\]"
 WHITE="\[\033[1;37m\]"
 
+OS=`uname`
+
 # Mac specifics
-if [[ `uname` == "Darwin" ]]; then
+if [[ $OS = "Darwin" ]]; then
   alias ls="ls -G"
-  alias fcache="dscacheutil -flushcache"
+  alias dnscache="sudo dscacheutil -flushcache"
 fi
 
 # Linux specifics
-if [[ `uname` == "Linux" ]]; then
+if [[ $OS = "Linux" ]]; then
   alias ifconfig="/sbin/ifconfig"
 fi
 
 # Mac + Linux stuff
-if [[ `uname` != "SunOS" ]]; then
+if [[ $OS != "SunOS" ]]; then
   alias grep="grep --color=auto"
   alias egrep="egrep --color=auto"
   alias fgrep="fgrep --color=auto"
 fi
 
 # Linux + Solaris stuff
-if [[ `uname` != "Darwin" ]]; then
+if [[ $OS != "Darwin" ]]; then
   alias ls="ls --color=auto"
 fi
 
@@ -40,7 +42,7 @@ alias h="history | tail -32"
 # PS1 Functions
 
 parse_identity() {
-  if [[ $UID == 0 ]]; then
+  if [[ $UID -eq 0 ]]; then
     printf "$RED\\\\u"
   else
     printf "$GREEN\\\\u"
@@ -57,7 +59,7 @@ git_branch_colors() {
 }
 
 uid_symbol() {
-  if [[ `whoami` == "root" ]]; then
+  if [[ $UID -eq 0 ]]; then
     printf " $RED#$WHITE "
   else
     printf " $RED%s$WHITE " "$"
@@ -65,32 +67,32 @@ uid_symbol() {
 }
 
 oneline() {
-  if [ "$ZSH" ]; then
+  if [[ -n "$BASH" ]]; then
+    export PS1="$(parse_identity)$(git_branch_colors)$(uid_symbol)"
+  elif [[ -n "$ZSH" ]]; then
     export PROMPT='%{$fg[$NCOLOR]%}%n%{$reset_color%}@%{$fg[cyan]%}%m\
 %{$reset_color%}:%{$fg[magenta]%}%~\
 $(git_prompt_info) \
 %{$fg[red]%}%(!.#.»)%{$reset_color%} '
-  elif [ "$BASH" ]; then
-    export PS1="$(parse_identity)$(git_branch_colors)$(uid_symbol)"
   fi
 }
 
 twoline() {
-  if [ "$ZSH" ]; then
+  if [[ -n "$BASH" ]]; then
+    export PS1="$(parse_identity)$(git_branch_colors)\n$(uid_symbol)"
+  elif [[ -n "$ZSH" ]]; then
     export PROMPT='%{$fg[$NCOLOR]%}%n%{$reset_color%}@%{$fg[cyan]%}%m\
 %{$reset_color%}:%{$fg[magenta]%}%~\
 $(git_prompt_info) \
 %{$fg[red]%}
 %(!.#.»)%{$reset_color%} '
-  elif [ "$BASH" ]; then
-    export PS1="$(parse_identity)$(git_branch_colors)\n$(uid_symbol)"
   fi
 }
 
 # Git
 
 gitpub() {
-  if [ "$1" ]; then
+  if [[ -n "$1" ]]; then
     git push origin "${1}:refs/heads/$1"
     git fetch origin
     git config "branch.$1.remote" origin
