@@ -3,7 +3,6 @@
 hash curl 2>&- || { echo >&2 "Error! Couldn't find cURL or Wget!"; exit 1; }
 bash -s stable < <(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)
 if [[ -d "$HOME/.dcp" ]]; then
-  rm -f "$HOME/.bash_login" "$HOME/.zlogin"
   cd "$HOME/.dcp"
-  git checkout "dot/zshrc" "dot/bashrc"
+  git checkout "dot/zshrc" "dot/bashrc" "dot/zlogin" "dot/bash_login"
 fi
