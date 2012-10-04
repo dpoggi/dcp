@@ -4,24 +4,25 @@
 hash git 2>&- || { echo >&2 "We need Git first, cap'n!"; exit 1; }
 hash curl 2>&- || { echo >&2 "We need cURL first, cap'n!"; exit 1; }
 
-# Clone oh-my-zsh if we have zsh
+# Clone oh-my-zsh
 cd "$HOME"
-test -d ".oh-my-zsh" ||
-  (hash zsh 2>&- && git clone "git://github.com/robbyrussell/oh-my-zsh.git" ".oh-my-zsh")
+[[ -d ".oh-my-zsh" ]] ||
+  git clone git://github.com/robbyrussell/oh-my-zsh.git .oh-my-zsh
+
+# oh-my-zsh plugin
+mkdir -p "$HOME/.oh-my-zsh/custom/plugins"
+cd "$HOME/.oh-my-zsh/custom/plugins"
+git clone git://github.com/zsh-users/zsh-syntax-highlighting.git
 
 # If it's me, I want to be able to change my dotfiles,
 # otherwise clone the public repos.
 GIT_PREFIX="git://github.com/dpoggi"
-test "$ITS_ME" && GIT_PREFIX="git@github.com:dpoggi"
+[[ "$ITS_ME" ]] && GIT_PREFIX="git@github.com:dpoggi"
 
 # Dotfiles and Vim config
-test -d ".dcp" || git clone "$GIT_PREFIX/dcp.git" ".dcp"
-test -d ".vim" || git clone "$GIT_PREFIX/dotvim.git" ".vim"
-
-# Install RVM if it doesn't already exist
-# Currently commented out - we don't always want RVM
-#test -d ".rvm" ||
-#  (test "$NO_RVM" || "$HOME/.dcp/bin/dcp-install-rvm")
+cd "$HOME"
+[[ -d ".dcp" ]] || git clone "$GIT_PREFIX/dcp.git" ".dcp"
+[[ -d ".vim" ]] || git clone "$GIT_PREFIX/dotvim.git" ".vim"
 
 # Clone Vim submodules
 cd "$HOME/.vim"
