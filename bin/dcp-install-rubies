@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+[[ "$(uname)" = "Darwin" ]] || { echo >&2 "Error: not on Mac OS X!"; exit 1; }
+[[ -d "$HOME/.rvm" ]] || { echo >&2 "Error: RVM not installed!"; exit 1; }
+hash 2>/dev/null gcc-4.2 || { echo >&2 "Error: gcc-4.2 not installed!"; exit 1; }
+
+rvm pkg install openssl
+rvm pkg install readline --verify-downloads 1
+
+rvm install 1.8.7 --with-gcc=gcc-4.2 --with-openssl-dir=$rvm_path/usr --with-readline-dir=$rvm_path/usr
+rvm install 1.9.3 --with-gcc=gcc-4.2 --with-openssl-dir=$rvm_path/usr --with-readline-dir=$rvm_path/usr
+rvm install jruby
+
+rvm use --default 1.9.3
