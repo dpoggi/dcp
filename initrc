@@ -70,7 +70,8 @@ oneline() {
   if [[ -n "$BASH" ]]; then
     export PS1="$(parse_identity)$(git_branch_colors)$(uid_symbol)"
   elif [[ -n "$ZSH" ]]; then
-    export PROMPT='%{$fg[$NCOLOR]%}%n%{$reset_color%}@%{$fg[cyan]%}%m\
+    [[ -e "$HOME/.dcp/theme" ]] ||
+      export PROMPT='%{$fg[$NCOLOR]%}%n%{$reset_color%}@%{$fg[cyan]%}%m\
 %{$reset_color%}:%{$fg[magenta]%}%~\
 $(git_prompt_info) \
 %{$fg[red]%}%(!.#.»)%{$reset_color%} '
@@ -81,7 +82,8 @@ twoline() {
   if [[ -n "$BASH" ]]; then
     export PS1="$(parse_identity)$(git_branch_colors)\n$(uid_symbol)"
   elif [[ -n "$ZSH" ]]; then
-    export PROMPT='%{$fg[$NCOLOR]%}%n%{$reset_color%}@%{$fg[cyan]%}%m\
+    [[ -e "$HOME/.dcp/theme" ]] ||
+      export PROMPT='%{$fg[$NCOLOR]%}%n%{$reset_color%}@%{$fg[cyan]%}%m\
 %{$reset_color%}:%{$fg[magenta]%}%~\
 $(git_prompt_info) \
 %{$fg[red]%}
