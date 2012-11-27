@@ -12,6 +12,12 @@ require 'rest_client'
 
 FB_ACCESS_TOKEN_PATH = File.expand_path('~/.dcp/fb_access_token')
 OLD_FRIENDS_PATH = File.expand_path('~/.dcp/friends')
+
+if !File.exist?(FB_ACCESS_TOKEN_PATH)
+  $stderr.puts "Error: you must put a valid Facebook access token in \"#{FB_ACCESS_TOKEN_PATH}\""
+  exit 1
+end
+
 FB_ACCESS_TOKEN = File.read(FB_ACCESS_TOKEN_PATH).strip
 FB_FRIENDS_URL = "https://graph.facebook.com/me/friends?access_token=#{FB_ACCESS_TOKEN}"
 
