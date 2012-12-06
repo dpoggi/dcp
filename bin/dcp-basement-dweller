@@ -10,15 +10,14 @@ require 'rest_client'
 # results, run monthly. Of course, this will show people who've changed their
 # name as well, but you can pretty easily figure out what's what.
 
-FB_ACCESS_TOKEN_PATH = File.expand_path('~/.dcp/fb_access_token')
 OLD_FRIENDS_PATH = File.expand_path('~/.dcp/friends')
 
-if !File.exist?(FB_ACCESS_TOKEN_PATH)
-  $stderr.puts "Error: you must put a valid Facebook access token in \"#{FB_ACCESS_TOKEN_PATH}\""
+if ARGV.empty?
+  $stderr.puts "Usage: #{File.basename($0)} {Facebook access token}"
   exit 1
 end
 
-FB_ACCESS_TOKEN = File.read(FB_ACCESS_TOKEN_PATH).strip
+FB_ACCESS_TOKEN = ARGV.first
 FB_FRIENDS_URL = "https://graph.facebook.com/me/friends?access_token=#{FB_ACCESS_TOKEN}"
 
 FileUtils.touch(OLD_FRIENDS_PATH) if !File.exist?(OLD_FRIENDS_PATH)

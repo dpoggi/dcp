@@ -1,7 +1,6 @@
 .DS_Store
 private
 theme
-fb_access_token
 friends
 bin/*
 !bin/dcp-*

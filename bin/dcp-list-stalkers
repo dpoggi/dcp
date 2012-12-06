@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require 'rest_client'
+
+# dcp-list-stalkers - lists the top people who've been viewing your Facebook
+# profile. PROBABLY WON'T WORK FOR LONG.
+
+FB_FRIEND_URL = 'https://graph.facebook.com/'
+
+if ARGV.empty?
+  $stderr.puts "Usage: #{File.basename($0)} {fb_profile_source.html}"
+  exit 1
+end
+
+source_code = File.read(ARGV.first)
+offset_begin = (/OrderedFriendsListInitialData/ =~ source_code) + 42
+source_code = source_code[offset_begin..-1]
+offset_end = /\]/ =~ source_code
+source_code = source_code[0..offset_end]
+
+id_list = JSON.parse(source_code)[0, 30]
+id_list.each do |id|
+  friend = JSON.parse(RestClient.get("#{FB_FRIEND_URL}#{id}"))
+  puts friend['name']
+end
