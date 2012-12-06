@@ -9,7 +9,7 @@ require 'rest_client'
 FB_FRIEND_URL = 'https://graph.facebook.com/'
 
 if ARGV.empty?
-  $stderr.puts "Usage: #{File.basename($0)} {fb_profile_source.html}"
+  $stderr.puts "Usage: #{File.basename($0)} {fb_profile_source.html} [# to show]"
   exit 1
 end
 
@@ -19,7 +19,8 @@ source_code = source_code[offset_begin..-1]
 offset_end = /\]/ =~ source_code
 source_code = source_code[0..offset_end]
 
-id_list = JSON.parse(source_code)[0, 30]
+number_to_show = ARGV[1] ? ARGV[1].to_i : 30
+id_list = JSON.parse(source_code)[0, number_to_show]
 id_list.each do |id|
   friend = JSON.parse(RestClient.get("#{FB_FRIEND_URL}#{id}"))
   puts friend['name']
