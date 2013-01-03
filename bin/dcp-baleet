@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+for FILE in $HOME/.dcp/dot/* $HOME/.vim/*rc; do
+  if [[ -s "$HOME/.$(basename $FILE)" ]]; then
+    echo "$HOME/.$(basename $FILE) already exists, deleting."
+    rm -f "$HOME/.$(basename $FILE)"
+  fi
+done
