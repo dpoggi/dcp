@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-for FILE in $HOME/.dcp/dot/* $HOME/.vim/*rc; do
-  if [[ -s "$HOME/.$(basename $FILE)" ]]; then
-    echo "$HOME/.$(basename $FILE) already exists, deleting."
-    rm -f "$HOME/.$(basename $FILE)"
+for FILE in bash_login bashrc gemrc gitignore_global gvimrc inputrc irbrc osx profile rvmrc tmux.conf vimrc zlogin zshrc; do
+  if [[ -s "$HOME/.$FILE" ]]; then
+    echo "$HOME/.$FILE already exists, deleting."
+    rm -f "$HOME/.$FILE"
   fi
 done
