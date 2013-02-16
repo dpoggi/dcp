@@ -11,3 +11,4 @@ plugins=(gem heroku node npm nyan pip powder redis-cli zsh-syntax-highlighting)
 [[ -s "$HOME/.dcp/common" ]] && source "$HOME/.dcp/common"
 [[ -s "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 [[ "$TWOLINE" = "true" ]] && twoline
+[[ "$HUB" = "true" ]] && compdef hub=git
