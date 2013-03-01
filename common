@@ -2,6 +2,8 @@
   source "$HOME/.dcp/initrc"
 [[ -s "$HOME/.dcp/private" ]] &&
   source "$HOME/.dcp/private"
+[[ -s "$HOME/.rvm/scripts/rvm" ]] &&
+  source "$HOME/.rvm/scripts/rvm"
 
 export PATH="$PATH:$HOME/.rvm/bin:$HOME/.dcp/bin"
 export EDITOR="vim"

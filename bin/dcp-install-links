@@ -9,6 +9,8 @@ for FILE in $HOME/.dcp/dot/* $HOME/.vim/*rc; do
   fi
 done
 
+rm -f "$HOME/.profile"
+
 if hash git 2>&-; then
   git config --global core.editor vim
   git config --global color.ui true

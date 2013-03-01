@@ -5,7 +5,7 @@ if [[ $# -ne 1 ]]; then
   exit 1
 fi
 if [[ -e "tmp" ]]; then
-  echo >&2 "Pick a different folder!"
+  echo >&2 "I need a folder to work with called tmp! Please delete or rename that!"
   exit 1
 fi
 

@@ -1,5 +1,0 @@
-if [ "$BASH" ]; then
-  test -s "$HOME/.bashrc" && source "$HOME/.bashrc"
-elif [ "$ZSH" ]; then
-  test -s "$HOME/.zshrc" && source "$HOME/.zshrc"
-fi
