@@ -4,3 +4,4 @@ theme
 friends
 bin/*
 !bin/dcp-*
+!bin/yolo
