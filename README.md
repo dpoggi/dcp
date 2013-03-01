@@ -16,5 +16,4 @@ curl https://raw.github.com/dpoggi/dcp/master/bin/dcp-bootstrap | bash
 I'll write this soon, I promise.
 
 ## Copyright
-
 Copyright (C) 2011 Dan Poggi. MIT License, see LICENSE for details.
