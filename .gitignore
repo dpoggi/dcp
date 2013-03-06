@@ -1,7 +1,12 @@
-.DS_Store
+# Ignore everything in bin except for my stuff - users need to be able to place
+# their own scripts here.
+/bin/*
+!/bin/dcp-*
+!/bin/yolo
+
+# private contains your custom aliases/environment variables
 private
+# theme contains just the name of a custom theme
 theme
+# friends contains your FB friends list (if you use dcp-facebook-friends)
 friends
-bin/*
-!bin/dcp-*
-!bin/yolo
