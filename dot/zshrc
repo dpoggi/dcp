@@ -13,4 +13,9 @@ fi
 
 # Nate West's fault
 [[ "$TWOLINE" = "true" ]] && twoline
-[[ "$HUB" = "true" ]] && compdef hub=git
+if [[ "$HUB" = "true" ]]; then
+  alias git=hub
+  if type compdef >/dev/null; then
+     compdef hub=git
+  fi
+fi
