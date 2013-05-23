@@ -11,5 +11,7 @@
 private
 # theme contains just the name of a custom theme
 theme
-# friends contains your FB friends list (if you use dcp-facebook-friends)
-friends
+
+# conf directory contains configuration for scripts
+/conf/*
+!/conf/.gitkeep

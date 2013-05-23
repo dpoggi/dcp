@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+[[ -e "$HOME/.dcp/conf/pushover" ]] ||
+  { echo >&2 "Error: must configure with ~/.dcp/conf/pushover."; exit 1; }
+
+source "$HOME/.dcp/conf/pushover"
+curl --data "token=${PUSHOVER_TOKEN}&user=${PUSHOVER_USER}&message=${1}" https://api.pushover.net/1/messages.json
