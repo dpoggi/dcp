@@ -7,3 +7,4 @@
 
 export PATH="$PATH:$HOME/.rvm/bin:$HOME/.dcp/bin"
 export EDITOR="vim"
+export dcp="$HOME/.dcp"
