@@ -11,6 +11,10 @@ fi
 [[ -s "$HOME/.dcp/common" ]] && source "$HOME/.dcp/common"
 [[ -s "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 
+# For Arch users like me, a "command not found" hook :)
+[[ -s "/usr/share/doc/pkgfile/command-not-found.zsh" ]] &&
+  source "/usr/share/doc/pkgfile/command-not-found.zsh"
+
 # Nate West's fault
 [[ "$TWOLINE" = "true" ]] && twoline
 if [[ "$HUB" = "true" ]]; then

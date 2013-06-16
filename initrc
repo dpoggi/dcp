@@ -20,6 +20,8 @@ fi
 # Linux specifics
 if [[ $OS = "Linux" ]]; then
   alias ifconfig="/sbin/ifconfig"
+  alias pbcopy="xsel --clipboard --input"
+  alias pbpaste="xsel --clipboard --output"
 fi
 
 # Mac + Linux stuff
