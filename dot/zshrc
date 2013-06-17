@@ -1,6 +1,6 @@
 export ZSH="$HOME/.oh-my-zsh"
 export DISABLE_AUTO_UPDATE="true"
-plugins=(gem heroku node npm nyan pip powder redis-cli zsh-syntax-highlighting)
+plugins=(gem zsh-syntax-highlighting)
 
 if [[ -s "$HOME/.dcp/theme" ]]; then
   export ZSH_THEME=`cat "$HOME/.dcp/theme"`
