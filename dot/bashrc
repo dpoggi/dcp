@@ -1,4 +1,4 @@
-[[ -s "$HOME/.dcp/common" ]] && source "$HOME/.dcp/common"
+[[ -s "$HOME/.dcp/commonrc" ]] && source "$HOME/.dcp/commonrc"
 export PS1="$(parse_identity)$(git_branch_colors)$(uid_symbol)"
 
 # For Arch users like me, a "command not found" hook :)

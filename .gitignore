@@ -7,8 +7,9 @@
 # lib directory so I can sneak PyPI packages onto my CSE account
 /lib/*
 
-# private contains your custom aliases/environment variables
+# localrc contains your custom aliases/environment variables
 private
+localrc
 # theme contains just the name of a custom theme
 theme
 

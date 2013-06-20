@@ -8,7 +8,7 @@ else
   export ZSH_THEME="dpoggi"
 fi
 
-[[ -s "$HOME/.dcp/common" ]] && source "$HOME/.dcp/common"
+[[ -s "$HOME/.dcp/commonrc" ]] && source "$HOME/.dcp/commonrc"
 [[ -s "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 
 # For Arch users like me, a "command not found" hook :)

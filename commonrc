@@ -2,6 +2,8 @@
   source "$HOME/.dcp/initrc"
 [[ -s "$HOME/.dcp/private" ]] &&
   source "$HOME/.dcp/private"
+[[ -s "$HOME/.dcp/localrc" ]] &&
+  source "$HOME/.dcp/localrc"
 [[ -s "$HOME/.rvm/scripts/rvm" ]] &&
   source "$HOME/.rvm/scripts/rvm"
 
