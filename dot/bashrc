@@ -1,9 +1,9 @@
 [[ -s "$HOME/.dcp/commonrc" ]] && source "$HOME/.dcp/commonrc"
 export PS1="$(parse_identity)$(git_branch_colors)$(uid_symbol)"
 
-# For Arch users like me, a "command not found" hook :)
+# Command not found hook for Arch Linux
 [[ -s "/usr/share/doc/pkgfile/command-not-found.bash" ]] &&
   source "/usr/share/doc/pkgfile/command-not-found.bash"
 
 # Nate West's fault
-[[ "$TWOLINE" = "true" ]] && twoline
+[[ $TWOLINE = "true" ]] && twoline
