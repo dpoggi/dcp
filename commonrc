@@ -1,12 +1,13 @@
 [[ -s "$HOME/.dcp/initrc" ]] &&
   source "$HOME/.dcp/initrc"
-[[ -s "$HOME/.dcp/private" ]] &&
-  source "$HOME/.dcp/private"
 [[ -s "$HOME/.dcp/localrc" ]] &&
   source "$HOME/.dcp/localrc"
 [[ -s "$HOME/.rvm/scripts/rvm" ]] &&
   source "$HOME/.rvm/scripts/rvm"
 
 export PATH="$PATH:$HOME/.rvm/bin:$HOME/.dcp/bin"
+export GREP_OPTIONS="--color=auto"
+export LS_OPTIONS="--color=auto"
+export CLICOLOR=1
+export DCP="$HOME/.dcp"
 export EDITOR="vim"
-export dcp="$HOME/.dcp"

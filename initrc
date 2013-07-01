@@ -9,37 +9,45 @@ LIGHTGRAY="\[\033[0;37m\]"
 DARKGRAY="\[\033[1;30m\]"
 WHITE="\[\033[1;37m\]"
 
-OS=`uname`
-
-# Mac specifics
-if [[ $OS = "Darwin" ]]; then
-  alias ls="ls -G"
-  alias dnscache="sudo dscacheutil -flushcache"
-fi
-
-# Linux specifics
-if [[ $OS = "Linux" ]]; then
-  alias ifconfig="/sbin/ifconfig"
-  alias pbcopy="xsel --clipboard --input"
-  alias pbpaste="xsel --clipboard --output"
-fi
-
-# Mac + Linux stuff
-if [[ $OS != "SunOS" ]]; then
-  alias grep="grep --color=auto"
-  alias egrep="egrep --color=auto"
-  alias fgrep="fgrep --color=auto"
-fi
-
-# Linux + Solaris stuff
-if [[ $OS != "Darwin" ]]; then
-  alias ls="ls --color=auto"
-fi
-
+# General aliases
 alias c="clear"
 alias ll="ls -la"
 alias la="ls -a"
 alias h="history | tail -32"
+
+# Git aliases
+alias ga="git add"
+alias gp="git push"
+alias gpl="git pull"
+alias gl="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --"
+alias gll="git log --stat --oneline --decorate"
+alias gs="git status"
+alias gd="git diff"
+alias gc="git commit"
+alias gcm="git commit -m"
+alias gco="git checkout"
+alias gb="git branch"
+alias gf="git fetch"
+alias gr="git rebase"
+alias gm="git merge"
+alias gn="git init && git add . && git commit -m 'Initial commit.'"
+alias grv="git remote -v"
+gitpub() {
+  if [[ -n "$1" ]]; then
+    git push origin "${1}:refs/heads/$1"
+    git fetch origin
+    git config "branch.$1.remote" origin
+    git config "branch.$1.merge" "refs/heads/$1"
+    git checkout "$1"
+  fi
+}
+
+# Linux specifics
+if [[ `uname` = "Linux" ]]; then
+  alias pbcopy="xsel --clipboard --input"
+  alias pbpaste="xsel --clipboard --output"
+fi
+
 
 # PS1 Functions
 
@@ -68,6 +76,8 @@ uid_symbol() {
   fi
 }
 
+# One-line/two-line prompt hacks (DIRTY)
+
 oneline() {
   if [[ -n "$BASH" ]]; then
     export PS1="$(parse_identity)$(git_branch_colors)$(uid_symbol)"
@@ -92,32 +102,3 @@ $(git_prompt_info) \
 %(!.#.»)%{$reset_color%} '
   fi
 }
-
-# Git
-
-gitpub() {
-  if [[ -n "$1" ]]; then
-    git push origin "${1}:refs/heads/$1"
-    git fetch origin
-    git config "branch.$1.remote" origin
-    git config "branch.$1.merge" "refs/heads/$1"
-    git checkout "$1"
-  fi
-}
-
-alias ga="git add"
-alias gp="git push"
-alias gpl="git pull"
-alias gl="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --"
-alias gll="git log --stat --oneline --decorate"
-alias gs="git status"
-alias gd="git diff"
-alias gc="git commit"
-alias gcm="git commit -m"
-alias gco="git checkout"
-alias gb="git branch"
-alias gf="git fetch"
-alias gr="git rebase"
-alias gm="git merge"
-alias gn="git init && git add . && git commit -m 'Initial commit.'"
-alias grv="git remote -v"
