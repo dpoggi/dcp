@@ -8,9 +8,7 @@
 /lib/*
 
 # localrc contains your custom aliases/environment variables
-# private is still here for backwards compatibility
 localrc
-private
 
 # conf directory contains configuration for scripts
 /conf/*
