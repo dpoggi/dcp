@@ -6,4 +6,4 @@ export PS1="$(parse_identity)$(git_branch_colors)$(uid_symbol)"
   source "/usr/share/doc/pkgfile/command-not-found.bash"
 
 # Nate West's fault
-[[ $TWOLINE = "true" ]] && twoline
+[[ "$TWOLINE" = "true" ]] && twoline
