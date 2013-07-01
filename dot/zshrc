@@ -1,6 +1,12 @@
 export ZSH="$HOME/.oh-my-zsh"
 export DISABLE_AUTO_UPDATE="true"
+
 plugins=(gem zsh-syntax-highlighting)
+if [[ -s "$HOME/.dcp/conf/plugins" ]]; then
+  for plugin in `cat $HOME/.dcp/conf/plugins`; do
+    plugins+=($plugin)
+  done
+fi
 
 if [[ -s "$HOME/.dcp/conf/theme" ]]; then
   export ZSH_THEME=`cat "$HOME/.dcp/conf/theme"`
