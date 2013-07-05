@@ -1,1 +1,2 @@
+test -s "$HOME/.dcp/localprofile" && source "$HOME/.dcp/localprofile"
 test -s "$HOME/.zshrc" && source "$HOME/.zshrc"

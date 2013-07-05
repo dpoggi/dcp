@@ -10,6 +10,9 @@
 # localrc contains your custom aliases/environment variables
 localrc
 
+# localprofile contains local login shell stuff
+localprofile
+
 # conf directory contains configuration for scripts
 /conf/*
 !/conf/.gitkeep
