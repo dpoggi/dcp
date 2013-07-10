@@ -5,6 +5,9 @@
 [[ -s "$HOME/.rvm/scripts/rvm" ]] &&
   source "$HOME/.rvm/scripts/rvm"
 
+[[ $TTY != *tty* && $TMUX != *tmux* ]] &&
+  export TERM="xterm-256color"
+
 export PATH="$PATH:$HOME/.dcp/bin"
 export GREP_OPTIONS="--color=auto"
 export LS_OPTIONS="--color=auto"
