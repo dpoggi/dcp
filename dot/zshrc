@@ -3,13 +3,13 @@ export DISABLE_AUTO_UPDATE="true"
 
 plugins=(gem zsh-syntax-highlighting)
 if [[ -s "$HOME/.dcp/conf/plugins" ]]; then
-  for plugin in `cat $HOME/.dcp/conf/plugins`; do
+  for plugin in "$(cat $HOME/.dcp/conf/plugins)"; do
     plugins+=($plugin)
   done
 fi
 
 if [[ -s "$HOME/.dcp/conf/theme" ]]; then
-  export ZSH_THEME=`cat "$HOME/.dcp/conf/theme"`
+  export ZSH_THEME="$(cat $HOME/.dcp/conf/theme)"
 else
   export ZSH_THEME="dpoggi"
 fi
@@ -22,8 +22,8 @@ fi
   source "/usr/share/doc/pkgfile/command-not-found.zsh"
 
 # Nate West's fault
-[[ "$TWOLINE" = "true" ]] && twoline
-if [[ "$HUB" = "true" ]]; then
+[[ $TWOLINE = "true" ]] && twoline
+if [[ $HUB = "true" ]]; then
   alias git=hub
   if type compdef >/dev/null; then
      compdef hub=git

@@ -1,5 +1,4 @@
 export rvm_path="$HOME/.rvm"
 export rvm_pretty_print_flag="1"
-export rvm_project_rvmrc="1"
 export rvmsudo_secure_path="1"
 export rvm_autolibs_flag="3"

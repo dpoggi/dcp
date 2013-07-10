@@ -34,7 +34,7 @@ alias gn="git init && git add . && git commit -m 'Initial commit.'"
 alias grv="git remote -v"
 gitpub() {
   if [[ -n "$1" ]]; then
-    git push origin "${1}:refs/heads/$1"
+    git push origin "${1}:refs/heads/${1}"
     git fetch origin
     git config "branch.$1.remote" origin
     git config "branch.$1.merge" "refs/heads/$1"
@@ -43,7 +43,7 @@ gitpub() {
 }
 
 # Linux specifics
-if [[ `uname` = "Linux" ]]; then
+if [[ "$(uname)" = "Linux" ]]; then
   alias pbcopy="xsel --clipboard --input"
   alias pbpaste="xsel --clipboard --output"
 fi

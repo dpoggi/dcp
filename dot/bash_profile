@@ -1,2 +1,4 @@
-test -s "$HOME/.dcp/localprofile" && source "$HOME/.dcp/localprofile"
-test -s "$HOME/.bashrc" && source "$HOME/.bashrc"
+[[ -s "$HOME/.dcp/localprofile" ]] &&
+  source "$HOME/.dcp/localprofile"
+[[ -s "$HOME/.bashrc" ]] &&
+  source "$HOME/.bashrc"
