@@ -27,4 +27,4 @@ git fetch origin
 git rebase origin/master
 git submodule update --init
 
-"$HOME/.dcp/bin/dcp-install-links"
+~/.dcp/bin/dcp-install-links
