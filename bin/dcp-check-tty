@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Brand new script. Exit codes 4, 3, and 2 are NOT ROBUST. Don't depend on them.
+
 [[ $# -lt 3 ]] &&
   { echo >&2 "Usage: $(basename $0) \"\$TTY\" \"\$TMUX\" \"\$SSH_TTY\""; exit 1; }
 
