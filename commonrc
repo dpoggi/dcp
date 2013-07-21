@@ -2,8 +2,14 @@
   source "$HOME/.dcp/initrc"
 [[ -s "$HOME/.dcp/localrc" ]] &&
   source "$HOME/.dcp/localrc"
-[[ -s "$HOME/.rvm/scripts/rvm" ]] &&
-  source "$HOME/.rvm/scripts/rvm"
+
+if [[ -d "$HOME/.rvm" ]]; then
+  [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+  export PATH="$PATH:$HOME/.rvm/bin"
+elif [[ -d "$HOME/.rbenv" ]]; then
+  eval "$(rbenv init -)"
+  export PATH="$PATH:$HOME/.rbenv/bin"
+fi
 
 export PATH="$PATH:$HOME/.dcp/bin"
 export GREP_OPTIONS="--color=auto"
