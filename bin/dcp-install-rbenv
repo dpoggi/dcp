@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+if [[ -d "$HOME/.rbenv" ]]; then
+  echo >&2 "Error! rbenv is already installed for this user!"
+  exit 1
+else
+  git clone git://github.com/sstephenson/rbenv.git "$HOME/.rbenv"
+  mkdir -p "$HOME/.rbenv/plugins"
+  git clone git://github.com/sstephenson/ruby-build.git "$HOME/.rbenv/plugins/ruby-build"
+  echo "rbenv has been installed at $HOME/.rbenv!"
+fi
