@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+if [[ ! -d "$HOME/.rbenv" ]]; then
+  echo >&2 "Error! rbenv isn't installed!"
+  exit 1
+else
+  cd "$HOME/.rbenv"
+  git fetch origin
+  git rebase origin/master
+  if [[ -d "$HOME/.rbenv/plugins/ruby-build" ]]; then
+    cd "$HOME/.rbenv/plugins/ruby-build"
+    git fetch origin
+    git rebase origin/master
+  fi
+fi

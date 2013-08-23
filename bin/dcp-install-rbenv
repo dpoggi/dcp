@@ -7,5 +7,6 @@ else
   git clone git://github.com/sstephenson/rbenv.git "$HOME/.rbenv"
   mkdir -p "$HOME/.rbenv/plugins"
   git clone git://github.com/sstephenson/ruby-build.git "$HOME/.rbenv/plugins/ruby-build"
-  echo "rbenv has been installed at $HOME/.rbenv!"
+  echo
+  echo "rbenv and ruby-build have been installed at $HOME/.rbenv!"
 fi
