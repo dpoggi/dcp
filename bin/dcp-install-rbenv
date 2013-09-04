@@ -1,12 +1,23 @@
 #!/usr/bin/env bash
 
+
 if [[ -d "$HOME/.rbenv" ]]; then
   echo >&2 "Error! rbenv is already installed for this user!"
   exit 1
-else
-  git clone git://github.com/sstephenson/rbenv.git "$HOME/.rbenv"
-  mkdir -p "$HOME/.rbenv/plugins"
-  git clone git://github.com/sstephenson/ruby-build.git "$HOME/.rbenv/plugins/ruby-build"
-  echo
-  echo "rbenv and ruby-build have been installed at $HOME/.rbenv!"
 fi
+
+git_prefix="git://github.com/sstephenson"
+if [[ $1 = "--system" ]]; then
+  prefix="/usr/local/rbenv"
+  sudo git clone "$git_prefix/rbenv.git" "$prefix"
+  sudo mkdir -p "$prefix/plugins"
+  sudo git clone "$git_prefix/ruby-build.git" "$prefix/plugins/ruby-build"
+else
+  prefix="$HOME/.rbenv"
+  git clone "$git_prefix/rbenv.git" "$prefix"
+  mkdir -p "$prefix/plugins"
+  git clone "$git_prefix/ruby-build.git" "$prefix/plugins/ruby-build"
+fi
+
+echo
+echo "rbenv and ruby-build have been installed at $prefix!"
