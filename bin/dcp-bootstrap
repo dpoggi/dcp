@@ -9,36 +9,42 @@ action=0
 # This one is to see if we need to run dcp-install-links at the end
 do_links=0
 
+# Install directories
+omz_dir="$HOME/.oh-my-zsh"
+omz_plugins_dir="$HOME/.oh-my-zsh/custom/plugins"
+syntax_dir="$omz_plugins_dir/zsh-syntax-highlighting"
+dcp_dir="$HOME/.dcp"
+vim_dir="$HOME/.vim"
+
 # If it's me, I want to be able to change my dotfiles,
 # otherwise clone the public repos.
 git_prefix="git://github.com/dpoggi"
 [[ "$ITS_ME" ]] && git_prefix="git@github.com:dpoggi"
 
 # Clone my fork of oh-my-zsh
-if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
-  git clone "$git_prefix/oh-my-zsh.git" "$HOME/.oh-my-zsh"
+if [[ ! -e "$omz_dir" ]]; then
+  git clone "$git_prefix/oh-my-zsh.git" "$omz_dir"
   action=1
 fi
 
 # oh-my-zsh syntax highlighter
-syntax_dir="$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
-if [[ ! -d "$syntax_dir" ]]; then
-  mkdir -p "$HOME/.oh-my-zsh/custom/plugins"
+if [[ ! -e "$syntax_dir" ]]; then
+  mkdir -p "$omz_plugins_dir"
   git clone git://github.com/zsh-users/zsh-syntax-highlighting.git "$syntax_dir"
   action=1
 fi
 
 # Dotfiles
-if [[ ! -d ".dcp" ]]; then
-  git clone "$git_prefix/dcp.git" "$HOME/.dcp"
+if [[ ! -e "$dcp_dir" ]]; then
+  git clone "$git_prefix/dcp.git" "$dcp_dir"
   action=1
   do_links=1
 fi
 
 # Vim configuration
-if [[ ! -d ".vim" ]]; then
-  git clone "$git_prefix/dotvim.git" "$HOME/.vim"
-  cd "$HOME/.vim"
+if [[ ! -e "$vim_dir" ]]; then
+  git clone "$git_prefix/dotvim.git" "$vim_dir"
+  cd "$vim_dir"
   git submodule update --init
   action=1
   do_links=1
@@ -57,7 +63,10 @@ elif [[ $action -eq 1 ]]; then
   echo "Make sure you're set up to use the system Ruby first."
 fi
 
-unset git_prefix
 unset action
 unset do_links
+unset omz_dir
 unset syntax_dir
+unset dcp_dir
+unset vim_dir
+unset git_prefix
