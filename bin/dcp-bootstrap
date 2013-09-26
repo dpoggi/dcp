@@ -6,31 +6,42 @@ hash curl 2>&- || { echo >&2 "We need cURL first, cap'n!"; exit 1; }
 
 # If it's me, I want to be able to change my dotfiles,
 # otherwise clone the public repos.
-GIT_PREFIX="git://github.com/dpoggi"
-[[ "$ITS_ME" ]] && GIT_PREFIX="git@github.com:dpoggi"
+git_prefix="git://github.com/dpoggi"
+[[ "$ITS_ME" ]] && git_prefix="git@github.com:dpoggi"
 
 # Clone my fork of oh-my-zsh
-cd "$HOME"
-[[ -d .oh-my-zsh ]] ||
-  git clone "$GIT_PREFIX/oh-my-zsh.git" .oh-my-zsh
+[[ -d "$HOME/.oh-my-zsh" ]] ||
+  git clone "$git_prefix/oh-my-zsh.git" "$HOME/.oh-my-zsh"
 
 # oh-my-zsh syntax highlighter
-mkdir -p "$HOME/.oh-my-zsh/custom/plugins"
-cd "$HOME/.oh-my-zsh/custom/plugins"
-git clone git://github.com/zsh-users/zsh-syntax-highlighting.git
+syntax_dir="$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+if [[ ! -d "$syntax_dir" ]]; then
+  mkdir -p "$HOME/.oh-my-zsh/custom/plugins"
+  git clone git://github.com/zsh-users/zsh-syntax-highlighting.git "$syntax_dir"
+fi
 
-# Dotfiles and Vim config
-cd "$HOME"
-[[ -d ".dcp" ]] || git clone "$GIT_PREFIX/dcp.git" ".dcp"
-[[ -d ".vim" ]] || git clone "$GIT_PREFIX/dotvim.git" ".vim"
+# Dotfiles
+do_links=0
+if [[ ! -d ".dcp" ]]; then
+  git clone "$git_prefix/dcp.git" "$HOME/.dcp"
+  do_links=1
+fi
 
-# Clone Vim submodules
-cd "$HOME/.vim"
-git submodule update --init
+# Vim configuration
+if [[ ! -d ".vim" ]]; then
+  git clone "$git_prefix/dotvim.git" "$HOME/.vim"
+  cd "$HOME/.vim"
+  git submodule update --init
+  do_links=1
+fi
 
-# Install symlinks to dotfiles
-~/.dcp/bin/dcp-install-links
+# Install symlinks to dotfiles (if we installed dotfiles or Vim config)
+[[ $do_links -eq 1 ]] && ~/.dcp/bin/dcp-install-links
 
 # Report.
 echo
 echo "Bro-tips: restart your shell, don't forget to compile Command-T."
+
+unset git_prefix
+unset syntax_dir
+unset do_links
