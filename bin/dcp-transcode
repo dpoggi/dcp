@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+hash ffmpeg 2>&-
+if [[ $? -ne 0 ]]; then
+  echo >&2 "Error: Need ffmpeg installed to continue!"
+  if [[ $(uname) = "Darwin" ]]; then
+    echo >&2 "You're on a Mac, you should install it from Homebrew."
+
+    hash brew 2>&-
+    if [[ $? -eq 0 ]]; then
+      read -p "You have Homebrew installed. Would you like to install ffmpeg now? (y/n) " -n 1 -r
+      echo
+      [[ $REPLY =~ ^[Yy]$ ]] && { brew update && brew install ffmpeg; }
+    fi
+  fi
+
+  exit 1
+fi
+
+convert() {
+  base="${1%.*}"
+  ext="${1##*.}"
+
+  if [[ $ext = "mp4" ]]; then
+    ffmpeg -i "$1" -strict experimental -c:v copy -c:a aac -cutoff 20000 -ac 2 -b:a 160k "${base}.transcode.mp4"
+  else
+    if [[ -e "${base}.mp4" ]]; then
+      echo >&2 "Error: ${base}.mp4 already exists, skipping."
+    else
+      ffmpeg -i "$1" -strict experimental -c:v copy -c:a aac -cutoff 20000 -ac 2 -b:a 160k "${base}.mp4"
+    fi
+  fi
+
+  unset base
+  unset ext
+}
+
+if [[ $# -eq 0 ]]; then
+  for mkv in *.mkv; do
+    [[ $mkv = "*.mkv" ]] &&
+      { echo >&2 "Error: no MKV files to digest, try --help."; exit 1; }
+
+    convert "$mkv"
+  done
+
+  unset mkv
+else
+  if [[ $1 = "--help" ]]; then
+    cat >&2 <<END
+dcp-transcode puts videos in an MP4 container using their existing video codec
+and 160kbps, 2 channel AAC audio. Though it flattens surround sound, this format
+is compatible with the iPad as well as most TV-connected streaming devices
+(Xbox 360, PlayStation 3, etc.).
+
+Running with no arguments looks for MKV files in the working directory and
+transcodes them all. Any argument besides --help will be treated as a singular
+video to be transcoded. If it's an MP4 whose audio you want to conform,
+the output will be named "filename.transcode.mp4".
+END
+  else
+    convert "$1"
+  fi
+fi
