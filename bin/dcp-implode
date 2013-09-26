@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 read -p "Are you sure? This will remove ~/.vim, ~/.dcp, ~/.oh-my-zsh, and all associated symlinks! (y/n) " -n 1 -r
+echo
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   for file in $HOME/.dcp/dot/* $HOME/.vim/*rc; do
