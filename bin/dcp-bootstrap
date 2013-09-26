@@ -4,26 +4,34 @@
 hash git 2>&- || { echo >&2 "We need Git first, cap'n!"; exit 1; }
 hash curl 2>&- || { echo >&2 "We need cURL first, cap'n!"; exit 1; }
 
+# This is to see if we actually did anything, so we can warn if we didn't
+action=0
+# This one is to see if we need to run dcp-install-links at the end
+do_links=0
+
 # If it's me, I want to be able to change my dotfiles,
 # otherwise clone the public repos.
 git_prefix="git://github.com/dpoggi"
 [[ "$ITS_ME" ]] && git_prefix="git@github.com:dpoggi"
 
 # Clone my fork of oh-my-zsh
-[[ -d "$HOME/.oh-my-zsh" ]] ||
+if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
   git clone "$git_prefix/oh-my-zsh.git" "$HOME/.oh-my-zsh"
+  action=1
+fi
 
 # oh-my-zsh syntax highlighter
 syntax_dir="$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
 if [[ ! -d "$syntax_dir" ]]; then
   mkdir -p "$HOME/.oh-my-zsh/custom/plugins"
   git clone git://github.com/zsh-users/zsh-syntax-highlighting.git "$syntax_dir"
+  action=1
 fi
 
 # Dotfiles
-do_links=0
 if [[ ! -d ".dcp" ]]; then
   git clone "$git_prefix/dcp.git" "$HOME/.dcp"
+  action=1
   do_links=1
 fi
 
@@ -32,6 +40,7 @@ if [[ ! -d ".vim" ]]; then
   git clone "$git_prefix/dotvim.git" "$HOME/.vim"
   cd "$HOME/.vim"
   git submodule update --init
+  action=1
   do_links=1
 fi
 
@@ -39,9 +48,16 @@ fi
 [[ $do_links -eq 1 ]] && ~/.dcp/bin/dcp-install-links
 
 # Report.
-echo
-echo "Bro-tips: restart your shell, don't forget to compile Command-T."
+if [[ $action -eq 0 ]]; then
+  echo "It looks like we didn't do anything, you probably already have this installed."
+elif [[ $action -eq 1 ]]; then
+  echo
+  echo "Tip: restart your shell now. To get Command-T working in Vim, do:"
+  echo "cd ~/.vim/bundle/command-t && rake make"
+  echo "Make sure you're set up to use the system Ruby first."
+fi
 
 unset git_prefix
-unset syntax_dir
+unset action
 unset do_links
+unset syntax_dir
