@@ -1,4 +1,2 @@
 [[ -s "$HOME/.dcp/localprofile" ]] &&
   source "$HOME/.dcp/localprofile"
-[[ -s "$HOME/.zshrc" ]] &&
-  source "$HOME/.zshrc"
