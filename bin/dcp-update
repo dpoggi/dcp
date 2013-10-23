@@ -26,5 +26,7 @@ git checkout master
 git fetch origin
 git rebase origin/master
 git submodule update --init
+# KILL IT
+[[ -d "bundle/clang_complete" ]] && rm -rf bundle/clang_complete
 
-~/.dcp/bin/dcp-install-links
+$HOME/.dcp/bin/dcp-install-links
