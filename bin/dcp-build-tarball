@@ -10,12 +10,13 @@ if [[ -e tmp ]]; then
 fi
 
 mkdir -p tmp
+git clone git://github.com/dpoggi/oh-my-zsh.git tmp/.oh-my-zsh
 git clone git://github.com/dpoggi/dcp.git tmp/.dcp
 git clone git://github.com/dpoggi/dotvim.git tmp/.vim
 cd tmp/.vim
 git submodule update --init
 
 cd ..
-tar czf "../$1" .dcp .vim
+tar czf "../$1" .oh-my-zsh .dcp .vim
 cd ..
 rm -rf tmp
