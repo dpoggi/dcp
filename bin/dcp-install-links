@@ -15,4 +15,5 @@ if hash git 2>&-; then
   git config --global core.editor vim
   git config --global color.ui true
   git config --global core.excludesfile ~/.gitignore_global
+  git config --global push.default matching
 fi
