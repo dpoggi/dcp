@@ -37,7 +37,7 @@ convert() {
 
 if [[ $# -eq 0 ]]; then
   for mkv in *.mkv; do
-    [[ $mkv = "*.mkv" ]] &&
+    [[ ! -f "$mkv" ]] &&
       { echo >&2 "Error: no MKV files to digest, try --help."; exit 1; }
 
     convert "$mkv"

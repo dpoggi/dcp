@@ -4,11 +4,11 @@ require 'json'
 require 'fileutils'
 require 'rest_client'
 
-# dcp-friends - reads your Facebook access token from an argument, compiles
-# a list of your friends, and lets you know what's changed since the last time
-# you ran the script. Basically, lets you know who unfriended you. For best
-# results, run monthly. Of course, this will show people who've changed their
-# name as well, but you can pretty easily figure out what's what.
+# dcp-facebook-friends - reads your Facebook access token from an argument,
+# compiles a list of your friends, and lets you know what's changed since the
+# last time you ran the script. Basically, lets you know who unfriended you. For
+# best results, run monthly. Of course, this will show people who've changed
+# their name as well, but you can pretty easily figure out what's what.
 
 OLD_FRIENDS_PATH = File.expand_path('~/.dcp/conf/friends')
 
