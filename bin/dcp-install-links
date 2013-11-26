@@ -16,4 +16,7 @@ if hash git 2>&-; then
   git config --global color.ui true
   git config --global core.excludesfile ~/.gitignore_global
   git config --global push.default matching
+
+  [[ "$(uname)" = "Darwin" ]] &&
+    git config --global core.trustctime false
 fi
