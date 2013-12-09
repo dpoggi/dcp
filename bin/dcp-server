@@ -1,6 +1,20 @@
-#!/usr/bin/env ruby
-require 'webrick'
+#!/usr/bin/env bash
 
-server = WEBrick::HTTPServer.new(:BindAddress => '0.0.0.0', :Port => 3000, :DocumentRoot => Dir.pwd)
-trap('INT') { server.shutdown }
-server.start
+start_message() {
+  echo "$1 starting on 0.0.0.0:9000..."
+}
+
+if hash twistd 2>&-; then
+  start_message "Twisted"
+  exec twistd -n --pidfile= web --path . --port 9000
+elif hash ruby 2>&-; then
+  start_message "WEBrick"
+  exec ruby -r webrick <<-EOF
+    server = WEBrick::HTTPServer.new(:BindAddress => '0.0.0.0', :Port => 9000, :DocumentRoot => Dir.pwd)
+    trap('INT') { server.shutdown }
+    server.start
+EOF
+elif hash python 2>&-; then
+  start_message "SimpleHTTPServer"
+  exec python -m SimpleHTTPServer 9000
+fi
