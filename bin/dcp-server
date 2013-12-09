@@ -17,4 +17,6 @@ EOF
 elif hash python 2>&-; then
   start_message "SimpleHTTPServer"
   exec python -m SimpleHTTPServer 9000
+else
+  echo >&2 "Error: couldn't find a Ruby or Python interpreter."
 fi
