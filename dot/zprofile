@@ -1,2 +1,2 @@
-[[ -s "$HOME/.dcp/localprofile" ]] &&
-  source "$HOME/.dcp/localprofile"
+[[ -s "${HOME}/.dcp/localprofile" ]] &&
+  source "${HOME}/.dcp/localprofile"

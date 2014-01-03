@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-for file in $HOME/.dcp/dot/* $HOME/.vim/*rc; do
-  if [[ -s "$HOME/.$(basename $file)" ]]; then
-    echo "$HOME/.$(basename $file) already exists, not linking."
+for file in ${HOME}/.dcp/dot/* ${HOME}/.vim/*rc; do
+  if [[ -s "${HOME}/.$(basename ${file})" ]]; then
+    echo "${HOME}/.$(basename ${file}) already exists, not linking."
   else
-    echo "Linking $HOME/.$(basename $file) => $file"
-    ln -s "$file" "$HOME/.$(basename $file)"
+    echo "Linking ${HOME}/.$(basename ${file}) => ${file}"
+    ln -s "${file}" "${HOME}/.$(basename ${file})"
   fi
 done
 
-rm -f "$HOME/.profile"
+rm -f "${HOME}/.profile"
 
 if hash git 2>&-; then
   git config --global core.editor vim

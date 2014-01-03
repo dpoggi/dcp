@@ -4,59 +4,54 @@
 hash git 2>&- || { echo >&2 "We need Git first, cap'n!"; exit 1; }
 hash curl 2>&- || { echo >&2 "We need cURL first, cap'n!"; exit 1; }
 
-# This is to see if we actually did anything, so we can warn if we didn't
-action=0
-# This one is to see if we need to run dcp-install-links at the end
-do_links=0
-
 # Install directories
-omz_dir="$HOME/.oh-my-zsh"
-omz_plugins_dir="$HOME/.oh-my-zsh/custom/plugins"
-syntax_dir="$omz_plugins_dir/zsh-syntax-highlighting"
-dcp_dir="$HOME/.dcp"
-vim_dir="$HOME/.vim"
+omz_dir="${HOME}/.oh-my-zsh"
+omz_plugins_dir="${HOME}/.oh-my-zsh/custom/plugins"
+syntax_dir="${omz_plugins_dir}/zsh-syntax-highlighting"
+dcp_dir="${HOME}/.dcp"
+vim_dir="${HOME}/.vim"
 
 # If it's me, I want to be able to change my dotfiles,
 # otherwise clone the public repos.
 git_prefix="git://github.com/dpoggi"
-[[ "$ITS_ME" ]] && git_prefix="git@github.com:dpoggi"
+[[ "${ITS_ME}" ]] && git_prefix="git@github.com:dpoggi"
 
 # Clone my fork of oh-my-zsh
-if [[ ! -e "$omz_dir" ]]; then
-  git clone "$git_prefix/oh-my-zsh.git" "$omz_dir"
-  action=1
+if [[ ! -e "${omz_dir}" ]]; then
+  git clone "${git_prefix}/oh-my-zsh.git" "${omz_dir}"
+  action="true"
 fi
 
 # oh-my-zsh syntax highlighter
-if [[ ! -e "$syntax_dir" ]]; then
-  mkdir -p "$omz_plugins_dir"
-  git clone git://github.com/zsh-users/zsh-syntax-highlighting.git "$syntax_dir"
-  action=1
+if [[ ! -e "${syntax_dir}" ]]; then
+  mkdir -p "${omz_plugins_dir}"
+  git clone git://github.com/zsh-users/zsh-syntax-highlighting.git "${syntax_dir}"
+  action="true"
 fi
 
 # Dotfiles
-if [[ ! -e "$dcp_dir" ]]; then
-  git clone "$git_prefix/dcp.git" "$dcp_dir"
-  action=1
-  do_links=1
+if [[ ! -e "${dcp_dir}" ]]; then
+  git clone "${git_prefix}/dcp.git" "${dcp_dir}"
+  action="true"
+  do_links="true"
 fi
 
 # Vim configuration
-if [[ ! -e "$vim_dir" ]]; then
-  git clone "$git_prefix/dotvim.git" "$vim_dir"
-  cd "$vim_dir"
+if [[ ! -e "${vim_dir}" ]]; then
+  git clone "${git_prefix}/dotvim.git" "${vim_dir}"
+  cd "${vim_dir}"
   git submodule update --init
-  action=1
-  do_links=1
+  action="true"
+  do_links="true"
 fi
 
 # Install symlinks to dotfiles (if we installed dotfiles or Vim config)
-[[ $do_links -eq 1 ]] && ~/.dcp/bin/dcp-install-links
+[[ -n "${do_links}" ]] && "${dcp_dir}/bin/dcp-install-links"
 
 # Report.
-if [[ $action -eq 0 ]]; then
+if [[ -z "${action}" ]]; then
   echo "It looks like we didn't do anything, you probably already have this installed."
-elif [[ $action -eq 1 ]]; then
+else
   echo
   echo "Tip: restart your shell now. To get Command-T working in Vim, do:"
   echo "cd ~/.vim/bundle/command-t && rake make"

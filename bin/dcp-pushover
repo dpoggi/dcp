@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 
-[[ -e "$HOME/.dcp/conf/pushover" ]] ||
+conf="${DCP}/conf/pushover"
+
+[[ -e "${conf}" ]] ||
   { echo >&2 "Error: must use ~/.dcp/conf/pushover to set \$PUSHOVER_TOKEN and \$PUSHOVER_USER."; exit 1; }
-[[ $# < 1 ]] &&
+[[ "$#" -lt "1" ]] &&
   { echo >&2 "Usage: $(basename $0) 'message'"; exit 1; }
 
-source "$HOME/.dcp/conf/pushover"
-curl -s --data "token=${PUSHOVER_TOKEN}&user=${PUSHOVER_USER}&message=${1}" https://api.pushover.net/1/messages.json
+source "${conf}"
+curl -s --data "token=${PUSHOVER_TOKEN}&user=${PUSHOVER_USER}&message=$1" https://api.pushover.net/1/messages.json
+
+unset conf

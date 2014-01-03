@@ -3,12 +3,12 @@
 read -p "Are you sure? This will remove ~/.vim, ~/.dcp, ~/.oh-my-zsh, and all associated symlinks! (y/n) " -n 1 -r
 echo
 
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-  for file in $HOME/.dcp/dot/* $HOME/.vim/*rc; do
-    if [[ -h "$HOME/.$(basename $file)" ]]; then
-      rm -f "$HOME/.$(basename $file)"
+if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+  for file in ${HOME}/.dcp/dot/* ${HOME}/.vim/*rc; do
+    if [[ -h "${HOME}/.$(basename ${file})" ]]; then
+      rm -f "${HOME}/.$(basename ${file})"
     fi
   done
 
-  rm -rf "$HOME/.dcp" "$HOME/.vim" "$HOME/.oh-my-zsh"
+  rm -rf "${HOME}/.dcp" "${HOME}/.vim" "${HOME}/.oh-my-zsh"
 fi

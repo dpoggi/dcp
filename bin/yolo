@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 read -p "What's the motto? " -n 4 -r
-if [[ $REPLY = "YOLO" ]]; then
+if [[ "$REPLY" = "YOLO" ]]; then
   echo
-  git commit -am 'DEAL WITH IT'
+  git commit -am "DEAL WITH IT"
   git push -f origin master
 fi

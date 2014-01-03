@@ -1,28 +1,28 @@
 #!/usr/bin/env bash
 
 git_prefix="git://github.com/sstephenson"
-rbenv="$git_prefix/rbenv.git"
-ruby_build="$git_prefix/ruby-build.git"
+rbenv="${git_prefix}/rbenv.git"
+ruby_build="${git_prefix}/ruby-build.git"
 
-if [[ $1 = "--system" ]]; then
+if [[ "$1" = "--system" ]]; then
   prefix="/usr/local/rbenv"
   user="root"
 else
-  prefix="$HOME/.rbenv"
-  user="$USER"
+  prefix="${HOME}/.rbenv"
+  user="${USER}"
 fi
 
-if [[ -d "$prefix" ]]; then
-  echo >&2 "Error! rbenv is already installed at $prefix!"
+if [[ -d "${prefix}" ]]; then
+  echo >&2 "Error! rbenv is already installed at ${prefix}!"
   exit 1
 fi
 
-sudo -u "$user" git clone "$git_prefix/rbenv.git" "$prefix"
-sudo -u "$user" mkdir -p "$prefix/plugins"
-sudo -u "$user" git clone "$git_prefix/ruby-build.git" "$prefix/plugins/ruby-build"
+sudo -u "$user" git clone "${git_prefix}/rbenv.git" "${prefix}"
+sudo -u "$user" mkdir -p "${prefix}/plugins"
+sudo -u "$user" git clone "${git_prefix}/ruby-build.git" "${prefix}/plugins/ruby-build"
 
 echo
-echo "rbenv and ruby-build have been installed at $prefix!"
+echo "rbenv and ruby-build have been installed at ${prefix}!"
 
 unset prefix
 unset user

@@ -34,10 +34,10 @@ alias gn="git init && git add . && git commit -m 'Initial commit.'"
 alias grv="git remote -v"
 gitpub() {
   if [[ -n "$1" ]]; then
-    git push origin "${1}:refs/heads/${1}"
+    git push origin "${1}:refs/heads/$1"
     git fetch origin
-    git config "branch.$1.remote" origin
-    git config "branch.$1.merge" "refs/heads/$1"
+    git config "branch.${1}.remote" origin
+    git config "branch.${1}.merge" "refs/heads/$1"
     git checkout "$1"
   fi
 }
@@ -52,12 +52,8 @@ fi
 # PS1 Functions
 
 parse_identity() {
-  if [[ $UID -eq 0 ]]; then
-    printf "$RED\\\\u"
-  else
-    printf "$GREEN\\\\u"
-  fi
-  printf "$WHITE@$CYAN\\h$WHITE:$PURPLE\\w$WHITE"
+  if [[ "${UID}" -eq "0" ]]; then printf "${RED}"; else printf "${GREEN}"; fi
+  printf "\\\\u${WHITE}@${CYAN}\\h${WHITE}:${PURPLE}\\w${WHITE}"
 }
 
 parse_git_branch() {
@@ -65,40 +61,30 @@ parse_git_branch() {
 }
 
 git_branch_colors() {
-  printf "$YELLOW\$(parse_git_branch)$WHITE"
+  printf "${YELLOW}\$(parse_git_branch)${WHITE}"
 }
 
 uid_symbol() {
-  if [[ $UID -eq 0 ]]; then
-    printf " $RED#$WHITE "
-  else
-    printf " $RED%s$WHITE " "$"
-  fi
+  local sym
+  if [[ "${UID}" -eq "0" ]]; then sym="#"; else sym="$"; fi
+  if [[ -n "${DPOGGI_TWOLINE}" ]]; then printf "\n"; else printf " "; fi
+  printf "${RED}${sym}${WHITE} "
 }
 
-# One-line/two-line prompt hacks (DIRTY)
-
-oneline() {
-  if [[ -n "$BASH" ]]; then
+set_prompt() {
+  if [[ -n "${BASH}" ]]; then
     export PS1="$(parse_identity)$(git_branch_colors)$(uid_symbol)"
-  elif [[ -n "$ZSH" ]]; then
-    [[ -e "$HOME/.dcp/theme" ]] ||
-      export PROMPT='%{$fg[$NCOLOR]%}%n%{$reset_color%}@%{$fg[cyan]%}%m\
-%{$reset_color%}:%{$fg[magenta]%}%~\
-$(git_prompt_info) \
-%{$fg[red]%}%(!.#.»)%{$reset_color%} '
+  elif [[ -n "${ZSH}" ]]; then
+    source "${ZSH}/themes/${ZSH_THEME}.zsh-theme"
   fi
 }
 
+# One-line or two-line prompt
+oneline() {
+  unset DPOGGI_TWOLINE
+  set_prompt
+}
 twoline() {
-  if [[ -n "$BASH" ]]; then
-    export PS1="$(parse_identity)$(git_branch_colors)\n$(uid_symbol)"
-  elif [[ -n "$ZSH" ]]; then
-    [[ -e "$HOME/.dcp/theme" ]] ||
-      export PROMPT='%{$fg[$NCOLOR]%}%n%{$reset_color%}@%{$fg[cyan]%}%m\
-%{$reset_color%}:%{$fg[magenta]%}%~\
-$(git_prompt_info) \
-%{$fg[red]%}
-%(!.#.»)%{$reset_color%} '
-  fi
+  export DPOGGI_TWOLINE="true"
+  set_prompt
 }

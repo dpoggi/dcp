@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
 
-cd "$HOME/.dcp"
+cd "${HOME}/.dcp"
 git checkout master
 git fetch origin
 git rebase origin/master
 
-if [[ -d "$HOME/.oh-my-zsh" ]]; then
-  cd "$HOME/.oh-my-zsh"
+if [[ -d "${HOME}/.oh-my-zsh" ]]; then
+  cd "${HOME}/.oh-my-zsh"
   git fetch origin
   git rebase origin/master
 
-  if [[ -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ]]; then
-    cd "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+  if [[ -d "${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ]]; then
+    cd "${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
     git fetch origin
     git rebase origin/master
   else
-    mkdir -p "$HOME/.oh-my-zsh/custom/plugins"
-    cd "$HOME/.oh-my-zsh/custom/plugins"
+    mkdir -p "${HOME}/.oh-my-zsh/custom/plugins"
+    cd "${HOME}/.oh-my-zsh/custom/plugins"
     git clone git://github.com/zsh-users/zsh-syntax-highlighting.git
   fi
 fi
 
-cd "$HOME/.vim"
+cd "${HOME}/.vim"
 git checkout master
 git fetch origin
 git rebase origin/master
@@ -29,4 +29,4 @@ git submodule update --init
 # KILL IT
 [[ -d "bundle/clang_complete" ]] && rm -rf bundle/clang_complete
 
-$HOME/.dcp/bin/dcp-install-links
+"${HOME}/.dcp/bin/dcp-install-links"
