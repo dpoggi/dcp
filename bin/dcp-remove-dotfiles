@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-for file in bash_login bash_profile bashrc gemrc gitignore_global gvimrc inputrc irbrc osx rvmrc tmux.conf vimrc zlogin zprofile zshrc; do
+for file in bash_profile bashrc gemrc gitignore_global gvimrc inputrc irbrc osx rvmrc tmux.conf vimrc xvimrc zprofile zshenv zshrc; do
   if [[ -s "${HOME}/.${file}" ]]; then
     echo "${HOME}/.${file} already exists, deleting."
     rm -f "${HOME}/.${file}"
