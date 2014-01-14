@@ -48,6 +48,14 @@ if [[ "$(uname)" = "Linux" ]]; then
   alias pbpaste="xsel --clipboard --output"
 fi
 
+# OS X specifics
+if [[ "$(uname)" = "Darwin" ]]; then
+  # Open a man page in Preview
+  pman() {
+    man -t "$1" | open -f -a /Applications/Preview.app
+  }
+fi
+
 
 # PS1 Functions
 
