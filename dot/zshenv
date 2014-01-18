@@ -1,4 +1,2 @@
-if [[ -d "${HOME}/.rbenv" ]]; then
-  export PATH="${HOME}/.rbenv/bin:${PATH}"
-  hash rbenv && eval "$(rbenv init -)"
-fi
+[[ -d "${HOME}/.rbenv/bin" ]] && export PATH="${HOME}/.rbenv/bin:${PATH}"
+hash rbenv 2>/dev/null && eval "$(rbenv init -)"

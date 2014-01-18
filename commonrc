@@ -6,9 +6,9 @@
 if [[ -d "${HOME}/.rvm" ]]; then
   [[ -s "${HOME}/.rvm/scripts/rvm" ]] && source "${HOME}/.rvm/scripts/rvm"
   export PATH="${PATH}:${HOME}/.rvm/bin"
-elif [[ -d "${HOME}/.rbenv" ]] && [[ -z "${ZSH}" ]]; then
-  export PATH="${HOME}/.rbenv/bin:${PATH}"
-  eval "$(rbenv init -)"
+elif [[ -z "${ZSH}" ]]; then
+  [[ -d "${HOME}/.rbenv/bin" ]] && export PATH="${HOME}/.rbenv/bin:${PATH}"
+  hash rbenv 2>/dev/null && eval "$(rbenv init -)"
 fi
 
 export PATH="${PATH}:${HOME}/.dcp/bin"

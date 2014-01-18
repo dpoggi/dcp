@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-if [[ ! -d "${HOME}/.rbenv" ]]; then
-  echo >&2 "Error! rbenv isn't installed!"
+if [[ ! -d "${HOME}/.rbenv/bin" ]]; then
+  echo >&2 "Error! rbenv isn't installed in ${HOME}!"
   exit 1
 else
   cd "${HOME}/.rbenv"
