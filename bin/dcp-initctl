@@ -29,14 +29,15 @@ find_ctlscript() {
 }
 
 find_initcfg() {
-  local conf
+  local cfg
 
   [[ -n "${ctlscript_bin}" ]] && { printf "${ctlscript_bin}"; return; }
 
-  for conf in /etc/init/${1}.conf /usr/lib/systemd/system/${1}.service \
-              /System/Library/LaunchDaemons/${1}.plist; do
-    if [[ -e "${conf}" ]]; then
-      printf "${conf}"
+  for cfg in /etc/init/${1}.conf /usr/lib/systemd/system/${1}.service \
+             /System/Library/LaunchDaemons/${1}.plist \
+             /Library/LaunchDaemons/${1}.plist; do
+    if [[ -e "${cfg}" ]]; then
+      printf "${cfg}"
       return
     fi
   done
