@@ -1,43 +1,157 @@
 #!/usr/bin/env bash
 
-sshd_ctl() {
-  if [[ "$1" = "Darwin" ]]; then
-    local plist="/System/Library/LaunchDaemons/ssh.plist"
+key_dir_local="${HOME}/.dcp/conf/halp"
+key_dir_remote="~/.dcp/conf/halp"
+key_local="${key_dir_local}/${USER}"
+key_remote="${key_dir_remote}/${USER}@$(hostname)"
 
-    if [[ "$2" = "start" ]]; then
-      sudo launchctl load -F "${plist}"
-    elif [[ "$2" = "stop" ]]; then
-      sudo launchctl unload -F "${plist}"
-    fi
-  elif [[ "$1" = "Linux" ]]; then
-    if hash systemctl 2>&-; then
-      echo "systemd!"
-    elif hash initctl 2>&-; then
-      echo "upstart!"
-    elif hash service 2>&-; then
-      echo "sysvinit with helper!"
-    elif [[ -f "/etc/init.d/ssh" && ! -h "/etc/init.d/ssh" ]]; then
-      echo "sysvinit with no helper!"
-    else
-      echo >&2 "Error: unknown init daemon type, quitting."
-      exit 1
-    fi
+backup_path() {
+  if [[ -z "${PATH_BACKUP}" ]]; then
+    export PATH_BACKUP="${PATH}"
+    export PATH="/usr/bin:/bin:/usr/local/bin:/usr/sbin:/sbin:/usr/local/sbin"
   fi
+}
+
+restore_path() {
+  if [[ -n "${PATH_BACKUP}" ]]; then
+    export PATH="${PATH_BACKUP}"
+    unset PATH_BACKUP
+  fi
+}
+
+cleanup_globals() {
+  unset sudo_path
+  unset test_path
+  unset init_ctl_type
+  unset init_ctl_path
+  unset ssh_ctl_path
+  unset ssh_svc_name
+
+  unset key_dir_local
+  unset key_dir_remote
+  unset key_local
+  unset key_remote
+}
+
+fail_loudly() {
+  echo >&2 "$@"
+  restore_path
+  cleanup_globals
+  exit 1
+}
+
+detect_init() {
+  backup_path
+
+  hash sudo 2>&- || fail_loudly "Error: sudo is not installed, quitting."
+  sudo_path="$(type -p sudo)"
+  hash test 2>&- || fail_loudly "Error: test (binary) is not installed, quitting."
+  test_path="$(type -P test)"
+
+  for prog in launchctl initctl systemctl service; do
+    if hash "${prog}" 2>&-; then
+      init_ctl_type="${prog}"
+      init_ctl_path="$(type -p "${prog}")"
+      echo "Found ${prog} at: ${init_ctl_path}"
+      break
+    fi
+  done
+
+  for prog in /etc/init.d/ssh /etc/init.d/sshd /etc/init.d/rc.d/ssh \
+              /etc/init.d/rc.d/sshd /etc/rc.d/ssh /etc/rc.d/sshd; do
+    if "${sudo_path}" "${test_path}" -x "${prog}"; then
+      ssh_ctl_path="${prog}"
+      echo "Found sshd ctl script at: ${ssh_ctl_path}"
+      break
+    fi
+  done
+
+  [[ -z "${init_ctl_path}" && -z "${ssh_ctl_path}" ]] &&
+    fail_loudly "Error: couldn't find a way to control sshd, quitting."
+
+  if [[ "${init_ctl_type}" = "launchctl" ]]; then
+    ssh_svc_name="/System/Library/LaunchDaemons/ssh.plist"
+  elif [[ "${init_ctl_type}" = "initctl" ]]; then
+    ssh_svc_name="ssh"
+    [[ -e "/etc/init/${ssh_svc_name}.conf" ]] ||
+      ssh_svc_name="sshd"
+    [[ -e "/etc/init/${ssh_svc_name}.conf" ]] ||
+      fail_loudly "Error: couldn't get Upstart service name for sshd."
+  elif [[ "${init_ctl_type}" = "systemctl" ]]; then
+    ssh_svc_name="sshd"
+    [[ -e "/usr/lib/systemd/system/${ssh_svc_name}.service" ]] ||
+      ssh_svc_name="ssh"
+    [[ -e "/usr/lib/systemd/system/${ssh_svc_name}.service" ]] ||
+      fail_loudly "Error: couldn't get systemd service name for sshd."
+  elif [[ "${init_ctl_type}" = "service" ]]; then
+    [[ -n "${ssh_ctl_path}" ]] ||
+      fail_loudly "Error: couldn't get sysvinit service name for sshd."
+    ssh_svc_name="$(basename "${ssh_ctl_path}")"
+  fi
+
+  restore_path
+}
+
+
+sshd_ctl() {
+  if [[ -n "${ssh_ctl_path}" ]]; then
+    "${sudo_path}" "${ssh_ctl_path}" "$@"
+    return
+  fi
+
+  if [[ "${init_ctl_type}" = "launchctl" ]]; then
+    if [[ "$1" = "start" ]]; then
+      "${sudo_path}" "${init_ctl_path}" load -F "${ssh_svc_name}"
+    elif [[ "$1" = "stop" ]]; then
+      "${sudo_path}" "${init_ctl_path}" unload -F "${ssh_svc_name}"
+    fi
+  elif [[ "${init_ctl_type}" = "service" ]]; then
+    "${sudo_path}" "${init_ctl_path}" "${ssh_svc_name}" "$1"
+  else
+    "${sudo_path}" "${init_ctl_path}" "$1" "${ssh_svc_name}"
+  fi
+}
+
+gen_ssh_key() {
+  [[ -e "${key_local}" && -e "${key_local}.pub" ]] &&
+    return
+
+  rm -f "${key_local}" "${key_local}.pub"
+  mkdir -p "${key_dir_local}"
+
+  ssh-keygen -q -t rsa -N "" -f "${key_local}"
 }
 
 if [[ -z "${SSH_TTY}" ]]; then
   [[ "$#" -gt "0" ]] ||
-    { echo >&2 "Usage: $(basename $0) nodename"; exit 1; }
+    { echo >&2 "Usage: $(basename "$0") nodename"; exit 1; }
 
-  os="$(uname)"
-  [[ "${os}" = "Darwin" || "${os}" = "Linux" ]] ||
-    { echo >&2 "Error: unknown operating system, quitting."; exit 1; }
+  detect_init
+  gen_ssh_key
 
-  sshd_ctl "${os}" "start"
-  sshd_ctl "${os}" "stop"
+  ssh "$1" "mkdir -p ${key_dir_remote}"
+  scp "${key_local}" "$1:${key_remote}"
+  scp "${key_local}.pub" "$1:${key_remote}.pub"
 
-  unset os
+  sshd_ctl start
+  echo "Now awaiting remote assistance..."
+  ssh -N -R 51337:localhost:22 "$1"
+  sshd_ctl stop
+
+  ssh "$1" "rm -f ${key_remote} ${key_remote}.pub"
+
+  cleanup_globals
 else
-  [[ "$#" -gt "0" ]] ||
-    { echo >&2 "Usage: $(basename $0) identityfile"; exit 1; }
+  if [[ "$#" -lt "1" ]]; then
+    echo >&2 "Usage: $(basename "$0") connection"
+    echo >&2 ""
+    echo >&2 "Currently available options:"
+    for conn in ${key_dir_local}/*@*; do
+      echo >&2 "$(basename "${conn}")"
+    done
+    exit 1
+  fi
+
+  [[ -e "${key_dir_local}/${1}" && -e "${key_dir_local}/${1}.pub" ]] ||
+    fail_loudly "Error: invalid connection."
 fi
