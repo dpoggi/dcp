@@ -122,6 +122,14 @@ gen_ssh_key() {
   ssh-keygen -q -t rsa -N "" -f "${key_local}"
 }
 
+grab_username() {
+  local ifs_old="${IFS}"
+  IFS="@"
+  local arr=$1
+  printf "${arr[0]}"
+  IFS="${ifs_old}"
+}
+
 if [[ -z "${SSH_TTY}" ]]; then
   [[ "$#" -gt "0" ]] ||
     { echo >&2 "Usage: $(basename "$0") nodename"; exit 1; }
@@ -146,12 +154,16 @@ else
     echo >&2 "Usage: $(basename "$0") connection"
     echo >&2 ""
     echo >&2 "Currently available options:"
-    for conn in ${key_dir_local}/*@*; do
-      echo >&2 "$(basename "${conn}")"
+    for conn in ${key_dir_local}/*@*.pub; do
+      conn="$(basename "${conn}")"
+      echo >&2 "${conn%.*}"
     done
+    unset conn
     exit 1
   fi
 
   [[ -e "${key_dir_local}/${1}" && -e "${key_dir_local}/${1}.pub" ]] ||
     fail_loudly "Error: invalid connection."
+
+  ssh -i "${key_dir_local}/${1}" "$(grab_username "${1}")@localhost"
 fi
