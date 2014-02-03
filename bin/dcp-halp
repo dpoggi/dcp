@@ -185,7 +185,7 @@ halp_scp() {
   fi
 }
 
-if [[ -z "${SSH_TTY}" ]]; then
+if [[ -z "${SSH_TTY}" || "${ignore_sshd}" = "true" ]]; then
   [[ "$#" -gt "0" ]] ||
     { echo >&2 "Usage: $(basename "$0") [--ssh] [--port 1234] nodename"; exit 1; }
 
