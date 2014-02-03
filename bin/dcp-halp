@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 
-[[ -z "${DCP_HALP_PORT}" ]] && DCP_HALP_PORT="51337"
+port="51337"
+ignore_sshd="false"
+while [[ "$#" -gt "1" ]]; do
+  [[ "$1" = "--ssh" ]] && ignore_sshd="true"
+  [[ "$1" = "--port" ]] && { port="$2"; shift; }
+  shift
+done
+
 key_dir_local="${HOME}/.dcp/conf/halp"
 key_dir_remote="~/.dcp/conf/halp"
 key_local="${key_dir_local}/${USER}"
@@ -38,7 +45,8 @@ cleanup_globals() {
   unset key_dir_remote
   unset key_local
   unset key_remote
-  unset DCP_HALP_PORT
+  unset port
+  unset ignore_sshd
 
   unset good_ssh_version
   unset control_dir
@@ -134,7 +142,7 @@ sshd_ctl() {
   elif [[ -n "${ssh_svc_name}" ]]; then
     "${sudo_path}" "${init_ctl_path}" "$1" "${ssh_svc_name}"
   elif [[ -n "${ssh_ctl_path}" ]]; then
-    "${sudo_path}" "${ssh_ctl_path}" "$@"
+    "${sudo_path}" "${ssh_ctl_path}" "$1"
   fi
 }
 
@@ -179,10 +187,10 @@ halp_scp() {
 
 if [[ -z "${SSH_TTY}" ]]; then
   [[ "$#" -gt "0" ]] ||
-    { echo >&2 "Usage: $(basename "$0") nodename"; exit 1; }
+    { echo >&2 "Usage: $(basename "$0") [--ssh] [--port 1234] nodename"; exit 1; }
 
   echo "$(basename "$0") may require your local sudo password to start. Setting up..."
-  detect_init
+  [[ "${ignore_sshd}" = "true" ]] || detect_init
   gen_ssh_key
   good_ssh_version="$(detect_ssh)"
 
@@ -190,11 +198,11 @@ if [[ -z "${SSH_TTY}" ]]; then
   halp_scp -q "${key_local}" "$1:${key_remote}"
   halp_scp -q "${key_local}.pub" "$1:${key_remote}.pub"
 
-  sshd_ctl start
+  [[ "${ignore_sshd}" = "true" ]] || sshd_ctl start
   echo "Awaiting remote assistance, Ctrl-C to end..."
-  halp_ssh -N -R "${DCP_HALP_PORT}:localhost:22" "$1"
+  halp_ssh -N -R "${port}:localhost:22" "$1"
   echo "Cleaning up..."
-  sshd_ctl stop
+  [[ "${ignore_sshd}" = "true" ]] || sshd_ctl stop
 
   halp_ssh "$1" "rm -f ${key_remote} ${key_remote}.pub"
 
@@ -202,7 +210,7 @@ if [[ -z "${SSH_TTY}" ]]; then
   cleanup_globals
 else
   if [[ "$#" -lt "1" ]]; then
-    echo >&2 "Usage: $(basename "$0") connection"
+    echo >&2 "Usage: $(basename "$0") [--port 1234] connection"
     echo >&2 ""
     echo >&2 "Currently available connections:"
     for conn in ${key_dir_local}/*@*.pub; do
@@ -216,6 +224,6 @@ else
   [[ -e "${key_dir_local}/${1}" && -e "${key_dir_local}/${1}.pub" ]] ||
     fail_loudly "Error: invalid connection."
 
-  ssh -p "${DCP_HALP_PORT}" -i "${key_dir_local}/${1}" "$(grab_username "${1}")@localhost"
+  ssh -p "${port}" -i "${key_dir_local}/${1}" "$(grab_username "${1}")@localhost"
   cleanup_globals
 fi
