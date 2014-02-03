@@ -27,6 +27,7 @@ cleanup_globals() {
   unset init_ctl_path
   unset ssh_ctl_path
   unset ssh_svc_name
+  unset prog
 
   unset key_dir_local
   unset key_dir_remote
