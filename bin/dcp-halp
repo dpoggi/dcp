@@ -123,11 +123,6 @@ detect_init() {
 
 
 sshd_ctl() {
-  if [[ -n "${ssh_ctl_path}" ]]; then
-    "${sudo_path}" "${ssh_ctl_path}" "$@"
-    return
-  fi
-
   if [[ "${init_ctl_type}" = "launchctl" ]]; then
     if [[ "$1" = "start" ]]; then
       "${sudo_path}" "${init_ctl_path}" load -F "${ssh_svc_name}"
@@ -136,8 +131,10 @@ sshd_ctl() {
     fi
   elif [[ "${init_ctl_type}" = "service" ]]; then
     "${sudo_path}" "${init_ctl_path}" "${ssh_svc_name}" "$1"
-  else
+  elif [[ -n "${ssh_svc_name}" ]]; then
     "${sudo_path}" "${init_ctl_path}" "$1" "${ssh_svc_name}"
+  elif [[ -n "${ssh_ctl_path}" ]]; then
+    "${sudo_path}" "${ssh_ctl_path}" "$@"
   fi
 }
 
