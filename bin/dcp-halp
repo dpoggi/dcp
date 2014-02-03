@@ -101,8 +101,10 @@ detect_init() {
     ssh_svc_name="ssh"
     [[ -e "/etc/init/${ssh_svc_name}.conf" ]] ||
       ssh_svc_name="sshd"
-    if [[ -e "/etc/init/${ssh_svc_name}.conf" && -z "${ssh_ctl_path}" ]]; then
-      fail_loudly "Error: couldn't get Upstart service name for sshd."
+    if [[ ! -e "/etc/init/${ssh_svc_name}.conf" ]]; then
+      [[ -z "${ssh_ctl_path}" ]] &&
+        fail_loudly "Error: couldn't get Upstart service name for sshd."
+      unset ssh_svc_name
     fi
   elif [[ "${init_ctl_type}" = "systemctl" ]]; then
     ssh_svc_name="sshd"
