@@ -86,8 +86,9 @@ detect_init() {
     ssh_svc_name="ssh"
     [[ -e "/etc/init/${ssh_svc_name}.conf" ]] ||
       ssh_svc_name="sshd"
-    [[ -e "/etc/init/${ssh_svc_name}.conf" ]] ||
+    if [[ -e "/etc/init/${ssh_svc_name}.conf" && -z "${ssh_ctl_path}" ]]; then
       fail_loudly "Error: couldn't get Upstart service name for sshd."
+    fi
   elif [[ "${init_ctl_type}" = "systemctl" ]]; then
     ssh_svc_name="sshd"
     [[ -e "/usr/lib/systemd/system/${ssh_svc_name}.service" ]] ||
