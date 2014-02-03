@@ -10,11 +10,11 @@ if [[ -e "tmp" ]]; then
 fi
 
 mkdir -p tmp
-git clone git://github.com/dpoggi/oh-my-zsh.git tmp/.oh-my-zsh
+git clone https://github.com/dpoggi/oh-my-zsh.git tmp/.oh-my-zsh
 mkdir -p tmp/.oh-my-zsh/custom/plugins
-git clone git://github.com/zsh-users/zsh-syntax-highlighting.git tmp/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
-git clone git://github.com/dpoggi/dcp.git tmp/.dcp
-git clone git://github.com/dpoggi/dotvim.git tmp/.vim
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git tmp/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+git clone https://github.com/dpoggi/dcp.git tmp/.dcp
+git clone https://github.com/dpoggi/dotvim.git tmp/.vim
 cd tmp/.vim
 git submodule update --init
 
