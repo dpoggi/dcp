@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+fail() {
+  echo >&2 "$@"
+  exit 1
+}
+
+find_initctl() {
+  local prog
+
+  for prog in launchctl initctl systemctl service; do
+    if hash "${prog}" 2>&-; then
+      printf "$(type -p "${prog}")"
+      return
+    fi
+  done
+}
+
+find_ctlscript() {
+  local prog
+
+  for prog in /etc/init.d/$1 /etc/init.d/$1 /etc/init.d/rc.d/$1 \
+              /etc/init.d/rc.d/$1 /etc/rc.d/$1 /etc/rc.d/$1; do
+    if "${sudo_bin}" "${test_bin}" -x "${prog}"; then
+      printf "${prog}"
+      return
+    fi
+  done
+}
+
+find_initcfg() {
+  local conf
+
+  [[ -n "${ctlscript_bin}" ]] && { printf "${ctlscript_bin}"; return; }
+
+  for conf in /etc/init/${1}.conf /usr/lib/systemd/system/${1}.service \
+              /System/Library/LaunchDaemons/${1}.plist; do
+    if [[ -e "${conf}" ]]; then
+      printf "${conf}"
+      return
+    fi
+  done
+}
+
+write_globals() {
+  PATH="/usr/bin:/bin:/usr/local/bin:/usr/sbin:/sbin:/usr/local/sbin"
+  hash sudo 2>&- || fail "Error: Couldn't find sudo, quitting."
+  sudo_bin="$(type -p sudo)"
+  hash test 2>&- || fail "Error: Couldn't find test (binary), quitting."
+  test_bin="$(type -P test)"
+
+  initctl_bin="$(find_initctl)"
+  [[ -n "${initctl_bin}" ]] && initctl_type="$(basename "${initctl_bin}")"
+  ctlscript_bin="$(find_ctlscript "${service}")"
+  init_cfg="$(find_initcfg "${service}")"
+}
+
+
+run_initctl() {
+  if [[ "${initctl_type}" = "launchctl" ]]; then
+    if [[ "${action}" = "start" ]]; then
+      "${sudo_bin}" "${initctl_bin}" load -F "${init_cfg}"
+    elif [[ "${action}" = "stop" ]]; then
+      "${sudo_bin}" "${initctl_bin}" unload -F "${init_cfg}"
+    fi
+  elif [[ "${initctl_type}" = "service" ]]; then
+    "${sudo_bin}" "${initctl_bin}" "${service}" "${action}"
+  else
+    "${sudo_bin}" "${initctl_bin}" "${action}" "${service}"
+  fi
+}
+
+[[ "$#" -lt "1" ]] &&
+  fail "Usage: $(basename "$0") action service"
+
+action="$1"
+service="$2"
+write_globals
+
+if [[ "${service}" = "ssh" && -z "${init_cfg}" ]]; then
+  service="sshd"
+  write_globals
+fi
+
+if [[ -n "${initctl_bin}" ]]; then
+  run_initctl
+elif [[ -n "${ctlscript_bin}" ]]; then
+  "${sudo_bin}" "${ctlscript_bin}" "${action}"
+else
+  fail "Error: couldn't find a way to control ${service}, quitting."
+fi
