@@ -52,7 +52,6 @@ detect_init() {
     if hash "${prog}" 2>&-; then
       init_ctl_type="${prog}"
       init_ctl_path="$(type -p "${prog}")"
-      echo "Found ${prog} at: ${init_ctl_path}"
       break
     fi
   done
@@ -61,7 +60,6 @@ detect_init() {
               /etc/init.d/rc.d/sshd /etc/rc.d/ssh /etc/rc.d/sshd; do
     if "${sudo_path}" "${test_path}" -x "${prog}"; then
       ssh_ctl_path="${prog}"
-      echo "Found sshd ctl script at: ${ssh_ctl_path}"
       break
     fi
   done
@@ -137,8 +135,8 @@ if [[ -z "${SSH_TTY}" ]]; then
   gen_ssh_key
 
   ssh "$1" "mkdir -p ${key_dir_remote}"
-  scp "${key_local}" "$1:${key_remote}"
-  scp "${key_local}.pub" "$1:${key_remote}.pub"
+  scp -q "${key_local}" "$1:${key_remote}"
+  scp -q "${key_local}.pub" "$1:${key_remote}.pub"
 
   sshd_ctl start
   echo "Now awaiting remote assistance..."
@@ -164,5 +162,5 @@ else
   [[ -e "${key_dir_local}/${1}" && -e "${key_dir_local}/${1}.pub" ]] ||
     fail_loudly "Error: invalid connection."
 
-  ssh -i "${key_dir_local}/${1}" "$(grab_username "${1}")@localhost"
+  ssh -p 51337 -i "${key_dir_local}/${1}" "$(grab_username "${1}")@localhost"
 fi
