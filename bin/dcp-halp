@@ -120,14 +120,13 @@ gen_ssh_key() {
   mkdir -p "${key_dir_local}"
 
   ssh-keygen -q -t rsa -N "" -f "${key_local}"
+  cat "${key_local}.pub" >>"${HOME}/.ssh/authorized_keys"
 }
 
 grab_username() {
-  local ifs_old="${IFS}"
-  IFS="@"
-  local arr=$1
-  printf "${arr[0]}"
-  IFS="${ifs_old}"
+  local hostname
+  IFS="@" read -ra hostname <<< "$1"
+  printf "${hostname[0]}"
 }
 
 if [[ -z "${SSH_TTY}" ]]; then
