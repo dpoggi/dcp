@@ -1,5 +1,62 @@
 #!/usr/bin/env bash
 
+fail() {
+  echo >&2 "$@"
+  exit 1
+}
+
+write_globals() {
+  initctl_bin="$(type -p dcp-initctl)"
+  local_conf_dir="${HOME}/.dcp/conf/halp"
+  ssh_conf_dir="${HOME}/.ssh"
+  remote_conf_dir="~/.dcp/conf/halp"
+
+  local_id="${local_conf_dir}/${USER}"
+  remote_id="${remote_conf_dir}/${USER}@$(hostname)"
+  authorized_keys="${ssh_conf_dir}/authorized_keys"
+  tmp_keys="${ssh_conf_dir}/tmp_keys"
+
+  mkdir -p "${local_conf_dir}" "${ssh_conf_dir}"
+}
+
+wipe_ssh_identity() {
+  rm -f "${local_id}" "${local_id}.pub"
+
+  if [[ -e "${authorized_keys}" ]]; then
+    sed '$ d' "${authorized_keys}" >"${tmp_keys}"
+    mv "${tmp_keys}" "${authorized_keys}"
+  fi
+}
+
+generate_ssh_identity() {
+  [[ -e "${local_id}" || -e "${local_id}.pub" ]] && wipe_ssh_identity
+  ssh-keygen -q -t rsa -N "" -f "${local_id}"
+  cat "${local_id}.pub" >>"${authorized_keys}"
+}
+
+user_for_host() {
+  local host
+  IFS="@" read -ra host <<< "$1"
+  printf "${host[0]}"
+}
+
+print_usage() {
+  local conn
+
+  echo >&2 "Usage: $(basename "$0") [--ssh] [--port 1234] (ssh node or connection)"
+  echo >&2 ""
+  echo >&2 "Currently available connections:"
+  for conn in ${local_conf_dir}/*@*.pub; do
+    conn="$(basename "${conn}")"
+    echo >&2 "${conn%.*}"
+  done
+}
+
+if [[ "$#" -lt "1" ]]; then
+  print_usage
+  exit 1
+fi
+
 port="51337"
 ignore_sshd="false"
 while [[ "$#" -gt "1" ]]; do
@@ -8,222 +65,27 @@ while [[ "$#" -gt "1" ]]; do
   shift
 done
 
-key_dir_local="${HOME}/.dcp/conf/halp"
-key_dir_remote="~/.dcp/conf/halp"
-key_local="${key_dir_local}/${USER}"
-key_remote="${key_dir_remote}/${USER}@$(hostname)"
-
-control_dir="${key_dir_local}/control"
-opt1="ControlMaster auto"
-opt2="ControlPath ${control_dir}/%r@%h:%p"
-opt3="ControlPersist 2"
-
-backup_path() {
-  if [[ -z "${PATH_BACKUP}" ]]; then
-    export PATH_BACKUP="${PATH}"
-    export PATH="/usr/bin:/bin:/usr/local/bin:/usr/sbin:/sbin:/usr/local/sbin"
-  fi
-}
-
-restore_path() {
-  if [[ -n "${PATH_BACKUP}" ]]; then
-    export PATH="${PATH_BACKUP}"
-    unset PATH_BACKUP
-  fi
-}
-
-cleanup_globals() {
-  unset prog
-  unset sudo_path
-  unset test_path
-  unset init_ctl_type
-  unset init_ctl_path
-  unset ssh_ctl_path
-  unset ssh_svc_name
-
-  unset key_dir_local
-  unset key_dir_remote
-  unset key_local
-  unset key_remote
-  unset port
-  unset ignore_sshd
-
-  unset good_ssh_version
-  unset control_dir
-  unset opt1
-  unset opt2
-  unset opt3
-}
-
-fail_loudly() {
-  echo >&2 "$@"
-  restore_path
-  cleanup_globals
-  exit 1
-}
-
-detect_ssh() {
-  local output="$(ssh -v 2>&1)"
-  local major="${output:8:1}"
-  local minor="${output:10:1}"
-
-  if [[ "${major}" -lt "5" ]]; then
-    return 1
-  elif [[ "${major}" -eq "5" && "${minor}" -lt "6" ]]; then
-    return 1
-  else
-    return 0
-  fi
-}
-
-detect_init() {
-  backup_path
-
-  hash sudo 2>&- || fail_loudly "Error: sudo is not installed, quitting."
-  sudo_path="$(type -p sudo)"
-  hash test 2>&- || fail_loudly "Error: test (binary) is not installed, quitting."
-  test_path="$(type -P test)"
-
-  for prog in launchctl initctl systemctl service; do
-    if hash "${prog}" 2>&-; then
-      init_ctl_type="${prog}"
-      init_ctl_path="$(type -p "${prog}")"
-      break
-    fi
-  done
-
-  for prog in /etc/init.d/ssh /etc/init.d/sshd /etc/init.d/rc.d/ssh \
-              /etc/init.d/rc.d/sshd /etc/rc.d/ssh /etc/rc.d/sshd; do
-    if "${sudo_path}" "${test_path}" -x "${prog}"; then
-      ssh_ctl_path="${prog}"
-      break
-    fi
-  done
-
-  [[ -z "${init_ctl_path}" && -z "${ssh_ctl_path}" ]] &&
-    fail_loudly "Error: couldn't find a way to control sshd, quitting."
-
-  if [[ "${init_ctl_type}" = "launchctl" ]]; then
-    ssh_svc_name="/System/Library/LaunchDaemons/ssh.plist"
-  elif [[ "${init_ctl_type}" = "initctl" ]]; then
-    ssh_svc_name="ssh"
-    [[ -e "/etc/init/${ssh_svc_name}.conf" ]] ||
-      ssh_svc_name="sshd"
-    if [[ ! -e "/etc/init/${ssh_svc_name}.conf" ]]; then
-      [[ -z "${ssh_ctl_path}" ]] &&
-        fail_loudly "Error: couldn't get Upstart service name for sshd."
-      unset ssh_svc_name
-    fi
-  elif [[ "${init_ctl_type}" = "systemctl" ]]; then
-    ssh_svc_name="sshd"
-    [[ -e "/usr/lib/systemd/system/${ssh_svc_name}.service" ]] ||
-      ssh_svc_name="ssh"
-    [[ -e "/usr/lib/systemd/system/${ssh_svc_name}.service" ]] ||
-      fail_loudly "Error: couldn't get systemd service name for sshd."
-  elif [[ "${init_ctl_type}" = "service" ]]; then
-    [[ -n "${ssh_ctl_path}" ]] ||
-      fail_loudly "Error: couldn't get sysvinit service name for sshd."
-    ssh_svc_name="$(basename "${ssh_ctl_path}")"
-  fi
-
-  restore_path
-}
-
-
-sshd_ctl() {
-  if [[ "${init_ctl_type}" = "launchctl" ]]; then
-    if [[ "$1" = "start" ]]; then
-      "${sudo_path}" "${init_ctl_path}" load -F "${ssh_svc_name}"
-    elif [[ "$1" = "stop" ]]; then
-      "${sudo_path}" "${init_ctl_path}" unload -F "${ssh_svc_name}"
-    fi
-  elif [[ "${init_ctl_type}" = "service" ]]; then
-    "${sudo_path}" "${init_ctl_path}" "${ssh_svc_name}" "$1"
-  elif [[ -n "${ssh_svc_name}" ]]; then
-    "${sudo_path}" "${init_ctl_path}" "$1" "${ssh_svc_name}"
-  elif [[ -n "${ssh_ctl_path}" ]]; then
-    "${sudo_path}" "${ssh_ctl_path}" "$1"
-  fi
-}
-
-wipe_ssh_key() {
-  rm -f "${key_local}" "${key_local}.pub"
-
-  if [[ -e "${HOME}/.ssh/authorized_keys" ]]; then
-    sed '$ d' "${HOME}/.ssh/authorized_keys" >"${HOME}/.ssh/tmp_keys"
-    mv "${HOME}/.ssh/tmp_keys" "${HOME}/.ssh/authorized_keys"
-  fi
-}
-
-gen_ssh_key() {
-  [[ -e "${key_local}" && -e "${key_local}.pub" ]] && wipe_ssh_key
-  mkdir -p "${key_dir_local}" "${control_dir}"
-
-  ssh-keygen -q -t rsa -N "" -f "${key_local}"
-  cat "${key_local}.pub" >>"${HOME}/.ssh/authorized_keys"
-}
-
-grab_username() {
-  local hostname
-  IFS="@" read -ra hostname <<< "$1"
-  printf "${hostname[0]}"
-}
-
-halp_ssh() {
-  if [[ "${good_ssh_version}" ]]; then
-    ssh -o "${opt1}" -o "${opt2}" -o "${opt3}" "$@"
-  else
-    ssh -o "${opt1}" -o "${opt2}" "$@"
-  fi
-}
-
-halp_scp() {
-  if [[ "${good_ssh_version}" ]]; then
-    scp -o "${opt1}" -o "${opt2}" -o "${opt3}" "$@"
-  else
-    scp -o "${opt1}" -o "${opt2}" "$@"
-  fi
-}
-
 if [[ -z "${SSH_TTY}" || "${ignore_sshd}" = "true" ]]; then
-  [[ "$#" -gt "0" ]] ||
-    { echo >&2 "Usage: $(basename "$0") [--ssh] [--port 1234] user@ssh.node"; exit 1; }
-
   echo "$(basename "$0") may require your local sudo password to start. Setting up..."
-  [[ "${ignore_sshd}" = "true" ]] || detect_init
-  gen_ssh_key
-  good_ssh_version="$(detect_ssh)"
 
-  halp_ssh "$1" "mkdir -p ${key_dir_remote}"
-  halp_scp -q "${key_local}" "$1:${key_remote}"
-  halp_scp -q "${key_local}.pub" "$1:${key_remote}.pub"
+  generate_ssh_identity
+  ssh "$1" "mkdir -p ${remote_conf_dir}"
+  scp -q "${local_id}" "$1:${remote_id}"
+  scp -q "${local_id}.pub" "$1:${remote_id}.pub"
+  [[ "${ignore_sshd}" = "true" ]] || "${initctl_bin}" start sshd
 
-  [[ "${ignore_sshd}" = "true" ]] || sshd_ctl start
   echo "Awaiting remote assistance, Ctrl-C to end..."
-  halp_ssh -N -R "${port}:localhost:22" "$1"
+  ssh -N -R "${port}:localhost:22" "$1"
   echo "Cleaning up..."
-  [[ "${ignore_sshd}" = "true" ]] || sshd_ctl stop
 
-  halp_ssh "$1" "rm -f ${key_remote} ${key_remote}.pub"
-
-  wipe_ssh_key
-  cleanup_globals
+  [[ "${ignore_sshd}" = "true" ]] || "${initctl_bin}" stop sshd
+  ssh "$1" "rm -f ${remote_id} ${remote_id}.pub"
+  wipe_ssh_identity
 else
-  if [[ "$#" -lt "1" ]]; then
-    echo >&2 "Usage: $(basename "$0") [--port 1234] connection"
-    echo >&2 ""
-    echo >&2 "Currently available connections:"
-    for conn in ${key_dir_local}/*@*.pub; do
-      conn="$(basename "${conn}")"
-      echo >&2 "${conn%.*}"
-    done
-    unset conn
-    exit 1
-  fi
+  identity="${local_conf_dir}/${1}"
+  user="$(user_for_host "$1")"
 
-  [[ -e "${key_dir_local}/${1}" && -e "${key_dir_local}/${1}.pub" ]] ||
-    fail_loudly "Error: invalid connection."
-
-  ssh -p "${port}" -i "${key_dir_local}/${1}" "$(grab_username "${1}")@localhost"
-  cleanup_globals
+  [[ -e "${identity}" && -e "${identity}.pub" ]] ||
+    fail "Error: invalid connection, quitting."
+  ssh -p "${port}" -i "${identity}" "${user}@localhost"
 fi
