@@ -6,6 +6,11 @@ key_dir_remote="~/.dcp/conf/halp"
 key_local="${key_dir_local}/${USER}"
 key_remote="${key_dir_remote}/${USER}@$(hostname)"
 
+control_dir="${key_dir_local}/control"
+opt1="ControlMaster auto"
+opt2="ControlPath ${control_dir}/%r@%h:%p"
+opt3="ControlPersist 2"
+
 backup_path() {
   if [[ -z "${PATH_BACKUP}" ]]; then
     export PATH_BACKUP="${PATH}"
@@ -21,19 +26,24 @@ restore_path() {
 }
 
 cleanup_globals() {
+  unset prog
   unset sudo_path
   unset test_path
   unset init_ctl_type
   unset init_ctl_path
   unset ssh_ctl_path
   unset ssh_svc_name
-  unset prog
 
   unset key_dir_local
   unset key_dir_remote
   unset key_local
   unset key_remote
   unset DCP_HALP_PORT
+
+  unset control_dir
+  unset opt1
+  unset opt2
+  unset opt3
 }
 
 fail_loudly() {
@@ -124,7 +134,7 @@ wipe_ssh_key() {
 
 gen_ssh_key() {
   [[ -e "${key_local}" && -e "${key_local}.pub" ]] && wipe_ssh_key
-  mkdir -p "${key_dir_local}"
+  mkdir -p "${key_dir_local}" "${control_dir}"
 
   ssh-keygen -q -t rsa -N "" -f "${key_local}"
   cat "${key_local}.pub" >>"${HOME}/.ssh/authorized_keys"
@@ -144,17 +154,17 @@ if [[ -z "${SSH_TTY}" ]]; then
   detect_init
   gen_ssh_key
 
-  ssh "$1" "mkdir -p ${key_dir_remote}"
-  scp -q "${key_local}" "$1:${key_remote}"
-  scp -q "${key_local}.pub" "$1:${key_remote}.pub"
+  ssh -o "${opt1}" -o "${opt2}" -o "${opt3}" "$1" "mkdir -p ${key_dir_remote}"
+  scp -o "${opt1}" -o "${opt2}" -o "${opt3}" -q "${key_local}" "$1:${key_remote}"
+  scp -o "${opt1}" -o "${opt2}" -o "${opt3}" -q "${key_local}.pub" "$1:${key_remote}.pub"
 
   sshd_ctl start
   echo "Awaiting remote assistance, Ctrl-C to end..."
-  ssh -N -R "${DCP_HALP_PORT}:localhost:22" "$1"
+  ssh -o "${opt1}" -o "${opt2}" -o "${opt3}" -N -R "${DCP_HALP_PORT}:localhost:22" "$1"
   echo "Cleaning up..."
   sshd_ctl stop
 
-  ssh "$1" "rm -f ${key_remote} ${key_remote}.pub"
+  ssh -o "${opt1}" -o "${opt2}" -o "${opt3}" "$1" "rm -f ${key_remote} ${key_remote}.pub"
 
   wipe_ssh_key
   cleanup_globals
