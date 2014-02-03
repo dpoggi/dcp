@@ -6,7 +6,7 @@ fail() {
 }
 
 write_globals() {
-  initctl_bin="$(type -p dcp-initctl)"
+  initctl_bin="$(type -p "dcp-initctl")"
   local_conf_dir="${HOME}/.dcp/conf/halp"
   ssh_conf_dir="${HOME}/.ssh"
   remote_conf_dir="~/.dcp/conf/halp"
@@ -64,6 +64,7 @@ while [[ "$#" -gt "1" ]]; do
   [[ "$1" = "--port" ]] && { port="$2"; shift; }
   shift
 done
+write_globals
 
 if [[ -z "${SSH_TTY}" || "${ignore_sshd}" = "true" ]]; then
   echo "$(basename "$0") may require your local sudo password to start. Setting up..."
