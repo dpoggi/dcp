@@ -112,8 +112,11 @@ sshd_ctl() {
 
 wipe_ssh_key() {
   rm -f "${key_local}" "${key_local}.pub"
-  sed '$ d' "${HOME}/.ssh/authorized_keys" >"${HOME}/.ssh/tmp_keys"
-  mv "${HOME}/.ssh/tmp_keys" "${HOME}/.ssh/authorized_keys"
+
+  if [[ -e "${HOME}/.ssh/authorized_keys" ]]; then
+    sed '$ d' "${HOME}/.ssh/authorized_keys" >"${HOME}/.ssh/tmp_keys"
+    mv "${HOME}/.ssh/tmp_keys" "${HOME}/.ssh/authorized_keys"
+  fi
 }
 
 gen_ssh_key() {
