@@ -19,6 +19,10 @@ write_globals() {
   mkdir -p "${local_conf_dir}" "${ssh_conf_dir}"
 }
 
+wipe_known_hosts() {
+  ssh-keygen -f "${ssh_conf_dir}/known_hosts" -R "[localhost]:${port}"
+}
+
 wipe_ssh_identity() {
   rm -f "${local_id}" "${local_id}.pub"
 
@@ -88,5 +92,6 @@ else
 
   [[ -e "${identity}" && -e "${identity}.pub" ]] ||
     fail "Error: invalid connection, quitting."
+  wipe_known_hosts
   ssh -p "${port}" -i "${identity}" "${user}@localhost"
 fi
