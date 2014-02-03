@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+[[ -z "${DCP_HALP_PORT}" ]] && DCP_HALP_PORT="51337"
 key_dir_local="${HOME}/.dcp/conf/halp"
 key_dir_remote="~/.dcp/conf/halp"
 key_local="${key_dir_local}/${USER}"
@@ -31,6 +32,7 @@ cleanup_globals() {
   unset key_dir_remote
   unset key_local
   unset key_remote
+  unset DCP_HALP_PORT
 }
 
 fail_loudly() {
@@ -145,8 +147,8 @@ if [[ -z "${SSH_TTY}" ]]; then
   scp -q "${key_local}.pub" "$1:${key_remote}.pub"
 
   sshd_ctl start
-  echo "Now awaiting remote assistance..."
-  ssh -N -R 51337:localhost:22 "$1"
+  echo "Awaiting remote assistance, Ctrl-C to end..."
+  ssh -N -R "${DCP_HALP_PORT}:localhost:22" "$1"
   echo "Cleaning up..."
   sshd_ctl stop
 
@@ -170,6 +172,6 @@ else
   [[ -e "${key_dir_local}/${1}" && -e "${key_dir_local}/${1}.pub" ]] ||
     fail_loudly "Error: invalid connection."
 
-  ssh -p 51337 -i "${key_dir_local}/${1}" "$(grab_username "${1}")@localhost"
+  ssh -p "${DCP_HALP_PORT}" -i "${key_dir_local}/${1}" "$(grab_username "${1}")@localhost"
   cleanup_globals
 fi
