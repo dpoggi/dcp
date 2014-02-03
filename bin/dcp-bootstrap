@@ -13,7 +13,7 @@ vim_dir="${HOME}/.vim"
 
 # If it's me, I want to be able to change my dotfiles,
 # otherwise clone the public repos.
-git_prefix="git://github.com/dpoggi"
+git_prefix="https://github.com/dpoggi"
 [[ "${ITS_ME}" ]] && git_prefix="git@github.com:dpoggi"
 
 # Clone my fork of oh-my-zsh
@@ -25,7 +25,7 @@ fi
 # oh-my-zsh syntax highlighter
 if [[ ! -e "${syntax_dir}" ]]; then
   mkdir -p "${omz_plugins_dir}"
-  git clone git://github.com/zsh-users/zsh-syntax-highlighting.git "${syntax_dir}"
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${syntax_dir}"
   action="true"
 fi
 

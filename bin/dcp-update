@@ -17,7 +17,7 @@ if [[ -d "${HOME}/.oh-my-zsh" ]]; then
   else
     mkdir -p "${HOME}/.oh-my-zsh/custom/plugins"
     cd "${HOME}/.oh-my-zsh/custom/plugins"
-    git clone git://github.com/zsh-users/zsh-syntax-highlighting.git
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git
   fi
 fi
 
