@@ -1,9 +1,43 @@
 #!/usr/bin/env bash
 
+sshd_ctl() {
+  if [[ "$1" = "Darwin" ]]; then
+    local plist="/System/Library/LaunchDaemons/ssh.plist"
+
+    if [[ "$2" = "start" ]]; then
+      sudo launchctl load -F "${plist}"
+    elif [[ "$2" = "stop" ]]; then
+      sudo launchctl unload -F "${plist}"
+    fi
+  elif [[ "$1" = "Linux" ]]; then
+    if hash systemctl 2>&-; then
+      echo "systemd!"
+    elif hash initctl 2>&-; then
+      echo "upstart!"
+    elif hash service 2>&-; then
+      echo "sysvinit with helper!"
+    elif [[ -f "/etc/init.d/ssh" && ! -h "/etc/init.d/ssh" ]]; then
+      echo "sysvinit with no helper!"
+    else
+      echo >&2 "Error: unknown init daemon type, quitting."
+      exit 1
+    fi
+  fi
+}
+
 if [[ -z "${SSH_TTY}" ]]; then
   [[ "$#" -gt "0" ]] ||
     { echo >&2 "Usage: $(basename $0) nodename"; exit 1; }
+
+  os="$(uname)"
+  [[ "${os}" = "Darwin" || "${os}" = "Linux" ]] ||
+    { echo >&2 "Error: unknown operating system, quitting."; exit 1; }
+
+  sshd_ctl "${os}" "start"
+  sshd_ctl "${os}" "stop"
+
+  unset os
 else
   [[ "$#" -gt "0" ]] ||
-    { echo >&2 "Usage: $(basename $0) halp-timestamp.pub"; exit 1; }
+    { echo >&2 "Usage: $(basename $0) identityfile"; exit 1; }
 fi
