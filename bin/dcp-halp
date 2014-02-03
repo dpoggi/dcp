@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if [[ -z "${SSH_TTY}" ]]; then
+  [[ "$#" -gt "0" ]] ||
+    { echo >&2 "Usage: $(basename $0) nodename"; exit 1; }
+else
+  [[ "$#" -gt "0" ]] ||
+    { echo >&2 "Usage: $(basename $0) halp-timestamp.pub"; exit 1; }
+fi
