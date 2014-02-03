@@ -32,7 +32,7 @@ alias gr="git rebase"
 alias gm="git merge"
 alias gn="git init && git add . && git commit -m 'Initial commit.'"
 alias grv="git remote -v"
-alias gcb="git fetch --prune && git branch --merged | xargs git branch -d"
+alias gcb="git fetch --prune; git branch --merged | xargs git branch -d"
 gitpub() {
   if [[ -n "$1" ]]; then
     git push origin "${1}:refs/heads/$1"
