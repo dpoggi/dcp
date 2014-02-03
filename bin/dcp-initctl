@@ -77,8 +77,13 @@ action="$1"
 service="$2"
 write_globals
 
-if [[ "${service}" = "ssh" && -z "${init_cfg}" ]]; then
-  service="sshd"
+if [[ -z "${init_cfg}" ]]; then
+  if [[ "${service}" = "ssh" ]]; then
+    service="sshd"
+  elif [[ "${service}" = "sshd" ]]; then
+    service="ssh"
+  fi
+
   write_globals
 fi
 
