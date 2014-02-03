@@ -187,7 +187,7 @@ halp_scp() {
 
 if [[ -z "${SSH_TTY}" || "${ignore_sshd}" = "true" ]]; then
   [[ "$#" -gt "0" ]] ||
-    { echo >&2 "Usage: $(basename "$0") [--ssh] [--port 1234] nodename"; exit 1; }
+    { echo >&2 "Usage: $(basename "$0") [--ssh] [--port 1234] user@ssh.node"; exit 1; }
 
   echo "$(basename "$0") may require your local sudo password to start. Setting up..."
   [[ "${ignore_sshd}" = "true" ]] || detect_init
