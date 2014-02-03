@@ -40,6 +40,7 @@ cleanup_globals() {
   unset key_remote
   unset DCP_HALP_PORT
 
+  unset good_ssh_version
   unset control_dir
   unset opt1
   unset opt2
@@ -51,6 +52,20 @@ fail_loudly() {
   restore_path
   cleanup_globals
   exit 1
+}
+
+detect_ssh() {
+  local output="$(ssh -v 2>&1)"
+  local major="${output:8:1}"
+  local minor="${output:10:1}"
+
+  if [[ "${major}" -lt "5" ]]; then
+    return 1
+  elif [[ "${major}" -eq "5" && "${minor}" -lt "6" ]]; then
+    return 1
+  else
+    return 0
+  fi
 }
 
 detect_init() {
@@ -147,6 +162,22 @@ grab_username() {
   printf "${hostname[0]}"
 }
 
+halp_ssh() {
+  if [[ "${good_ssh_version}" ]]; then
+    ssh -o "${opt1}" -o "${opt2}" -o "${opt3}" "$@"
+  else
+    ssh -o "${opt1}" -o "${opt2}" "$@"
+  fi
+}
+
+halp_scp() {
+  if [[ "${good_ssh_version}" ]]; then
+    scp -o "${opt1}" -o "${opt2}" -o "${opt3}" "$@"
+  else
+    scp -o "${opt1}" -o "${opt2}" "$@"
+  fi
+}
+
 if [[ -z "${SSH_TTY}" ]]; then
   [[ "$#" -gt "0" ]] ||
     { echo >&2 "Usage: $(basename "$0") nodename"; exit 1; }
@@ -154,18 +185,19 @@ if [[ -z "${SSH_TTY}" ]]; then
   echo "$(basename "$0") may require your local sudo password to start. Setting up..."
   detect_init
   gen_ssh_key
+  good_ssh_version="$(detect_ssh)"
 
-  ssh -o "${opt1}" -o "${opt2}" -o "${opt3}" "$1" "mkdir -p ${key_dir_remote}"
-  scp -o "${opt1}" -o "${opt2}" -o "${opt3}" -q "${key_local}" "$1:${key_remote}"
-  scp -o "${opt1}" -o "${opt2}" -o "${opt3}" -q "${key_local}.pub" "$1:${key_remote}.pub"
+  halp_ssh "$1" "mkdir -p ${key_dir_remote}"
+  halp_scp -q "${key_local}" "$1:${key_remote}"
+  halp_scp -q "${key_local}.pub" "$1:${key_remote}.pub"
 
   sshd_ctl start
   echo "Awaiting remote assistance, Ctrl-C to end..."
-  ssh -o "${opt1}" -o "${opt2}" -o "${opt3}" -N -R "${DCP_HALP_PORT}:localhost:22" "$1"
+  halp_ssh -N -R "${DCP_HALP_PORT}:localhost:22" "$1"
   echo "Cleaning up..."
   sshd_ctl stop
 
-  ssh -o "${opt1}" -o "${opt2}" -o "${opt3}" "$1" "rm -f ${key_remote} ${key_remote}.pub"
+  halp_ssh "$1" "rm -f ${key_remote} ${key_remote}.pub"
 
   wipe_ssh_key
   cleanup_globals
