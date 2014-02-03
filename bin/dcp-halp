@@ -139,7 +139,7 @@ if [[ -z "${SSH_TTY}" ]]; then
   [[ "$#" -gt "0" ]] ||
     { echo >&2 "Usage: $(basename "$0") nodename"; exit 1; }
 
-  echo "$(basename "$0") may require your local sudo password..."
+  echo "$(basename "$0") may require your local sudo password to start. Setting up..."
   detect_init
   gen_ssh_key
 
