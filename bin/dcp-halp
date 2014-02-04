@@ -45,53 +45,55 @@ user_for_host() {
 }
 
 print_usage() {
-  local conn
+  local glob="$(shopt -s nullglob; echo ${local_conf_dir}/*@*)"
+  local connection
 
-  echo >&2 "Usage: $(basename "$0") [--ssh] [--port 1234] (ssh node or connection)"
+  echo >&2 "Usage: $(basename "$0") [--skip-sshd] [--port 1234] (ssh node or connection)"
   echo >&2 ""
   echo >&2 "Currently available connections:"
-  for conn in ${local_conf_dir}/*@*.pub; do
-    conn="$(basename "${conn}")"
-    echo >&2 "${conn%.*}"
-  done
+
+  if [[ -n "${glob}" ]]; then
+    for connection in ${glob}; do
+      echo >&2 "$(basename "${connection}")"
+    done
+  else
+    echo >&2 "(none)"
+  fi
 }
 
 write_globals
-if [[ "$#" -lt "1" ]]; then
-  print_usage
-  exit 1
-fi
+[[ "$#" -gt "0" ]] || { print_usage; exit 1; }
 
 port="51337"
-ignore_sshd="false"
+skip_sshd="false"
 while [[ "$#" -gt "1" ]]; do
-  [[ "$1" = "--ssh" ]] && ignore_sshd="true"
+  [[ "$1" = "--skip-sshd" ]] && skip_sshd="true"
   [[ "$1" = "--port" ]] && { port="$2"; shift; }
   shift
 done
 
-if [[ -z "${SSH_TTY}" || "${ignore_sshd}" = "true" ]]; then
-  echo "$(basename "$0") may require your local sudo password to start. Setting up..."
-
-  generate_ssh_identity
-  ssh "$1" "mkdir -p ${remote_conf_dir}"
-  scp -q "${local_id}" "$1:${remote_id}"
-  scp -q "${local_id}.pub" "$1:${remote_id}.pub"
-  [[ "${ignore_sshd}" = "true" ]] || "${initctl_bin}" start sshd
-
-  echo "Awaiting remote assistance, Ctrl-C to end..."
-  ssh -N -R "${port}:localhost:22" "$1"
-  echo "Cleaning up..."
-
-  [[ "${ignore_sshd}" = "true" ]] || "${initctl_bin}" stop sshd
-  ssh "$1" "rm -f ${remote_id} ${remote_id}.pub"
-  wipe_ssh_identity
-else
-  identity="${local_conf_dir}/${1}"
+if [[ -e "${local_conf_dir}/$1" ]]; then
+  identity="${local_conf_dir}/$1"
   user="$(user_for_host "$1")"
 
   [[ -e "${identity}" && -e "${identity}.pub" ]] ||
     fail "Error: invalid connection, quitting."
   wipe_known_hosts
   ssh -p "${port}" -i "${identity}" "${user}@localhost"
+else
+  echo "$(basename "$0") may require your local sudo password to start. Setting up..."
+
+  generate_ssh_identity
+  ssh "$1" "mkdir -p ${remote_conf_dir}"
+  scp -q "${local_id}" "$1:${remote_id}"
+  scp -q "${local_id}.pub" "$1:${remote_id}.pub"
+  [[ "${skip_sshd}" = "true" ]] || "${initctl_bin}" start sshd
+
+  echo "Awaiting remote assistance, Ctrl-C to end..."
+  ssh -N -R "${port}:localhost:22" "$1"
+  echo "Cleaning up..."
+
+  [[ "${skip_sshd}" = "true" ]] || "${initctl_bin}" stop sshd
+  ssh "$1" "rm -f ${remote_id} ${remote_id}.pub"
+  wipe_ssh_identity
 fi
