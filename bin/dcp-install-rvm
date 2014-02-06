@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-hash curl 2>&- || { echo >&2 "Error! Couldn't find cURL!"; exit 1; }
-curl -L https://get.rvm.io | bash -s stable
-if [[ -d "${HOME}/.dcp" ]]; then
-  cd "${HOME}/.dcp"
-  git checkout dot/zshrc dot/bashrc dot/zprofile dot/bash_profile
-fi

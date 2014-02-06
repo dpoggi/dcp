@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
+fail() {
+  echo >&2 "$@"
+  exit 1
+}
+
 # Freak out and quit if we don't have Git and/or cURL.
-hash git 2>&- || { echo >&2 "We need Git first, cap'n!"; exit 1; }
-hash curl 2>&- || { echo >&2 "We need cURL first, cap'n!"; exit 1; }
+hash git 2>&- || fail "Error: git must be installed"
+hash curl 2>&- || fail "Error: curl must be installed"
 
 # Install directories
 omz_dir="${HOME}/.oh-my-zsh"
@@ -14,7 +19,7 @@ vim_dir="${HOME}/.vim"
 # If it's me, I want to be able to change my dotfiles,
 # otherwise clone the public repos.
 git_prefix="https://github.com/dpoggi"
-[[ "${ITS_ME}" ]] && git_prefix="git@github.com:dpoggi"
+[[ -n "${DCP_YEAH_YOU_KNOW_ME}" ]] && git_prefix="git@github.com:dpoggi"
 
 # Clone my fork of oh-my-zsh
 if [[ ! -e "${omz_dir}" ]]; then
@@ -57,11 +62,3 @@ else
   echo "cd ~/.vim/bundle/command-t && rake make"
   echo "Make sure you're set up to use the system Ruby first."
 fi
-
-unset action
-unset do_links
-unset omz_dir
-unset syntax_dir
-unset dcp_dir
-unset vim_dir
-unset git_prefix

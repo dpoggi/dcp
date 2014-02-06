@@ -3,8 +3,9 @@
 for file in ackrc bash_logout bash_profile bashrc gemrc gitignore_global \
             gvimrc inputrc irbrc osx profile rvmrc tmux.conf vimrc xvimrc \
             zprofile zshenv zshrc; do
-  if [[ -s "${HOME}/.${file}" ]]; then
-    echo "${HOME}/.${file} already exists, deleting."
-    rm -f "${HOME}/.${file}"
+  dotfile="${HOME}/.${file}"
+  if [[ -e "${dotfile}" ]]; then
+    echo "Deleting ${dotfile}"
+    rm -f "${dotfile}"
   fi
 done

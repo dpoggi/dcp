@@ -1,31 +1,51 @@
 #!/usr/bin/env bash
 
-git_prefix="https://github.com/sstephenson"
-rbenv="${git_prefix}/rbenv.git"
-ruby_build="${git_prefix}/ruby-build.git"
+fail() {
+  echo >&2 "$@"
+  exit 1
+}
+
+[[ "${UID}" -gt "0" ]] ||
+  fail "Error: this script is meant to be run as an unprivileged user"
 
 if [[ "$1" = "--system" ]]; then
+  [[ -n "$(type -P lsb_release)" && "$(lsb_release -si)" = "Ubuntu" ]] ||
+    fail "Error: this script only supports the --system option on Ubuntu"
+
+  sudo_cmd="sudo"
   prefix="/usr/local/rbenv"
-  user="root"
 else
   prefix="${HOME}/.rbenv"
-  user="${USER}"
 fi
 
-if [[ -d "${prefix}" ]]; then
-  echo >&2 "Error! rbenv is already installed at ${prefix}!"
-  exit 1
-fi
+[[ -e "${prefix}" ]] &&
+  fail "Error: ${prefix} already exists"
 
-sudo -u "$user" git clone "${git_prefix}/rbenv.git" "${prefix}"
-sudo -u "$user" mkdir -p "${prefix}/plugins"
-sudo -u "$user" git clone "${git_prefix}/ruby-build.git" "${prefix}/plugins/ruby-build"
+sstephenson="https://github.com/sstephenson"
+rbenv="${sstephenson}/rbenv.git"
+ruby_build="${sstephenson}/ruby-build.git"
+
+${sudo_cmd} git clone "${rbenv}" "${prefix}"
+${sudo_cmd} mkdir -p "${prefix}/plugins"
+${sudo_cmd} git clone "${ruby_build}" "${prefix}/plugins/ruby-build"
+
+if [[ -n "${sudo_cmd}" ]]; then
+  ${sudo_cmd} usermod -a -G staff "${USER}"
+  ${sudo_cmd} chown -R root:staff "${prefix}"
+  ${sudo_cmd} chmod -R g+rwxXs "${prefix}"
+
+  rc_script="/etc/profile.d/rbenv.sh"
+  cat <<EOF | ${sudo_cmd} tee ${rc_script} >/dev/null
+if [ -d "/usr/local/rbenv" ] && [ ! -d "\$HOME/.rbenv" ]; then
+  export RBENV_ROOT="/usr/local/rbenv"
+  export PATH="\$RBENV_ROOT/bin:\$PATH"
+  eval "\$(rbenv init -)"
+fi
+EOF
+  cat <<EOF | ${sudo_cmd} tee -a /etc/zsh/zshenv >/dev/null
+  [[ -s "${rc_script}" ]] && source "${rc_script}"
+EOF
+fi
 
 echo
 echo "rbenv and ruby-build have been installed at ${prefix}!"
-
-unset prefix
-unset user
-unset git_prefix
-unset rbenv
-unset ruby_build

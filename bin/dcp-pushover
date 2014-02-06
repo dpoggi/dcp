@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 
-conf="${DCP}/conf/pushover"
+fail() {
+  echo >&2 "$@"
+  exit 1
+}
 
-[[ -e "${conf}" ]] ||
-  { echo >&2 "Error: must use ~/.dcp/conf/pushover to set \$PUSHOVER_TOKEN and \$PUSHOVER_USER."; exit 1; }
-[[ "$#" -lt "1" ]] &&
-  { echo >&2 "Usage: $(basename $0) 'message'"; exit 1; }
+config="${HOME}/.dcp/conf/pushover"
+if [[ ! -e "${config}" ]]; then
+  printf >&2 "Error: ~/.dcp/conf/pushover is missing, "
+  fail "need it to set \$PUSHOVER_TOKEN and \$PUSHOVER_USER"
+fi
+source "${config}"
 
-source "${conf}"
+[[ "$#" -ge "1" ]] ||
+  fail "Usage: $(basename "$0") 'message'"
+
 curl -s --data "token=${PUSHOVER_TOKEN}&user=${PUSHOVER_USER}&message=$1" https://api.pushover.net/1/messages.json
-
-unset conf

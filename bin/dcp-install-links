@@ -1,21 +1,27 @@
 #!/usr/bin/env bash
 
-for file in ${HOME}/.dcp/dot/* ${HOME}/.vim/*rc; do
-  if [[ -s "${HOME}/.$(basename ${file})" ]]; then
-    echo "${HOME}/.$(basename ${file}) already exists, not linking."
-  else
-    echo "Linking ${HOME}/.$(basename ${file}) => ${file}"
-    ln -s "${file}" "${HOME}/.$(basename ${file})"
-  fi
-done
+link_dotfile() {
+  local original="$1"
+  local link="${HOME}/.$(basename "${original}")"
 
+  if [[ ! -s "${link}" || -h "${link}" ]]; then
+    echo "Linking ${link} => ${original}"
+    ln -s -f "${original}" "${link}"
+  else
+    echo >&2 "Warning: ${link} is a file of non-zero size, skipping"
+  fi
+}
+
+for dotfile in ${HOME}/.dcp/dot/* ${HOME}/.vim/*rc; do
+  link_dotfile "${dotfile}"
+done
 rm -f "${HOME}/.profile"
 
 if hash git 2>&-; then
   git config --global core.editor vim
-  git config --global color.ui true
   git config --global core.excludesfile ~/.gitignore_global
   git config --global push.default matching
+  git config --global color.ui true
 
   [[ "$(uname)" = "Darwin" ]] &&
     git config --global core.trustctime false

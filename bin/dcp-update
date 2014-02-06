@@ -1,32 +1,26 @@
 #!/usr/bin/env bash
 
-cd "${HOME}/.dcp"
-git checkout master
-git fetch origin
-git rebase origin/master
+update_repo() {
+  [[ -d "$1" ]] || return 1
+  cd "$1"
+  git fetch --all
+  git checkout master
+  git rebase refs/remotes/origin/master
+  git submodule update --init
+}
 
-if [[ -d "${HOME}/.oh-my-zsh" ]]; then
-  cd "${HOME}/.oh-my-zsh"
-  git fetch origin
-  git rebase origin/master
+update_repo "${HOME}/.dcp"
+update_repo "${HOME}/.oh-my-zsh"
 
-  if [[ -d "${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ]]; then
-    cd "${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
-    git fetch origin
-    git rebase origin/master
-  else
-    mkdir -p "${HOME}/.oh-my-zsh/custom/plugins"
-    cd "${HOME}/.oh-my-zsh/custom/plugins"
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git
-  fi
+update_repo "${HOME}/.vim"
+clang_complete_dir="${HOME}/.vim/bundle/clang_complete"
+[[ -d "${clang_complete_dir}" ]] && rm -rf "${clang_complete_dir}"
+
+omz_plugins_dir="${HOME}/.oh-my-zsh/custom/plugins"
+update_repo "${omz_plugins_dir}/zsh-syntax-highlighting"
+if [[ "$?" -gt "0" ]]; then
+  mkdir -p "${omz_plugins_dir}"
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${omz_plugins_dir}/zsh-syntax-highlighting"
 fi
-
-cd "${HOME}/.vim"
-git checkout master
-git fetch origin
-git rebase origin/master
-git submodule update --init
-# KILL IT
-[[ -d "bundle/clang_complete" ]] && rm -rf bundle/clang_complete
 
 "${HOME}/.dcp/bin/dcp-install-links"

@@ -10,7 +10,9 @@ if hash twistd 2>&-; then
 elif hash ruby 2>&-; then
   start_message "WEBrick"
   exec ruby -r webrick <<-EOF
-    server = WEBrick::HTTPServer.new(:BindAddress => '0.0.0.0', :Port => 9000, :DocumentRoot => Dir.pwd)
+    server = WEBrick::HTTPServer.new(:BindAddress => '0.0.0.0',
+                                     :Port => 9000,
+                                     :DocumentRoot => Dir.pwd)
     trap('INT') { server.shutdown }
     server.start
 EOF
