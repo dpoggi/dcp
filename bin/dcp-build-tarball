@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
-if [[ "$#" -lt "1" ]]; then
-  echo >&2 "Usage: $(basename $0) <output>"
+fail() {
+  echo >&2 "$@"
   exit 1
-fi
-if [[ -e "tmp" ]]; then
-  echo >&2 "I need a folder to work with called tmp! Please delete or rename that!"
-  exit 1
-fi
+}
+
+[[ "$#" -ge "1" ]] ||
+  fail "Usage: $(basename "$0") archive.tar.gz"
+[[ ! -e "tmp" ]] ||
+  fail "Error: tmp already exists"
 
 mkdir -p tmp
 git clone https://github.com/dpoggi/oh-my-zsh.git tmp/.oh-my-zsh
@@ -19,6 +20,6 @@ cd tmp/.vim
 git submodule update --init
 
 cd ..
-tar czf "../$1" .oh-my-zsh .dcp .vim
+tar czf "../$1" .dcp .vim .oh-my-zsh
 cd ..
 rm -rf tmp
