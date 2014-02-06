@@ -20,6 +20,6 @@ syslog facility = local5
   readonly = yes
 EOF
 else
-  echo "Starting rsync daemon, Ctrl-C to quit..."
+  sudo echo "Starting rsync daemon, Ctrl-C to quit..."
   sudo rsync --daemon --no-detach --config=${config_path}
 fi
