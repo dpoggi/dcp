@@ -71,7 +71,7 @@ run_initctl() {
   fi
 }
 
-[[ "$#" -gt "0" ]] ||
+[[ "$#" -ge "2" ]] ||
   fail "Usage: $(basename "$0") action service"
 
 action="$1"

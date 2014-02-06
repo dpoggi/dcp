@@ -62,7 +62,7 @@ print_usage() {
 }
 
 write_globals
-[[ "$#" -gt "0" ]] || { print_usage; exit 1; }
+[[ "$#" -ge "1" ]] || { print_usage; exit 1; }
 
 port="51337"
 skip_sshd="false"
