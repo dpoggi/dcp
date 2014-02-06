@@ -43,7 +43,8 @@ if [ -d "/usr/local/rbenv" ] && [ ! -d "\$HOME/.rbenv" ]; then
 fi
 EOF
   cat <<EOF | ${sudo_cmd} tee -a /etc/zsh/zshenv >/dev/null
-  [[ -s "${rc_script}" ]] && source "${rc_script}"
+
+[[ -s "${rc_script}" ]] && source "${rc_script}"
 EOF
 fi
 
