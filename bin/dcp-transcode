@@ -8,12 +8,12 @@ fail() {
 ffmpeg() {
   local ffmpeg_bin="$(type -P ffmpeg)"
   [[ -x "${ffmpeg_bin}" ]] || fail "Error: ffmpeg must be installed"
-
-  "${ffmpeg_bin}" -i "$1" -strict experimental -c:v copy -c:a aac -cutoff 20000 -ac 2 -b:a 160k "$2"
+  "${ffmpeg_bin}" -i "$1" ${codec_options} ${metadata_options} "$2"
 }
 
 convert() {
-  local base="${1%.*}" ext="${1##*.}"
+  local base="${1%.*}"
+  local ext="${1##*.}"
 
   if [[ "${ext}" = "mp4" ]]; then
     ffmpeg "$1" "${base}.transcode.mp4"
@@ -26,28 +26,44 @@ convert() {
   fi
 }
 
+print_usage() {
+  cat >&2 <<END
+Usage: $(basename "$0") [--copy-audio] [--strip-metadata] (video file)
 
-if [[ "$#" -eq "0" ]]; then
-  for mkv in *.mkv; do
-    [[ ! -f "${mkv}" ]] &&
-      { echo >&2 "Error: no MKV files to digest, try --help."; exit 1; }
-
-    convert "${mkv}"
-  done
-else
-  if [[ "$1" = "--help" ]]; then
-    cat >&2 <<END
-dcp-transcode puts videos in an MP4 container using their existing video codec
+$(basename "$0") puts videos in an MP4 container using their existing video codec
 and 160kbps, 2 channel AAC audio. Though it flattens surround sound, this format
 is compatible with the iPad as well as most TV-connected streaming devices
 (Xbox 360, PlayStation 3, etc.).
 
-Running with no arguments looks for MKV files in the working directory and
-transcodes them all. Any argument besides --help will be treated as a singular
-video to be transcoded. If it's an MP4 whose audio you want to conform,
-the output will be named "filename.transcode.mp4".
+Unless a video is supplied on the command line, the script looks for *.mkv in the
+current directory and transcodes them all. --copy-audio skips the conversion to
+AAC, --strip-metadata does just what it says.
 END
+}
+
+codec_options="-strict experimental -c:a aac -cutoff 20000 -ac 2 -b:a 160k -c:v copy"
+while [[ "$#" -gt "0" ]]; do
+  if [[ "$1" = "--help" ]]; then
+    print_usage
+    exit
+  elif [[ "$1" = "--copy-audio" ]]; then
+    codec_options="-c:a copy -c:v copy"
+  elif [[ "$1" = "--strip-metadata" ]]; then
+    metadata_options="-map_metadata -1"
   else
-    convert "$1"
+    file="$1"
   fi
+
+  shift
+done
+
+if [[ -n "${file}" ]]; then
+  convert "${file}"
+else
+  test -n "$(find . -maxdepth 1 -name '*.mkv' -print -quit)" ||
+    fail "Error: no MKV files to digest, try --help"
+
+  for mkv in *.mkv; do
+    convert "${mkv}"
+  done
 fi

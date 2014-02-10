@@ -45,32 +45,43 @@ user_for_host() {
 }
 
 print_usage() {
-  local glob="$(shopt -s nullglob; echo ${local_conf_dir}/*@*)"
   local connection
 
   echo >&2 "Usage: $(basename "$0") [--skip-sshd] [--port 1234] (ssh node or connection)"
   echo >&2 ""
   echo >&2 "Currently available connections:"
 
-  if [[ -n "${glob}" ]]; then
-    for connection in ${glob}; do
-      echo >&2 "$(basename "${connection}")"
+  pushd "${local_conf_dir}" >/dev/null 2>&1
+  if test -n "$(find . -maxdepth 1 -name '*@*' -print -quit)"; then
+    for connection in *@*; do
+      echo >&2 "${connection}"
     done
   else
     echo >&2 "(none)"
   fi
+  popd >/dev/null 2>&1
 }
-
-write_globals
-[[ "$#" -ge "1" ]] || { print_usage; exit 1; }
 
 port="51337"
 skip_sshd="false"
-while [[ "$#" -gt "1" ]]; do
-  [[ "$1" = "--skip-sshd" ]] && skip_sshd="true"
-  [[ "$1" = "--port" ]] && { port="$2"; shift; }
+while [[ "$#" -gt "0" ]]; do
+  if [[ "$1" = "--help" ]]; then
+    print_usage
+    exit
+  elif [[ "$1" = "--skip-sshd" ]]; then
+    skip_sshd="true"
+  elif [[ "$1" = "--port" ]]; then
+    port="$2"
+    shift
+  else
+    target="$1"
+  fi
+
   shift
 done
+
+write_globals
+[[ -n "${target}" ]] || { print_usage; exit 1; }
 
 if [[ -e "${local_conf_dir}/$1" ]]; then
   identity="${local_conf_dir}/$1"
