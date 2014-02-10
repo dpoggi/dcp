@@ -1,0 +1,9 @@
+export DCP="${HOME}/.dcp"
+export GREP_OPTIONS="--color=auto"
+export LS_OPTIONS="--color=auto"
+export CLICOLOR="1"
+export EDITOR="vim"
+
+[[ -x "/usr/local/bin/brew" ]] &&
+  export PATH="/usr/local/bin:/usr/local/sbin:${PATH}"
+export PATH="${PATH}:${DCP}/bin"

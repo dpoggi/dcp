@@ -1,0 +1,95 @@
+# General aliases
+alias c="clear"
+alias ll="ls -la"
+alias la="ls -a"
+alias h="history | tail -32"
+
+# Git aliases
+alias ga="git add"
+alias gp="git push"
+alias gpl="git pull"
+alias gl="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias gll="git log --stat --oneline --decorate"
+alias gs="git status"
+alias gd="git diff"
+alias gc="git commit"
+alias gcm="git commit -m"
+alias gco="git checkout"
+alias gb="git branch"
+alias gf="git fetch"
+alias gr="git rebase"
+alias gm="git merge"
+alias gn="git init && git add . && git commit -m 'Initial commit.'"
+alias grv="git remote -v"
+alias gcb="git fetch --prune; git branch --merged | xargs git branch -d"
+gpub() {
+  [[ -n "$1" ]] || return 1
+
+  git push origin "$1:refs/heads/$1"
+  git fetch origin
+  git config "branch.${1}.remote" origin
+  git config "branch.${1}.merge" "refs/heads/$1"
+  git checkout "$1"
+}
+
+# Mac specifics
+if [[ "$(uname)" = "Darwin" ]]; then
+  # Open a man page in Preview
+  pman() {
+    man -t "$1" | open -f -a /Applications/Preview.app
+  }
+# Linux specifics
+elif [[ "$(uname)" = "Linux" ]]; then
+  # Mac-style aliases for xsel
+  alias pbcopy="xsel --clipboard --input"
+  alias pbpaste="xsel --clipboard --output"
+fi
+
+# Bash PS1 Functions
+dcp_ps1_preamble() {
+  local red="\[\033[0;31m\]"
+  local green="\[\033[0;32m\]"
+  local white="\[\033[1;37m\]"
+  local cyan="\[\033[0;36m\]"
+  local purple="\[\033[0;35m\]"
+
+  if [[ "${UID}" -eq "0" ]]; then printf "${red}"; else printf "${green}"; fi
+  printf "\\\\u${white}@${cyan}\\h${white}:${purple}\\w${white}"
+}
+dcp_ps1_git_branch() {
+  git branch 2>&- | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+}
+dcp_ps1_git() {
+  local yellow="\[\033[1;33m\]"
+  local white="\[\033[1;37m\]"
+
+  printf "${yellow}\$(dcp_ps1_git_branch)${white}"
+}
+dcp_ps1_uid() {
+  local red="\[\033[0;31m\]"
+  local white="\[\033[1;37m\]"
+  local sym
+
+  if [[ "${UID}" -eq "0" ]]; then sym="#"; else sym="$"; fi
+  if [[ -n "${DPOGGI_TWOLINE}" ]]; then printf "\n"; else printf " "; fi
+  printf "${red}${sym}${white} "
+}
+
+# Set prompt in either shell
+dcp_set_prompt() {
+  if [[ -n "${BASH}" ]]; then
+    export PS1="$(dcp_ps1_preamble)$(dcp_ps1_git)$(dcp_ps1_uid)"
+  elif [[ -n "${ZSH}" ]]; then
+    source "${ZSH}/themes/${ZSH_THEME}.zsh-theme"
+  fi
+}
+
+# One-line or two-line prompt (for convenience, these have no prefix)
+oneline() {
+  unset DPOGGI_TWOLINE
+  dcp_set_prompt
+}
+twoline() {
+  export DPOGGI_TWOLINE="true"
+  dcp_set_prompt
+}

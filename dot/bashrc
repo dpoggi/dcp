@@ -1,6 +1,13 @@
-[[ -s "$HOME/.dcp/commonrc" ]] && source "$HOME/.dcp/commonrc"
-set_prompt
+# Load rbenv
+[[ -e "${HOME}/.dcp/rbenvrc" ]] &&
+  source "${HOME}/.dcp/rbenvrc"
+# Load aliases, local scripts, environment
+[[ -e "${HOME}/.dcp/initrc" ]] &&
+  source "${HOME}/.dcp/initrc"
 
-# Command not found hook for Arch Linux
+# Set prompt
+dcp_set_prompt
+
+# 'Command not found' hook for Arch Linux
 [[ -s "/usr/share/doc/pkgfile/command-not-found.bash" ]] &&
   source "/usr/share/doc/pkgfile/command-not-found.bash"
