@@ -16,54 +16,68 @@ convert() {
   local ext="${1##*.}"
 
   if [[ "${ext}" = "mp4" ]]; then
-    ffmpeg "$1" "${base}.transcode.mp4"
+    ffmpeg "$1" "${output_dir}/${base}.transcode.mp4"
   else
-    if [[ -e "${base}.mp4" ]]; then
+    if [[ -e "${output_dir}/${base}.mp4" ]]; then
       echo >&2 "Error: ${base}.mp4 already exists, skipping."
     else
-      ffmpeg "$1" "${base}.mp4"
+      ffmpeg "$1" "${output_dir}/${base}.mp4"
     fi
   fi
 }
 
 print_usage() {
   cat >&2 <<END
-Usage: $(basename "$0") [--copy-audio] [--strip-metadata] (video file)
+Usage: $(basename "$0") [options] (video file or dir)
 
-$(basename "$0") puts videos in an MP4 container using their existing video codec
-and 160kbps, 2 channel AAC audio. Though it flattens surround sound, this format
-is compatible with the iPad as well as most TV-connected streaming devices
-(Xbox 360, PlayStation 3, etc.).
+$(basename "$0") puts videos in an MP4 container using their existing video
+codec and 160kbps, 2 channel AAC audio. Though it flattens surround sound, this
+format is compatible with the iPad as well as most TV-connected streaming
+devices (Xbox 360, PlayStation 3, etc.).
 
-Unless a video is supplied on the command line, the script looks for *.mkv in the
-current directory and transcodes them all. --copy-audio skips the conversion to
-AAC, --strip-metadata does just what it says.
+Unless a video file or directory is supplied on the command line, the script
+looks for *.mkv in the current directory and transcodes them all.
+
+Specific options:
+        --output-dir DIR             Output MP4 files to DIR
+        --copy-audio                 Skip transcoding audio to AAC
+        --strip-metadata             Strip all metadata from the output file(s)
+
+    -h, --help                       Show this message
 END
 }
 
 codec_options="-strict experimental -c:a aac -cutoff 20000 -ac 2 -b:a 160k -c:v copy"
+output_dir="."
+target="."
 while [[ "$#" -gt "0" ]]; do
-  if [[ "$1" = "--help" ]]; then
+  if [[ "$1" = "-h" || "$1" = "--help" ]]; then
     print_usage
     exit
   elif [[ "$1" = "--copy-audio" ]]; then
     codec_options="-c:a copy -c:v copy"
   elif [[ "$1" = "--strip-metadata" ]]; then
     metadata_options="-map_metadata -1"
+  elif [[ "$1" = "--output-dir" ]]; then
+    [[ -d "$2" ]] || fail "Error: output directory does not exist"
+    output_dir="$2"
+    shift
   else
-    file="$1"
+    target="$1"
   fi
 
   shift
 done
 
-if [[ -n "${file}" ]]; then
-  convert "${file}"
-else
+if [[ -d "${target}" ]]; then
+  pushd "${target}" >/dev/null 2>&1
   test -n "$(find . -maxdepth 1 -name '*.mkv' -print -quit)" ||
     fail "Error: no MKV files to digest, try --help"
 
   for mkv in *.mkv; do
     convert "${mkv}"
   done
+  popd >/dev/null 2>&1
+elif [[ -n "${target}" ]]; then
+  convert "${file}"
 fi
