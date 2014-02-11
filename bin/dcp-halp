@@ -20,7 +20,7 @@ write_globals() {
 }
 
 wipe_known_hosts() {
-  ssh-keygen -f "${ssh_conf_dir}/known_hosts" -R "[localhost]:${port}"
+  ssh-keygen -f "${ssh_conf_dir}/known_hosts" -R "[localhost]:${port}" >/dev/null 2>&1
 }
 
 wipe_ssh_identity() {
