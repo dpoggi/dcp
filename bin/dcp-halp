@@ -52,9 +52,9 @@ print_usage() {
   echo >&2 "Currently available connections:"
 
   pushd "${local_conf_dir}" >/dev/null 2>&1
-  if test -n "$(find . -maxdepth 1 -name '*@*' -print -quit)"; then
-    for connection in *@*; do
-      echo >&2 "${connection}"
+  if test -n "$(find . -maxdepth 1 -name '*@*.pub' -print -quit)"; then
+    for connection in *@*.pub; do
+      echo >&2 "${connection%.*}"
     done
   else
     echo >&2 "(none)"
