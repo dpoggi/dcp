@@ -83,9 +83,9 @@ done
 write_globals
 [[ -n "${target}" ]] || { print_usage; exit 1; }
 
-if [[ -e "${local_conf_dir}/$1" ]]; then
-  identity="${local_conf_dir}/$1"
-  user="$(user_for_host "$1")"
+if [[ -e "${local_conf_dir}/${target}" ]]; then
+  identity="${local_conf_dir}/${target}"
+  user="$(user_for_host "${target}")"
 
   [[ -e "${identity}" && -e "${identity}.pub" ]] ||
     fail "Error: invalid connection, quitting."
@@ -95,16 +95,16 @@ else
   echo "$(basename "$0") may require your local sudo password to start. Setting up..."
 
   generate_ssh_identity
-  ssh "$1" "mkdir -p ${remote_conf_dir}"
-  scp -q "${local_id}" "$1:${remote_id}"
-  scp -q "${local_id}.pub" "$1:${remote_id}.pub"
+  ssh "${target}" "mkdir -p ${remote_conf_dir}"
+  scp -q "${local_id}" "${target}:${remote_id}"
+  scp -q "${local_id}.pub" "${target}:${remote_id}.pub"
   [[ "${skip_sshd}" = "true" ]] || "${initctl_bin}" start sshd
 
   echo "Awaiting remote assistance, Ctrl-C to end..."
-  ssh -N -R "${port}:localhost:22" "$1"
+  ssh -N -R "${port}:localhost:22" "${target}"
   echo "Cleaning up..."
 
   [[ "${skip_sshd}" = "true" ]] || "${initctl_bin}" stop sshd
-  ssh "$1" "rm -f ${remote_id} ${remote_id}.pub"
+  ssh "${target}" "rm -f ${remote_id} ${remote_id}.pub"
   wipe_ssh_identity
 fi
