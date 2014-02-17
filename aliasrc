@@ -38,6 +38,12 @@ if [[ "$(uname)" = "Darwin" ]]; then
   pman() {
     man -t "$1" | open -f -a /Applications/Preview.app
   }
+
+  # Reset "Open With..." menus after connecting a drive with applications on it
+  reset_launch_services() {
+    /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -kill -r -domain local -domain system -domain user
+    killall Finder
+  }
 # Linux specifics
 elif [[ "$(uname)" = "Linux" ]]; then
   # Mac-style aliases for xsel
