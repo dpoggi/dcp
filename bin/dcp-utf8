@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+require 'ensure/encoding'
+
+if ARGV.empty?
+  STDERR.puts "Usage: #{File.basename(__FILE__)} file.txt"
+  exit 1
+end
+
+path = ARGV.first
+text = File.read(path)
+text = text.ensure_encoding(
+  Encoding::UTF_8,
+  external_encoding: :sniff,
+  invalid_characters: :transcode
+).encode(
+  Encoding::UTF_8,
+  universal_newline: true
+)
+
+File.open(path, 'w').write(text)
+text = File.open(path, 'r:bom|utf-8').read
+File.open(path, 'w').write(text)
