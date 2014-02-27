@@ -25,7 +25,7 @@ alias gcb="git fetch --prune; git branch --merged | xargs git branch -d"
 gpub() {
   [[ -n "$1" ]] || return 1
 
-  git push origin "$1:refs/heads/$1"
+  git push origin "${1}:refs/heads/$1"
   git fetch origin
   git config "branch.${1}.remote" origin
   git config "branch.${1}.merge" "refs/heads/$1"
