@@ -22,6 +22,7 @@ alias gm="git merge"
 alias gn="git init && git add . && git commit -m 'Initial commit.'"
 alias grv="git remote -v"
 alias gcb="git fetch --prune; git branch --merged | xargs git branch -d"
+alias ggr="git grep --break --heading --line-number"
 gpub() {
   [[ -n "$1" ]] || return 1
 
