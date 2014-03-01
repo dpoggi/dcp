@@ -5,8 +5,7 @@ link_dotfile() {
   local link="${HOME}/.$(basename "${original}")"
 
   if [[ ! -s "${link}" || -h "${link}" ]]; then
-    echo "Linking ${link} => ${original}"
-    ln -s -f "${original}" "${link}"
+    ln -sfv "${original}" "${link}"
   else
     echo >&2 "Warning: ${link} is a file of non-zero size, skipping"
   fi
@@ -22,6 +21,7 @@ if hash git 2>&-; then
   git config --global core.excludesfile ~/.gitignore_global
   git config --global push.default matching
   git config --global color.ui true
+  git config --global grep.lineNumber true
 
   [[ "$(uname)" = "Darwin" ]] &&
     git config --global core.trustctime false
