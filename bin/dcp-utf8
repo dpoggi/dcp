@@ -12,11 +12,11 @@ text = text.ensure_encoding(
   Encoding::UTF_8,
   external_encoding: :sniff,
   invalid_characters: :transcode
+).ensure_encoding(
+  Encoding::UTF_8,
+  external_encoding: :sniff,
+  invalid_characters: :drop
 ).encode(
   Encoding::UTF_8,
   universal_newline: true
 )
-
-File.open(path, 'w').write(text)
-text = File.open(path, 'r:bom|utf-8').read
-File.open(path, 'w').write(text)
