@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 if ARGV.count < 2
-  $stderr.puts "Usage: dcp-split-csv file.csv num_chunks"
+  $stderr.puts "Usage: dcp-split-csv file.csv chunksize"
   exit 1
 end
 
@@ -9,10 +9,7 @@ path = ARGV[0]
 extension = File.extname(path)
 extensionless_path = path.gsub(/#{Regexp.escape(File.extname(path))}$/, '')
 
-num_chunks = ARGV[1].to_i
-num_lines = %x{wc -l #{path}}.split.first.to_i - 1
-chunk_size = num_lines / num_chunks + num_chunks
-
+chunk_size = ARGV[1].to_i
 lines = File.readlines(ARGV.first)
 headers = lines.shift
 
