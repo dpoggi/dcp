@@ -1,4 +1,6 @@
 [[ -d "${HOME}/.rbenv/bin" ]] &&
   export PATH="${HOME}/.rbenv/bin:${PATH}"
+[[ -d "${HOME}/.rbenv/shims" ]] &&
+  export RBENV_ROOT="${HOME}/.rbenv"
 hash rbenv 2>/dev/null &&
   eval "$(rbenv init -)"
