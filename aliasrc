@@ -13,6 +13,7 @@ alias gl="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %
 alias gll="git log --stat --oneline --decorate"
 alias gs="git status"
 alias gd="git diff"
+alias gds="git diff --staged"
 alias gc="git commit"
 alias gcm="git commit -m"
 alias gco="git checkout"
