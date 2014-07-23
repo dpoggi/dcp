@@ -7,3 +7,5 @@ export EDITOR="vim"
 [[ -x "/usr/local/bin/brew" ]] &&
   export PATH="/usr/local/bin:/usr/local/sbin:${PATH}"
 export PATH="${PATH}:${DCP}/bin"
+[[ -e "${HOME}/.dcp/localenv" ]] &&
+  source "${HOME}/.dcp/localenv"

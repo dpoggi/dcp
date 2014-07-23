@@ -13,6 +13,9 @@ localrc
 # localprofile contains local login shell stuff
 localprofile
 
+# localenv contains local environment
+localenv
+
 # conf directory contains configuration for scripts
 /conf/*
 !/conf/.gitkeep
