@@ -23,7 +23,7 @@ class YTFormat
   private
   def awk_parameter(options = {})
     raise ArgumentError unless options[:text] && options[:parameter]
-    `/bin/echo "#{options[:text]}" | /usr/bin/awk '{ print $#{options[:parameter]}; }'`.strip
+    `echo "#{options[:text]}" | awk '{ print $#{options[:parameter]}; }'`.strip
   end
 end
 
@@ -33,7 +33,7 @@ if ARGV.length < 1
 end
 
 puts '==> Fetching available formats...'
-ytdl_formats = `/usr/local/bin/youtube-dl -F "#{ARGV.first}" | /usr/bin/grep -A 50 -i '^format' | /usr/bin/tail -n +2`
+ytdl_formats = `youtube-dl -F "#{ARGV.first}" | grep -A 50 -i '^format' | tail -n +2`
 
 formats = []
 ytdl_formats.each_line do |line|
@@ -46,10 +46,10 @@ puts "==> Downloading video as a #{formats.first.resolution} #{formats.first.cod
 video_file = "#{Time.now.to_i}"
 audio_file = "#{video_file}.wav"
 video_file = "#{video_file}.#{formats.first.codec}"
-`/usr/local/bin/youtube-dl -f #{formats.first.number} -o "#{video_file}" "#{ARGV.first}"`
+`youtube-dl -f #{formats.first.number} -o "#{video_file}" "#{ARGV.first}"`
 
 puts "==> Extracting audio to #{audio_file}..."
-`/usr/local/bin/ffmpeg -i "#{video_file}" -map_metadata -1 -c:a pcm_s16le "#{audio_file}" 2>&1`
+`ffmpeg -i "#{video_file}" -map_metadata -1 -c:a pcm_s16le "#{audio_file}" 2>&1`
 
 FileUtils.rm_f(video_file)
 puts '==> Done.'
