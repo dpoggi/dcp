@@ -1,0 +1,55 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+
+class YTFormat
+  attr_reader :number, :codec, :resolution, :description
+
+  def initialize(line)
+    line.gsub!(' , ', ',')
+    line.gsub!('audio only', 'audio-only')
+    line.gsub!('video only', 'video-only')
+    line.gsub!('DASH ', 'DASH')
+    line.gsub!('@ ', '@')
+    line.gsub!(' (best)', '(best)')
+    line.gsub!(' (worst)', '(worst)')
+
+    @number = awk_parameter(text: line, parameter: 1).to_i
+    @codec = awk_parameter(text: line, parameter: 2)
+    @resolution = awk_parameter(text: line, parameter: 3)
+    @description = awk_parameter(text: line, parameter: 4)
+  end
+
+  private
+  def awk_parameter(options = {})
+    raise ArgumentError unless options[:text] && options[:parameter]
+    `/bin/echo "#{options[:text]}" | /usr/bin/awk '{ print $#{options[:parameter]}; }'`.strip
+  end
+end
+
+if ARGV.length < 1
+  $stderr.puts "Usage: dcp-yt-rip <url>"
+  exit 1
+end
+
+puts '==> Fetching available formats...'
+ytdl_formats = `/usr/local/bin/youtube-dl -F "#{ARGV.first}" | /usr/bin/grep -A 50 -i '^format' | /usr/bin/tail -n +2`
+
+formats = []
+ytdl_formats.each_line do |line|
+  format = YTFormat.new(line)
+  formats << format if format.description == "(best)"
+end
+formats.sort! { |a, b| b.number <=> a.number }
+
+puts "==> Downloading video as a #{formats.first.resolution} #{formats.first.codec}..."
+video_file = "#{Time.now.to_i}"
+audio_file = "#{video_file}.wav"
+video_file = "#{video_file}.#{formats.first.codec}"
+`/usr/local/bin/youtube-dl -f #{formats.first.number} -o "#{video_file}" "#{ARGV.first}"`
+
+puts "==> Extracting audio to #{audio_file}..."
+`/usr/local/bin/ffmpeg -i "#{video_file}" -map_metadata -1 -c:a pcm_s16le "#{audio_file}" 2>&1`
+
+FileUtils.rm_f(video_file)
+puts '==> Done.'
