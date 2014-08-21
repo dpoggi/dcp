@@ -51,6 +51,13 @@ if [[ "$(uname)" = "Darwin" ]]; then
     /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -kill -r -domain local -domain system -domain user
     killall Finder
   }
+
+  # Flush DNS cache and reset mDNSResponder
+  reset_dns() {
+    echo "Please enter your user password to flush the DNS cache."
+    sudo dscacheutil -flushcache
+    sudo killall -HUP mDNSResponder
+  }
 # Linux specifics
 elif [[ "$(uname)" = "Linux" ]]; then
   # Mac-style aliases for xsel
