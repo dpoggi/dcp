@@ -1,24 +1,38 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 start_message() {
-  echo "$1 starting on 0.0.0.0:9000..."
+  echo "$1 starting on ${bind_address}:9000..."
 }
+
+webrick() {
+  start_message "WEBrick"
+  exec ruby -r webrick <<-EOF
+    server = WEBrick::HTTPServer.new(:BindAddress   => '${bind_address}',
+                                     :Port          => 9000,
+                                     :DocumentRoot  => Dir.pwd)
+    trap('INT') { server.shutdown }
+    server.start
+EOF
+}
+
+if [[ "$#" -gt "0" ]]; then
+  bind_address="$1"
+  hash ruby 2>&- || { echo >&2 "Error: couldn't find a Ruby interpreter."; exit 1; }
+  webrick
+  exit
+else
+  bind_address="0.0.0.0"
+fi
 
 if hash twistd 2>&-; then
   start_message "Twisted"
   exec twistd -n --pidfile= web --path . --port 9000
 elif hash ruby 2>&-; then
-  start_message "WEBrick"
-  exec ruby -r webrick <<-EOF
-    server = WEBrick::HTTPServer.new(:BindAddress => '0.0.0.0',
-                                     :Port => 9000,
-                                     :DocumentRoot => Dir.pwd)
-    trap('INT') { server.shutdown }
-    server.start
-EOF
+  webrick
 elif hash python 2>&-; then
   start_message "SimpleHTTPServer"
   exec python -m SimpleHTTPServer 9000
 else
   echo >&2 "Error: couldn't find a Ruby or Python interpreter."
+  exit 1
 fi
