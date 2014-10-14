@@ -1,83 +1,40 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 fail() {
-  echo >&2 "$@"
+  [[ "$#" -gt "0" ]] || return
+  printf >&2 "Fatal: %s\n" "$1"
   exit 1
 }
-
-ffmpeg() {
-  local ffmpeg_bin="$(type -P ffmpeg)"
-  [[ -x "${ffmpeg_bin}" ]] || fail "Error: ffmpeg must be installed"
-  "${ffmpeg_bin}" -i "$1" ${codec_options} ${metadata_options} "$2"
+log_msg() {
+  [[ "$#" -gt "0" ]] || return
+  printf >&2 "%s\t%s\n" "$(date -u "+%Y-%m-%dT%H:%M:%SZ")" "$1"
 }
 
-convert() {
-  local base="${1%.*}"
-  local ext="${1##*.}"
+[[ "$#" -gt "0" ]] || fail "no input file."
+hash 2>&- ffmpeg || fail "ffmpeg could not be found."
+hash 2>&- afconvert || fail "afconvert could not be found."
 
-  if [[ "${ext}" = "mp4" ]]; then
-    ffmpeg "$1" "${output_dir}/${base}.transcode.mp4"
-  else
-    if [[ -e "${output_dir}/${base}.mp4" ]]; then
-      echo >&2 "Error: ${base}.mp4 already exists, skipping."
-    else
-      ffmpeg "$1" "${output_dir}/${base}.mp4"
-    fi
-  fi
-}
+base="${1%.*}"
+video="${base}_video.mkv"
+wav="${base}.wav"
+caf="${base}.caf"
+aac="${base}.m4a"
+output="${base}.mp4"
+[[ -e "${output}" ]] && output="${base}_out.mp4"
 
-print_usage() {
-  cat >&2 <<END
-Usage: $(basename "$0") [options] (video file or dir)
+log_msg "Extracting video as-is..."
+ffmpeg -i "$1" -an -c:v copy "${video}" 2>/dev/null
+log_msg "Converting audio from source -> WAV..."
+ffmpeg -i "$1" -vn -c:a pcm_s16le -ac 2 "${wav}" 2>/dev/null
 
-$(basename "$0") puts videos in an MP4 container using their existing video
-codec and 160kbps, 2 channel AAC audio. Though it flattens surround sound, this
-format is compatible with the iPad as well as most TV-connected streaming
-devices (Xbox 360, PlayStation 3, etc.).
+log_msg "Converting audio from WAV -> CAF..."
+afconvert "${wav}" "${caf}" -d 0 -f caff --soundcheck-generate
+log_msg "Converting audio from CAF -> AAC..."
+afconvert "${caf}" "${aac}" -d aac -f m4af -u pgcm 2 -b 256000 -q 127 -s 2 --soundcheck-read
 
-Unless a video file or directory is supplied on the command line, the script
-looks for *.mkv in the current directory and transcodes them all.
+log_msg "Muxing..."
+ffmpeg -i "${video}" -i "${aac}" -c:v copy -c:a copy "${output}" 2>/dev/null
 
-Specific options:
-        --output-dir DIR             Output MP4 files to DIR
-        --copy-audio                 Skip transcoding audio to AAC
-        --strip-metadata             Strip all metadata from the output file(s)
-
-    -h, --help                       Show this message
-END
-}
-
-codec_options="-strict experimental -c:a aac -cutoff 20000 -ac 2 -b:a 160k -c:v copy"
-output_dir="."
-target="."
-while [[ "$#" -gt "0" ]]; do
-  if [[ "$1" = "-h" || "$1" = "--help" ]]; then
-    print_usage
-    exit
-  elif [[ "$1" = "--copy-audio" ]]; then
-    codec_options="-c:a copy -c:v copy"
-  elif [[ "$1" = "--strip-metadata" ]]; then
-    metadata_options="-map_metadata -1"
-  elif [[ "$1" = "--output-dir" ]]; then
-    [[ -d "$2" ]] || fail "Error: output directory does not exist"
-    output_dir="$2"
-    shift
-  else
-    target="$1"
-  fi
-
-  shift
-done
-
-if [[ -d "${target}" ]]; then
-  pushd "${target}" >/dev/null 2>&1
-  test -n "$(find . -maxdepth 1 -name '*.mkv' -print -quit)" ||
-    fail "Error: no MKV files to digest, try --help"
-
-  for mkv in *.mkv; do
-    convert "${mkv}"
-  done
-  popd >/dev/null 2>&1
-elif [[ -n "${target}" ]]; then
-  convert "${file}"
-fi
+log_msg "Cleaning up intermediate files..."
+rm -f "${video}" "${wav}" "${caf}" "${aac}"
+log_msg "Done."
