@@ -1,0 +1,17 @@
+#!/bin/bash
+
+[[ "$#" -gt "0" ]] || exit 1
+[[ -e "$1" ]] || exit 1
+
+ncols="$(cat "$1" | head -n 1 | grep -o ',' | wc -l | tr -d ' ')"
+ncols="$(expr $ncols + 1)"
+headers="$(cat "$1" | head -n 1 | tr -d ',' | wc -c | tr -d ' ')"
+data="$(cat "$1" | head -n 2 | tail -n 1 | tr -d ',' | wc -c | tr -d ' ')"
+lines="$(cat "$1" | tail -n +2 | wc -l | tr -d ' ')"
+
+ncolst="$(expr $ncols \* 8)"
+rsize="$(expr $ncolst + $headers + $data + 68)"
+fsize="$(expr $rsize \* $lines)"
+
+echo "Size per record: ${rsize} bytes"
+echo "Size of file: ${fsize} bytes"
