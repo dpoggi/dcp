@@ -30,6 +30,7 @@ def make_record(zone, options = {})
   $stderr.print "Configuring DNSimple #{options[:type]} record..."
   record.save
   $stderr.puts(record.persisted? ? ' Done.' : ' Failed.')
+  record
 end
 
 begin
@@ -49,6 +50,10 @@ unless ENV['MYSQL_USERNAME'] && ENV['MYSQL_PASSWORD']
 end
 unless ENV['DNSIMPLE_EMAIL'] && ENV['DNSIMPLE_TOKEN'] && ENV['SERVER_IP']
   $stderr.puts "Error: DNSimple API credentials and an IP address for this machine must be in #{CONF_PATH} as DNSIMPLE_EMAIL, DNSIMPLE_TOKEN, and SERVER_IP."
+  exit 1
+end
+unless ENV['NGX_CONF_DIR']
+  $stderr.puts "Error: nginx configuration directory must be in #{CONF_PATH} as NGX_CONF_DIR."
   exit 1
 end
 
@@ -73,6 +78,11 @@ else
   exit 1
 end
 dnsimple_domain = "#{domain_name}.#{tld}"
+if subdomain && subdomain != 'www'
+  friendly_name = "#{subdomain}_#{domain_name}"
+else
+  friendly_name = domain_name
+end
 
 old_wd = Dir.pwd
 Dir.chdir(ENV['HOME'])
@@ -86,12 +96,12 @@ $stderr.print 'Extracting WordPress...'
 handle_exit { $stderr.puts ' Done.' }
 FileUtils.rm_f(File.basename(WORDPRESS_URL))
 
-FileUtils.mv('wordpress', domain_name)
-wp_path = File.join(ENV['HOME'], domain_name)
+FileUtils.mv('wordpress', friendly_name)
+wp_path = File.join(ENV['HOME'], friendly_name)
 Dir.chdir(old_wd)
 
 $stderr.print 'Creating database...'
-`mysqladmin -u #{ENV['MYSQL_USERNAME']} -p#{ENV['MYSQL_PASSWORD']} create #{domain_name}`
+`mysqladmin -u #{ENV['MYSQL_USERNAME']} -p#{ENV['MYSQL_PASSWORD']} create #{friendly_name}`
 handle_exit { $stderr.puts ' Done.' }
 
 $stderr.print 'Configuring WordPress... '
@@ -121,9 +131,10 @@ else
 end
 
 $stderr.puts 'Configuring server (you may be prompted for your password)...'
-ngx_conf_path = File.join('/', 'etc', 'nginx', 'conf.d', "#{domain_name}.conf")
-ngx_tmpl = ERB.new(File.read(NGX_TMPL_PATH)).result(binding)
-tf = Tempfile.new(domain_name)
+ngx_conf_path = File.join(ENV['NGX_CONF_DIR'], "#{friendly_name}#{ENV['NGX_CONF_EXT']}")
+ngx_tmpl = ERB.new(File.read(NGX_TMPL_PATH), nil, '<>').result(binding)
+
+tf = Tempfile.new(friendly_name)
 begin
   tf.write(ngx_tmpl)
   tf.flush

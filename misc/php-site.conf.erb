@@ -9,7 +9,7 @@ server {
 server {
   listen      80;
   server_name <%= server_domain %>;
-  root        <%= ENV['HOME'] %>/<%= domain_name %>;
+  root        <%= ENV['HOME'] %>/<%= friendly_name %>;
   index       index.php index.html;
 
   location / {
