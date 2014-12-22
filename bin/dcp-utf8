@@ -1,22 +1,72 @@
 #!/usr/bin/env ruby
-require 'ensure/encoding'
+
+require 'fileutils'
+require 'tempfile'
+
+ENV['BUNDLE_GEMFILE'] = File.join(ENV['HOME'], '.dcp', 'Gemfile')
+require 'bundler/setup'
+require 'rchardet'
 
 if ARGV.empty?
-  STDERR.puts "Usage: #{File.basename(__FILE__)} file.txt"
+  $stderr.puts "Usage: #{File.basename(__FILE__)} file.txt"
   exit 1
 end
 
+def convert_line_endings(path)
+  tmp = File.join(File.dirname(path), 'tmp.dat')
+
+  File.open(path, encoding: Encoding::ASCII_8BIT) do |f|
+    begin
+      loop do
+        c = f.readchar
+
+        if c == "\r"
+          c = f.readchar
+          if c == "\n"
+            `cat "#{path}" | tr -d "\r" >"#{tmp}"`
+          else
+            `cat "#{path}" | tr "\r" "\n" >"#{tmp}"`
+          end
+
+          FileUtils.mv(tmp, path)
+          return
+        elsif c == "\n"
+          return
+        end
+      end
+    rescue EOFError
+    end
+  end
+end
+
 path = ARGV.first
-text = File.read(path)
-text = text.ensure_encoding(
-  Encoding::UTF_8,
-  external_encoding: :sniff,
-  invalid_characters: :transcode
-).ensure_encoding(
-  Encoding::UTF_8,
-  external_encoding: :sniff,
-  invalid_characters: :drop
-).encode(
-  Encoding::UTF_8,
-  universal_newline: true
-)
+convert_line_endings(path)
+head = File.read(path, encoding: Encoding::ASCII_8BIT).lines[0..100].join
+encoding = CharDet.detect(head)['encoding']
+if encoding.downcase == 'utf-8'
+  options = { mode: 'r:bom|utf-8' }
+else
+  options = { encoding: encoding }
+end
+
+begin
+  data = File.read(path, options)
+rescue Encoding::InvalidByteSequenceError => e
+  data = File.read(path, mode: 'r:bom|utf-8')
+ensure
+  data.encode!(
+    Encoding::UTF_8,
+    invalid: :replace,
+    undef: :replace,
+    replace: '?',
+  )
+end
+
+begin
+  data.delete("\000")
+rescue ArgumentError
+end
+
+File.open(path, 'w') do |f|
+  f.write(data)
+end
