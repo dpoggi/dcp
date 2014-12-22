@@ -2,7 +2,7 @@
 
 require 'json'
 require 'fileutils'
-require 'rest_client'
+require 'rest-client'
 
 # dcp-facebook-friends - reads your Facebook access token from an argument,
 # compiles a list of your friends, and lets you know what's changed since the
