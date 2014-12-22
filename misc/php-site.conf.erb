@@ -1,0 +1,38 @@
+<% if redirect_domain %>
+server {
+  listen      80;
+  server_name <%= redirect_domain %>;
+  rewrite     ^/(.*) http://<%= server_domain %>/$1 permanent;
+}
+<% end %>
+
+server {
+  listen      80;
+  server_name <%= server_domain %>;
+  root        <%= ENV['HOME'] %>/<%= domain_name %>;
+  index       index.php index.html;
+
+  location / {
+    try_files $uri $uri/ /index.php?$args;
+  }
+
+  rewrite /wp-admin$ $scheme://$host$uri/ permanent;
+
+  location ~* ^.+\.(ogg|ogv|svg|svgz|eot|otf|woff|mp4|ttf|rss|atom|jpg|jpeg|gif|png|ico|zip|tgz|gz|rar|bz2|doc|xls|exe|ppt|tar|mid|midi|wav|bmp|rtf)$ {
+    access_log off;
+    log_not_found off;
+    expires max;
+  }
+
+  location ~ \.php$ {
+    try_files $uri =404;
+    fastcgi_pass 127.0.0.1:9000;
+    fastcgi_index index.php;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    include fastcgi_params;
+  }
+
+  location ~ /\.ht {
+    deny all;
+  }
+}
