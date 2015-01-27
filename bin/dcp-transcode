@@ -14,13 +14,14 @@ log_msg() {
 hash 2>&- ffmpeg || fail "ffmpeg could not be found."
 hash 2>&- afconvert || fail "afconvert could not be found."
 
-ios="false"
 if [[ "$1" = "--ios" ]]; then
-  base="${2%.*}"
+  input="$2"
   ios="true"
 else
-  base="${1%.*}"
+  input="$1"
+  ios="false"
 fi
+base="${input%.*}"
 video="${base}_video.mkv"
 wav="${base}.wav"
 caf="${base}.caf"
@@ -29,9 +30,9 @@ output="${base}.mp4"
 [[ -e "${output}" ]] && output="${base}_out.mp4"
 
 log_msg "Extracting video as-is..."
-ffmpeg -i "$1" -an -c:v copy "${video}" 2>/dev/null
+ffmpeg -i "${input}" -an -c:v copy "${video}" 2>/dev/null
 log_msg "Converting audio from source -> WAV..."
-ffmpeg -i "$1" -vn -c:a pcm_s16le -ac 2 "${wav}" 2>/dev/null
+ffmpeg -i "${input}" -vn -c:a pcm_s16le -ac 2 "${wav}" 2>/dev/null
 
 log_msg "Converting audio from WAV -> CAF..."
 afconvert "${wav}" "${caf}" -d 0 -f caff --soundcheck-generate
