@@ -14,7 +14,13 @@ log_msg() {
 hash 2>&- ffmpeg || fail "ffmpeg could not be found."
 hash 2>&- afconvert || fail "afconvert could not be found."
 
-base="${1%.*}"
+ios="false"
+if [[ "$1" = "--ios" ]]; then
+  base="${2%.*}"
+  ios="true"
+else
+  base="${1%.*}"
+fi
 video="${base}_video.mkv"
 wav="${base}.wav"
 caf="${base}.caf"
@@ -29,8 +35,13 @@ ffmpeg -i "$1" -vn -c:a pcm_s16le -ac 2 "${wav}" 2>/dev/null
 
 log_msg "Converting audio from WAV -> CAF..."
 afconvert "${wav}" "${caf}" -d 0 -f caff --soundcheck-generate
-log_msg "Converting audio from CAF -> AAC..."
-afconvert "${caf}" "${aac}" -d aac -f m4af -u pgcm 2 -b 256000 -q 127 -s 2 --soundcheck-read
+if [[ "${ios}" = "true" ]]; then
+  log_msg "Converting audio from CAF -> AAC (160kbps)..."
+  afconvert "${caf}" "${aac}" -d aac -f m4af -u pgcm 2 -b 160000 -q 127 -s 2 --soundcheck-read
+else
+  log_msg "Converting audio from CAF -> AAC (256kbps)..."
+  afconvert "${caf}" "${aac}" -d aac -f m4af -u pgcm 2 -b 256000 -q 127 -s 2 --soundcheck-read
+fi
 
 log_msg "Muxing..."
 ffmpeg -i "${video}" -i "${aac}" -c:v copy -c:a copy "${output}" 2>/dev/null
