@@ -5,6 +5,7 @@ if [[ "$#" -lt "1" ]]; then
   echo >&2 "Usage: dcp-gif movie.mkv [00:00:00.000] [00:00:00.000]"
   exit 1
 fi
+hash ffmpeg 2>&- || { echo >&2 "Error: ffmpeg must be installed."; exit 1; }
 
 in="$1"
 palette="${in%.*}.png"
