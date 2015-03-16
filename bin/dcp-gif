@@ -8,11 +8,9 @@ in="$1"
 palette="${in%.*}.png"
 out="${in%.*}.gif"
 
-time_opts=""
-if [[ "$#" -ge "3" ]]; then
-  time_opts="-ss $2 -t $3"
-fi
 filters="fps=15,scale=480:-1:flags=lanczos"
+time_opts=""
+[[ "$#" -ge "3" ]] && time_opts="-ss $2 -t $3"
 
 echo >&2 "Generating the palette..."
 ffmpeg -v warning ${time_opts} -i "${in}" -vf "${filters},palettegen" -y "${palette}"
