@@ -1,0 +1,24 @@
+#!/bin/bash
+# From http://blog.pkh.me/p/21-high-quality-gif-with-ffmpeg.html
+
+if [[ "$#" -lt "1" ]]; then
+  echo >&2 "Usage: dcp-gif movie.mkv [00:00:00.000] [00:00:00.000]"
+  exit 1
+fi
+
+in="$1"
+palette="${in%.*}.png"
+out="${in%.*}.gif"
+
+time_opts=""
+if [[ "$#" -ge "3" ]]; then
+  time_opts="-ss $2 -t $3"
+fi
+filters="fps=15,scale=480:-1:flags=lanczos"
+
+echo >&2 "Generating the palette..."
+ffmpeg -v warning ${time_opts} -i "${in}" -vf "${filters},palettegen" -y "${palette}"
+echo >&2 "Building GIF..."
+ffmpeg -v warning ${time_opts} -i "${in}" -i "${palette}" -lavfi "${filters} [x]; [x][1:v] paletteuse=dither=floyd_steinberg" -y "${out}" && echo >&2 "Done." || echo >&2 "Error!"
+
+rm -f "${palette}"
