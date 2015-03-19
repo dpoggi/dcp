@@ -1,47 +1,59 @@
 #!/bin/bash
 
 fail() {
-  [[ "$#" -gt "0" ]] || return
   printf >&2 "Fatal: %s\n" "$1"
   exit 1
 }
 log_msg() {
-  [[ "$#" -gt "0" ]] || return
   printf >&2 "%s\t%s\n" "$(date -u "+%Y-%m-%dT%H:%M:%SZ")" "$1"
+}
+
+transcode() {
+  local base="${1%.*}"
+  local video="${base}_video.mkv"
+  local wav="${base}.wav"
+  local caf="${base}.caf"
+  local aac="${base}.m4a"
+  local output="${base}.mp4"
+  [[ -e "${output}" ]] && output="${base}_out.mp4"
+
+  log_msg "Transcoding ${1}..."
+  log_msg "Extracting video as-is..."
+  ffmpeg -v warning -i "$1" -an -c:v copy "${video}"
+  log_msg "Converting audio from source -> WAV..."
+  ffmpeg -v warning -i "$1" -vn -c:a pcm_s16le -ac 2 "${wav}"
+
+  log_msg "Converting audio from WAV -> CAF..."
+  afconvert "${wav}" "${caf}" -d 0 -f caff --soundcheck-generate
+  log_msg "Converting audio from CAF -> AAC ($(expr ${bitrate} / 1000)kbps)..."
+  afconvert "${caf}" "${aac}" -d aac -f m4af -u pgcm 2 -b "${bitrate}" -q 127 -s 2 --soundcheck-read
+
+  log_msg "Muxing..."
+  ffmpeg -v warning -i "${video}" -i "${aac}" -c:v copy -c:a copy "${output}"
+
+  log_msg "Cleaning up intermediate files..."
+  rm -f "${video}" "${wav}" "${caf}" "${aac}"
+  log_msg "Finished transcoding ${1}."
 }
 
 [[ "$#" -gt "0" ]] || fail "no input file."
 hash 2>&- ffmpeg || fail "ffmpeg could not be found."
 hash 2>&- afconvert || fail "afconvert could not be found."
 
-if [[ "$1" = "--ios" ]]; then
-  input="$2"
-  bitrate="160000"
-else
-  input="$1"
-  bitrate="256000"
-fi
-base="${input%.*}"
-video="${base}_video.mkv"
-wav="${base}.wav"
-caf="${base}.caf"
-aac="${base}.m4a"
-output="${base}.mp4"
-[[ -e "${output}" ]] && output="${base}_out.mp4"
+bitrate="256000"
+declare -a inputs
+while [[ "$#" -gt "0" ]]; do
+  if [[ "$1" = "--ios" ]]; then
+    bitrate="160000"
+  elif [[ "$1" = "--help" ]]; then
+    echo >&2 "Usage: dcp-transcode [--ios] input1.mkv input2.mkv..."
+    exit
+  else
+    inputs+=( "$1" )
+  fi
+  shift
+done
 
-log_msg "Extracting video as-is..."
-ffmpeg -i "${input}" -an -c:v copy "${video}" 2>/dev/null
-log_msg "Converting audio from source -> WAV..."
-ffmpeg -i "${input}" -vn -c:a pcm_s16le -ac 2 "${wav}" 2>/dev/null
-
-log_msg "Converting audio from WAV -> CAF..."
-afconvert "${wav}" "${caf}" -d 0 -f caff --soundcheck-generate
-log_msg "Converting audio from CAF -> AAC ($(expr ${bitrate} / 1000)kbps)..."
-afconvert "${caf}" "${aac}" -d aac -f m4af -u pgcm 2 -b "${bitrate}" -q 127 -s 2 --soundcheck-read
-
-log_msg "Muxing..."
-ffmpeg -i "${video}" -i "${aac}" -c:v copy -c:a copy "${output}" 2>/dev/null
-
-log_msg "Cleaning up intermediate files..."
-rm -f "${video}" "${wav}" "${caf}" "${aac}"
-log_msg "Done."
+for (( i = 0; i < ${#inputs[@]}; i++ )); do
+  transcode "${inputs[$i]}"
+done
