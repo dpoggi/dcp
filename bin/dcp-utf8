@@ -3,8 +3,8 @@
 require 'fileutils'
 require 'tempfile'
 
-ENV['BUNDLE_GEMFILE'] = File.join(ENV['HOME'], '.dcp', 'Gemfile')
-require 'bundler/setup'
+#ENV['BUNDLE_GEMFILE'] = File.join(ENV['HOME'], '.dcp', 'Gemfile')
+#require 'bundler/setup'
 require 'rchardet'
 
 if ARGV.empty?
