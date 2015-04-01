@@ -43,6 +43,7 @@ path = ARGV.first
 convert_line_endings(path)
 head = File.read(path, encoding: Encoding::ASCII_8BIT).lines[0..100].join
 encoding = CharDet.detect(head)['encoding']
+encoding = 'utf-8' if encoding.nil?
 if encoding.downcase == 'utf-8'
   options = { mode: 'r:bom|utf-8' }
 else
