@@ -58,6 +58,9 @@ if [[ "$(uname)" = "Darwin" ]]; then
     sudo dscacheutil -flushcache
     sudo killall -HUP mDNSResponder
   }
+
+  # Open Xcode for current folder
+  alias xc="open -a /Applications/Xcode.app ."
 # Linux specifics
 elif [[ "$(uname)" = "Linux" ]]; then
   # Mac-style aliases for xsel
