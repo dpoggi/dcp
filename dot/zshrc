@@ -9,7 +9,7 @@ else
 fi
 
 # Load oh-my-zsh plugins
-plugins=( brew bundler gem rake rbenv tmuxinator zsh-syntax-highlighting )
+plugins=( brew bundler emoji gem rake rbenv tmuxinator zsh-syntax-highlighting )
 if [[ -e "${HOME}/.dcp/conf/plugins" ]]; then
   for plugin in "$(cat "${HOME}/.dcp/conf/plugins")"; do
     plugins+=( "${plugin}" )
