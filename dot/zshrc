@@ -34,3 +34,6 @@ if hash hub 2>/dev/null; then
      compdef hub=git
   fi
 fi
+
+# Disable nasty % sign at end of output when there's no newline
+export PROMPT_EOL_MARK=""
