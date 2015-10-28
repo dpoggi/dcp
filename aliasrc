@@ -61,11 +61,8 @@ if [[ "$(uname)" = "Darwin" ]]; then
 
   # Open Xcode for current folder
   alias xc="open -a /Applications/Xcode.app ."
-# Linux specifics
-elif [[ "$(uname)" = "Linux" ]]; then
-  # Mac-style aliases for xsel
-  alias pbcopy="xsel --clipboard --input"
-  alias pbpaste="xsel --clipboard --output"
+  # Dammit Xcode
+  alias fuxcode="rm -rf ${HOME}/Library/Developer/Xcode/DerivedData"
 fi
 
 # Bash PS1 colors
@@ -119,5 +116,42 @@ get_bin() {
     whence -p "$1"
   else
     type -P "$1"
+  fi
+}
+
+# Clipboard
+cbcopy() {
+  local copy
+  if hash pbcopy 2>/dev/null; then
+    copy="pbcopy"
+  elif hash xsel 2>/dev/null; then
+    copy="xsel --clipboard --input"
+  else
+    printf >&2 "Fatal: neither pbcopy nor xsel found.\n"
+    return 1
+  fi
+
+  if [[ -n "$1" ]]; then
+    cat "$1" | ${copy}
+  else
+    ${copy}
+  fi
+}
+
+cbpaste() {
+  local paste
+  if hash pbpaste 2>/dev/null; then
+    paste="pbpaste"
+  elif hash xsel 2>/dev/null; then
+    paste="xsel --clipboard --output"
+  else
+    printf >&2 "Fatal: neither pbpaste nor xsel found.\n"
+    return 1
+  fi
+
+  if [[ -n "$1" ]]; then
+    ${paste} >>"$1"
+  else
+    ${paste}
   fi
 }
