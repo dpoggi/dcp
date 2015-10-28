@@ -111,3 +111,13 @@ twoline() {
   export DPOGGI_TWOLINE="true"
   dcp_set_prompt
 }
+
+# Utility function for alias/function overrides of binaries
+get_bin() {
+  [[ "$#" -ge "1" ]] || return 1
+  if [[ -z "${BASH}" ]]; then
+    whence -p "$1"
+  else
+    type -P "$1"
+  fi
+}
