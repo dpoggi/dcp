@@ -1,0 +1,12 @@
+if [[ -d "${HOME}/.rbenv/bin" ]]; then
+  export PATH="${HOME}/.rbenv/bin:${PATH}"
+fi
+if [[ -d "${HOME}/.rbenv/shims" ]]; then
+  export RBENV_ROOT="${HOME}/.rbenv"
+fi
+hash rbenv 2>/dev/null && eval "$(rbenv init -)"
+
+if [[ -d "${HOME}/.jenv/bin" ]]; then
+  export PATH="${HOME}/.jenv/bin:${PATH}"
+fi
+hash jenv 2>/dev/null && eval "$(jenv init -)"

@@ -1,6 +1,6 @@
-# Load rbenv
-[[ -e "${HOME}/.dcp/rbenvrc" ]] &&
-  source "${HOME}/.dcp/rbenvrc"
+# Load rbenv/jenv
+[[ -e "${HOME}/.dcp/envrc" ]] &&
+  source "${HOME}/.dcp/envrc"
 # Load aliases, local scripts, environment
 [[ -e "${HOME}/.dcp/initrc" ]] &&
   source "${HOME}/.dcp/initrc"

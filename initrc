@@ -5,7 +5,10 @@
 [[ -e "${HOME}/.dcp/localrc" ]] &&
   source "${HOME}/.dcp/localrc"
 
+#
 # Load environment
+#
+
 export DCP="${HOME}/.dcp"
 export GREP_OPTIONS="--color=auto"
 export LS_OPTIONS="--color=auto"
