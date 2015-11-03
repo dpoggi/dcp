@@ -20,3 +20,17 @@ export EDITOR="vim"
 export PATH="${PATH}:${DCP}/bin"
 [[ -e "${HOME}/.dcp/localenv" ]] &&
   source "${HOME}/.dcp/localenv"
+
+#
+# Load jenv
+#
+
+if [[ -d "${HOME}/.jenv/bin" ]]; then
+  export PATH="${HOME}/.jenv/bin:${PATH}"
+fi
+if [[ -d "${HOME}/.jenv/shims" ]]; then
+  export JENV_ROOT="${HOME}/.jenv"
+fi
+if hash jenv 2>/dev/null; then
+  eval "$(jenv init -)"
+fi

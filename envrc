@@ -5,18 +5,3 @@ if [[ -d "${HOME}/.rbenv/shims" ]]; then
   export RBENV_ROOT="${HOME}/.rbenv"
 fi
 hash rbenv 2>/dev/null && eval "$(rbenv init -)"
-
-if [[ -d "${HOME}/.jenv/bin" ]]; then
-  export PATH="${HOME}/.jenv/bin:${PATH}"
-fi
-if [[ -d "${HOME}/.jenv/shims" ]]; then
-  export JENV_ROOT="${HOME}/.jenv"
-fi
-
-jenv_path_osx="/usr/local/bin/jenv"
-if hash jenv 2>/dev/null; then
-  eval "$(jenv init -)"
-elif [[ -x "${jenv_path_osx}" ]]; then
-  eval "$(${jenv_path_osx} init -)"
-fi
-unset jenv_path_osx
