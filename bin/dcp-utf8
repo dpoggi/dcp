@@ -1,71 +1,71 @@
 #!/usr/bin/env ruby
 
 require 'fileutils'
-require 'tempfile'
+require 'optparse'
 
 require 'rchardet'
 
-if ARGV.empty?
-  $stderr.puts "Usage: #{File.basename(__FILE__)} file.txt"
-  exit 1
-end
+option_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename(__FILE__)} [options] INPUT"
 
-def convert_line_endings(path)
-  tmp = File.join(File.dirname(path), 'tmp.dat')
-
-  File.open(path, encoding: Encoding::ASCII_8BIT) do |f|
-    begin
-      loop do
-        c = f.readchar
-
-        if c == "\r"
-          c = f.readchar
-          if c == "\n"
-            `cat "#{path}" | tr -d "\r" >"#{tmp}"`
-          else
-            `cat "#{path}" | tr "\r" "\n" >"#{tmp}"`
-          end
-
-          FileUtils.mv(tmp, path)
-          return
-        elsif c == "\n"
-          return
-        end
-      end
-    rescue EOFError
-    end
+  opts.on('--macroman', 'Skip encoding detection and use Mac OS Roman (Excel for Mac 2011/2016)') do |macroman|
+    $macroman = true
   end
+  opts.on('--output=OUTPUT', 'Output file (otherwise stdout)') do |out_file|
+    $out_file = out_file
+  end
+
+  opts.on_tail('-h', '--help', 'Show this message') { $stderr.puts opts; exit }
 end
 
-path = ARGV.first
-convert_line_endings(path)
-head = File.read(path, encoding: Encoding::ASCII_8BIT).lines[0..100].join
-encoding = CharDet.detect(head)['encoding']
-encoding = 'utf-8' if encoding.nil?
-if encoding.downcase == 'utf-8'
-  options = { mode: 'r:bom|utf-8' }
+option_parser.parse!(ARGV)
+raise OptionParser::MissingArgument.new('INPUT, see --help') if ARGV.empty?
+$in_file = ARGV[0]
+
+if $macroman
+  encoding = 'macroman'
+  confidence = 1.0
 else
-  options = { encoding: encoding }
+  data = File.read($in_file, encoding: Encoding::BINARY)
+  det = CharDet.detect(data)
+  det = {} unless det
+  encoding = det['encoding'] || 'utf-8'
+  confidence = det['confidence'] || 0.0
+end
+
+confidence_percentage = confidence * 100.0
+$stderr.puts "Detected character encoding #{encoding}, confidence level #{sprintf('%.2f', confidence_percentage)}%."
+$stderr.puts "Converting to UTF-8, LF line endings..."
+
+if encoding.downcase == 'utf-8'
+  read_options = { mode: 'r:bom|utf-8' }
+else
+  read_options = { encoding: Encoding::BINARY }
 end
 
 begin
-  data = File.read(path, options)
+  data = File.read($in_file, read_options)
 rescue Encoding::InvalidByteSequenceError => e
-  data = File.read(path, mode: 'r:bom|utf-8')
-ensure
-  data.encode!(
-    Encoding::UTF_8,
-    invalid: :replace,
-    undef: :replace,
-    replace: '?',
-  )
+  data = File.read($in_file, encoding: Encoding::BINARY)
 end
 
+data.encode!(
+  Encoding::UTF_8,
+  Encoding.find(encoding),
+  invalid: :replace,
+  undef: :replace,
+  replace: '?',
+  universal_newline: true,
+)
 begin
   data.delete("\000")
 rescue ArgumentError
 end
 
-File.open(path, 'w') do |f|
-  f.write(data)
+if $out_file
+  File.open($out_file, 'wb') { |f| f.write(data) }
+else
+  $stdout.write(data)
 end
+
+$stderr.puts "Done."
