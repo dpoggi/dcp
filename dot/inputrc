@@ -1,3 +1,57 @@
+# Massively augmented from .inputrc in github.com/netj/dotfiles
+# Thanks/credit to Jaeho Shin for this pile of cool!
+
 set completion-ignore-case on
+set completion-map-case on
+set visible-stats on
+set colored-stats on
+set mark-symlinked-directories on
+set skip-completed-text on
+
 set show-all-if-ambiguous on
+set show-all-if-unmodified off
+set menu-complete-display-prefix off
+set completion-query-items -1
+
+# Comments list Emacs key notation for bindings because this termcap-y stuff
+# can be hard to read.
+
+# TAB
+Tab:        menu-complete
+# S-TAB: menu-complete-backward workaround for older Bash
+"\e[Z":     "\e-1\C-i"
+# M-C-d
+"\e\C-d":   possible-completions
+
+# C-r
+"\C-r":     reverse-search-history
+# C-]
+"\C-]":     forward-search-history
+
+# M-]
+"\e]":      character-search
+# M-C-]
+"\e\C-]":   character-search-backward
+# M-B: move backward by path components
+"\eB":      "\C-b\e\C-]/\C-f"
+# M-F: move forward by path components
+"\eF":      "\e]/"
+# M-|
+"\e|":      delete-horizontal-space
+
+$if Bash
+    Space:      magic-space
+    "\eviB":    vi-bWord
+    "\eviE":    vi-eWord
+    # M-b
+    "\eb":      "\eviB" 
+    # M-f
+    "\ef":      "\C-f\eviE\C-f"
+
+    "\e\e[D":   shell-backward-word
+    "\e\e[C":   shell-forward-word
+    "\eH":      shell-backward-kill-word
+    "\eD":      shell-kill-word
+$endif
+
 set bell-style none
