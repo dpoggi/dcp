@@ -19,3 +19,7 @@ localenv
 # conf directory contains configuration for scripts
 /conf/*
 !/conf/.gitkeep
+
+# Ignore Gemfile.lock, Gemfile is really just to make sure you have everything
+# to run the Ruby stuff in bin/
+Gemfile.lock

@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'dotenv', '~> 1.0.2'
-gem 'rest-client', '~> 1.7.2'
-gem 'rchardet', '~> 1.5.0'
-gem 'fog', '~> 1.26.0'
+gem 'dotenv', '>= 2.0.2'
+gem 'rest-client', '>= 1.8.0'
+gem 'rchardet', '>= 1.6.1'
+gem 'fog', '>= 1.35.0'

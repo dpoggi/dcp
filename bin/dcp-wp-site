@@ -4,17 +4,15 @@ require 'fileutils'
 require 'tempfile'
 require 'erb'
 
+require 'dotenv'
+require 'fog'
+
 DCP_PATH = File.join(ENV['HOME'], '.dcp')
 CONF_PATH = File.join(DCP_PATH, 'conf', 'wp-site')
 WP_TMPL_PATH = File.join(DCP_PATH, 'misc', 'wp-config.php.erb')
 NGX_TMPL_PATH = File.join(DCP_PATH, 'misc', 'php-site.conf.erb')
 INITCTL_PATH = File.join(DCP_PATH, 'bin', 'dcp-initctl')
 WORDPRESS_URL = 'https://wordpress.org/latest.tar.gz'
-
-ENV['BUNDLE_GEMFILE'] = File.join(DCP_PATH, 'Gemfile')
-require 'bundler/setup'
-require 'dotenv'
-require 'fog'
 
 def handle_exit
   if $?.exitstatus == 0
