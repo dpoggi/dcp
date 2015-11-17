@@ -55,8 +55,14 @@ if [[ "$(uname)" = "Darwin" ]]; then
   # Flush DNS cache and reset mDNSResponder
   reset_dns() {
     echo "Please enter your user password to flush the DNS cache."
-    sudo dscacheutil -flushcache
-    sudo killall -HUP mDNSResponder
+
+    if [[ -n "$(get_bin discoveryutil)" ]]; then
+      sudo discoveryutil mdnsflushcache
+      sudo discoveryutil udnsflushcache
+    else
+      sudo dscacheutil -flushcache
+      sudo killall -HUP mDNSResponder
+    fi
   }
 
   # Open Xcode for current folder
