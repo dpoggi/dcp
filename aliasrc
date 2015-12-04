@@ -89,7 +89,7 @@ dcp_ps1_git_branch() {
   git branch 2>&- | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
 }
 dcp_ps1_git() {
-  printf "${c_yellow}\$(dcp_ps1_git_branch)${c_reset}"
+  [[ "${UID}" -eq "0" ]] || printf "${c_yellow}\$(dcp_ps1_git_branch)"
 }
 dcp_ps1_uid() {
   if [[ -n "${DPOGGI_TWOLINE}" ]]; then printf "\n"; else printf " "; fi
