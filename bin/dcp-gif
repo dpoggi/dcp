@@ -9,7 +9,7 @@ print_usage() {
   printf >&2 "  -d <time>, --duration <time>         Set duration after start [max] (hours:minutes:seconds.ms)\n"
   printf >&2 "  -a <algo>, --algorithm <algo>        Set dithering algorithm [floyd_steinberg] (see ffmpeg for list)\n"
   printf >&2 "  -s <scale>, --scale <scale>          Set scale [480] (width in px)\n"
-  printf >&2 "  -f <fps>, --framerate <fps>          Set framerate [15]\n"
+  printf >&2 "  -f <fps>, --framerate <fps>          Set framerate [15] (in fps)\n"
 }
 
 [[ "$#" -ge "1" ]] || { print_usage; exit 1; }
