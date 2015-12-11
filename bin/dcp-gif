@@ -6,8 +6,10 @@ print_usage() {
   printf >&2 "OPTIONS:\n"
   printf >&2 "  -h, --help                           Display this message\n"
   printf >&2 "  -t <time>, --start <time>            Set start time [00:00:00.000] (hours:minutes:seconds.ms)\n"
-  printf >&2 "  -d <time>, --duration <time>         Set duration after start [max] (hours:minutes:seconds.ms)\n"
-  printf >&2 "  -a <algo>, --algorithm <algo>        Set dithering algorithm [floyd_steinberg] (see ffmpeg for list)\n"
+  printf >&2 "  -d <time>, --duration <time>         Set duration after start [max] (hours:minutes:seconds.ms)\n\n"
+  printf >&2 "  -a <algo>, --algorithm <algo>        Set dithering algorithm [floyd_steinberg]\n"
+  printf >&2 "  Algorithm options to try are bayer, floyd_steinberg, sierra2, sierra2_4a, or none.\n"
+  printf >&2 "  bayer takes an argument, it can be specified as bayer:bayer_scale=n, where n is 1 to ~3.\n\n"
   printf >&2 "  -s <scale>, --scale <scale>          Set scale [480] (width in px)\n"
   printf >&2 "  -f <fps>, --framerate <fps>          Set framerate [15] (in fps)\n"
 }
