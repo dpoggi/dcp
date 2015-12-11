@@ -1,21 +1,79 @@
 #!/bin/bash
 # From http://blog.pkh.me/p/21-high-quality-gif-with-ffmpeg.html
 
-[[ "$#" -ge "1" ]] || { echo >&2 "Usage: dcp-gif movie.mkv [00:00:00.000] [00:00:00.000]"; exit 1; }
-hash ffmpeg 2>&- || { echo >&2 "Error: ffmpeg must be installed."; exit 1; }
+print_usage() {
+  printf >&2 "Usage: $(basename "$0") [options] <input>\n\n"
+  printf >&2 "OPTIONS:\n"
+  printf >&2 "  -h, --help                           Display this message\n"
+  printf >&2 "  -t <time>, --start <time>            Set start time [00:00:00.000] (hours:minutes:seconds.ms)\n"
+  printf >&2 "  -d <time>, --duration <time>         Set duration after start [max] (hours:minutes:seconds.ms)\n"
+  printf >&2 "  -a <algo>, --algorithm <algo>        Set dithering algorithm [floyd_steinberg] (see ffmpeg for list)\n"
+  printf >&2 "  -s <scale>, --scale <scale>          Set scale [480] (width in px)\n"
+  printf >&2 "  -f <fps>, --framerate <fps>          Set framerate [15]\n"
+}
 
-in="$1"
-palette="${in%.*}.png"
-out="${in%.*}.gif"
+[[ "$#" -ge "1" ]] || { print_usage; exit 1; }
+hash ffmpeg 2>/dev/null || { printf >&2 "Fatal: ffmpeg must be installed.\n"; exit 1; }
 
-filters="fps=15,scale=480:-1:flags=lanczos"
-time_opts=""
-[[ "$#" -ge "3" ]] && time_opts="-ss $2 -t $3"
+start_time="00:00:00.000"
+algorithm="floyd_steinberg"
+scale="480"
+fps="15"
 
-echo >&2 "Generating the palette..."
-ffmpeg -v warning ${time_opts} -i "${in}" -vf "${filters},palettegen" -y "${palette}"
-echo >&2 "Building GIF..."
-ffmpeg -v warning ${time_opts} -i "${in}" -i "${palette}" -lavfi "${filters} [x]; [x][1:v] paletteuse=dither=floyd_steinberg" -y "${out}"
-echo >&2 "Done."
+while [[ "$#" -gt "0" ]]; do
+  case "$1" in
+    -h | --help)
+      print_usage
+      exit 0
+      ;;
+    -t | --start)
+      start_time="$2"
+      shift 2
+      ;;
+    -d | --duration)
+      duration="$2"
+      shift 2
+      ;;
+    -a | --algorithm)
+      algorithm="$2"
+      shift 2
+      ;;
+    -s | --scale)
+      scale="$2"
+      shift 2
+      ;;
+    -f | --framerate)
+      fps="$2"
+      shift 2
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*)
+      printf >&2 "Fatal: unknown option $1.\n"
+      exit 1
+      ;;
+    *)
+      input="$1"
+      shift
+      ;;
+  esac
+done
+[[ -n "${input}" ]] || { printf >&2 "Fatal: no input file.\n\n"; print_usage; exit 1; }
+
+palette="${input%.*}.png"
+output="${input%.*}.gif"
+
+filters="fps=${fps},scale=${scale}:-1:flags=lanczos"
+time_opts="-ss ${start_time}"
+[[ -n "${duration}" ]] && time_opts="${time_opts} -t ${duration}"
+palette_opts="paletteuse=dither=${algorithm}"
+
+printf >&2 "Generating the palette...\n"
+ffmpeg -v warning ${time_opts} -i "${input}" -vf "${filters},palettegen" -y "${palette}"
+printf >&2 "Makin' the GIF...\n"
+ffmpeg -v warning ${time_opts} -i "${input}" -i "${palette}" -lavfi "${filters} [x]; [x][1:v] ${palette_opts}" -y "${output}"
+printf >&2 "Done.\n"
 
 rm -f "${palette}"
