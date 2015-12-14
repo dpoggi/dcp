@@ -125,6 +125,13 @@ get_bin() {
   fi
 }
 
+# Utility function to get job number after &ing a process from its PID
+# (for shell functions only unless you're doing something weird and set -m)
+get_jobno() {
+  local sed_opts
+  jobs -l | fgrep "${pid}" | cut -d ' ' -f 1 | sed -e 's/[^0-9]//g'
+}
+
 # Clipboard
 cbcopy() {
   local copy
