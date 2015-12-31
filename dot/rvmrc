@@ -1,0 +1,4 @@
+export rvm_gemset_create_on_use_flag="1"
+export rvm_pretty_print_flag="auto"
+export rvmsudo_secure_path="1"
+export rvm_autolibs_flag="2"
