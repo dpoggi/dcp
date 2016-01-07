@@ -69,7 +69,16 @@ if [[ "$(uname)" = "Darwin" ]]; then
     launchctl getenv "$1"
   }
   lctl_setenv() {
-    launchctl setenv "$1" "${!1}"
+    local arg="$1"
+    local val
+
+    if [[ -z "${BASH}" ]]; then
+      val="${(P)arg}"
+    else
+      val="${!arg}"
+    fi
+
+    launchctl setenv "${arg}" "${val}"
   }
 
   # Open Xcode for current folder
