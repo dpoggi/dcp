@@ -65,6 +65,13 @@ if [[ "$(uname)" = "Darwin" ]]; then
     fi
   }
 
+  lctl_getenv() {
+    launchctl getenv "$1"
+  }
+  lctl_setenv() {
+    launchctl setenv "$1" "${!1}"
+  }
+
   # Open Xcode for current folder
   alias xc="open -a /Applications/Xcode.app ."
   # Dammit Xcode
