@@ -8,45 +8,54 @@ require 'rchardet'
 option_parser = OptionParser.new do |opts|
   opts.banner = "Usage: #{File.basename(__FILE__)} [options] INPUT"
 
-  opts.on('--macroman', 'Skip encoding detection and use Mac OS Roman (Excel for Mac 2011/2016)') do |macroman|
-    $macroman = true
-  end
-  opts.on('--output=OUTPUT', 'Output file (otherwise stdout)') do |out_file|
+  opts.on('-o', '--output=OUTPUT', 'Output file (otherwise stdout)') do |out_file|
     $out_file = out_file
+  end
+  opts.on('-t', '--tty', 'Allow output to a TTY if no output file specified') do |tty|
+    $force_tty = true
+  end
+  opts.on('-m', '--macroman', 'Skip encoding detection and use Mac OS Roman (Excel for Mac 2011/2016)') do |macroman|
+    $macroman = true
   end
 
   opts.on_tail('-h', '--help', 'Show this message') { $stderr.puts opts; exit }
 end
 
 option_parser.parse!(ARGV)
-raise OptionParser::MissingArgument.new('INPUT, see --help') if ARGV.empty?
+if ARGV.empty?
+  $stderr.puts 'Fatal: INPUT file is required, see --help.'
+  exit 1
+end
 $in_file = ARGV[0]
 
+if !$out_file && $stdout.tty? && !$force_tty
+  $stderr.puts 'Fatal: -t or --tty is required if no output file is specified and stdout is a TTY.'
+  exit 1
+end
+
+data = File.read($in_file, encoding: Encoding::BINARY)
 if $macroman
   encoding = 'macroman'
   confidence = 1.0
 else
-  data = File.read($in_file, encoding: Encoding::BINARY)
-  det = CharDet.detect(data)
-  det = {} unless det
+  det = CharDet.detect(data) || {}
   encoding = det['encoding'] || 'utf-8'
   confidence = det['confidence'] || 0.0
 end
 
-confidence_percentage = confidence * 100.0
-$stderr.puts "Detected character encoding #{encoding}, confidence level #{sprintf('%.2f', confidence_percentage)}%."
-$stderr.puts "Converting to UTF-8, LF line endings..."
+confidence_percentage = sprintf('%.2f%%', confidence * 100.0)
+$stderr.puts "Detected character encoding #{encoding}, confidence level #{confidence_percentage}."
+$stderr.puts 'Converting to UTF-8, LF line endings...'
 
 if encoding.downcase == 'utf-8'
-  read_options = { mode: 'r:bom|utf-8' }
-else
-  read_options = { encoding: Encoding::BINARY }
-end
-
-begin
-  data = File.read($in_file, read_options)
-rescue Encoding::InvalidByteSequenceError => e
-  data = File.read($in_file, encoding: Encoding::BINARY)
+  $stderr.puts 'Re-reading UTF-8 file to drop byte order mark (BOM) if it exists...'
+  begin
+    utf8_data = File.read($in_file, mode: 'r:bom|utf-8')
+    $stderr.puts 'Success, continuing conversion...'
+    data = utf8_data
+  rescue Encoding::InvalidByteSequenceError
+    $stderr.puts 'Failed, continuing conversion without dropping BOM...'
+  end
 end
 
 data.encode!(
@@ -68,4 +77,4 @@ else
   $stdout.write(data)
 end
 
-$stderr.puts "Done."
+$stderr.puts 'Done.'
