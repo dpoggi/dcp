@@ -41,50 +41,7 @@ gpub() {
 
 # Mac specifics
 if [[ "$(uname)" = "Darwin" ]]; then
-  # Open a man page in Preview
-  pman() {
-    man -t "$1" | open -f -a /Applications/Preview.app
-  }
-
-  # Reset "Open With..." menus after connecting a drive with applications on it
-  reset_launch_services() {
-    /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -kill -r -domain local -domain system -domain user
-    killall Finder
-  }
-
-  # Flush DNS cache and reset mDNSResponder
-  reset_dns() {
-    echo "Please enter your user password to flush the DNS cache."
-
-    if [[ -n "$(get_bin discoveryutil)" ]]; then
-      sudo discoveryutil mdnsflushcache
-      sudo discoveryutil udnsflushcache
-    else
-      sudo dscacheutil -flushcache
-      sudo killall -HUP mDNSResponder
-    fi
-  }
-
-  lctl_getenv() {
-    launchctl getenv "$1"
-  }
-  lctl_setenv() {
-    local arg="$1"
-    local val
-
-    if [[ -z "${BASH}" ]]; then
-      val="${(P)arg}"
-    else
-      val="${!arg}"
-    fi
-
-    launchctl setenv "${arg}" "${val}"
-  }
-
-  # Open Xcode for current folder
-  alias xc="open -a /Applications/Xcode.app ."
-  # Dammit Xcode
-  alias fuxcode="rm -rf ${HOME}/Library/Developer/Xcode/DerivedData"
+  [[ -e "${HOME}/.dcp/aliasrc_osx" ]] && source "${HOME}/.dcp/aliasrc_osx"
 fi
 
 # Bash PS1 colors

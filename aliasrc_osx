@@ -1,0 +1,134 @@
+# Open Xcode for current folder
+alias xc="open -a /Applications/Xcode.app ."
+# Dammit Xcode
+alias fuxcode="rm -rf ${HOME}/Library/Developer/Xcode/DerivedData"
+
+# Open a man page in Preview
+pman() {
+  man -t "$1" | open -f -a /Applications/Preview.app
+}
+
+# Reset "Open With..." menus after connecting a drive with applications on it
+reset_launch_services() {
+  /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -kill -r -domain local -domain system -domain user
+  killall Finder
+}
+
+# Flush DNS cache and reset mDNSResponder
+reset_dns() {
+  printf >&2 "Flushing the DNS cache (enter your user password if prompted)...\n"
+  if [[ -n "$(get_bin discoveryutil)" ]]; then
+    sudo discoveryutil mdnsflushcache
+    sudo discoveryutil udnsflushcache
+  else
+    sudo dscacheutil -flushcache
+    sudo killall -HUP mDNSResponder
+  fi
+}
+
+# Clear Quick Look's file locks
+alias reset_quicklook="qlmanage -r"
+
+# Convenience wrapper for pg_ctl
+pg_ctl() {
+  [[ "$#" -gt "0" ]] || return 1
+  local cmd="$1"
+  shift
+
+  local bin="$(get_bin pg_ctl)"
+  local log="--log=/usr/local/var/postgres/server.log"
+  local mode="--mode=fast"
+  [[ -n "${PGDATA}" ]] || export PGDATA="/usr/local/var/postgres"
+
+  case "${cmd}" in
+    start)
+      "${bin}" "${cmd}" "${log}" "$@"
+      ;;
+    stop)
+      "${bin}" "${cmd}" "${mode}" "$@"
+      ;;
+    restart)
+      "${bin}" "${cmd}" "${log}" "${mode}" "$@"
+      ;;
+    *)
+      "${bin}" "${cmd}" "$@"
+  esac
+}
+
+# launchctl wrappers for setting shell-independent environment
+lctl_getenv() {
+  launchctl getenv "$1"
+}
+lctl_setenv() {
+  local arg="$1"
+  local val
+
+  if [[ -z "${BASH}" ]]; then
+    val="${(P)arg}"
+  else
+    val="${!arg}"
+  fi
+
+  launchctl setenv "${arg}" "${val}"
+}
+
+# Generic launchctl service wrapper
+lctl_plist_path() {
+  [[ "$#" -gt "0" ]] || return 1
+  local plist_dirs="/System/Library/LaunchDaemons /System/Library/LaunchAgents /Library/LaunchDaemons /Library/LaunchAgents ${HOME}/Library/LaunchDaemons ${HOME}/Library/LaunchAgents"
+  local plist_dir
+  local plist_path
+
+  for plist_dir in $(printf "${plist_dirs}"); do
+    plist_path="$(find "${plist_dir}" -name "${1}.plist" -print 2>/dev/null)"
+    [[ -e "${plist_path}" ]] && break || plist_path=""
+  done
+  [[ -n "${plist_path}" ]] && printf "${plist_path}" || return 1
+}
+lctl() {
+  [[ "$#" -ge "2" ]] || return 1 
+  local plist_path="$(lctl_plist_path "$2")"
+  if [[ -z "${plist_path}" ]]; then
+    printf >&2 "Error: plist for $2 not found.\n"
+    return 1
+  fi
+
+  case "$1" in
+    start)
+      sudo launchctl load -F "${plist_path}"
+      ;;
+    stop)
+      sudo launchctl unload -F "${plist_path}"
+      ;;
+    restart)
+      lctl stop "$2"
+      lctl start "$2"
+      ;;
+    *)
+      printf >&2 "Error: lctl wrapper only accepts start/stop/restart.\n"
+      return 1
+  esac
+}
+
+# Service wrapper for apsd (Apple Push Service)
+aps() {
+  lctl "$1" com.apple.apsd
+}
+# Service wrapper for CoreAudio
+coreaudio() {
+  lctl "$1" com.apple.audio.coreaudiod
+}
+
+# Java switcheroo
+jswitch() {
+  [[ "$#" -gt "0" ]] || return 1
+  local jdk_dir="$(find "/Library/Java/JavaVirtualMachines" -name "jdk1\.${1}*" -print | tail -n 1)"
+
+  if [[ -d "${jdk_dir}" ]]; then
+    printf >&2 "Switching to $(basename "${jdk_dir}") (enter your user password if prompted)...\n"
+    sudo ln -snfv "${jdk_dir}/Contents/Home" "/Library/Java/Home"
+  else
+    printf >&2 "Error: Java $1 not found.\n"
+    return 1
+  fi
+}
