@@ -73,8 +73,7 @@ lctl_setenv() {
 }
 
 # Generic launchctl service wrapper
-lctl_plist_path() {
-  [[ "$#" -gt "0" ]] || return 1
+_lctl_plist_path() {
   local plist_dirs="/System/Library/LaunchDaemons /System/Library/LaunchAgents /Library/LaunchDaemons /Library/LaunchAgents ${HOME}/Library/LaunchDaemons ${HOME}/Library/LaunchAgents"
   local plist_dir
   local plist_path
@@ -85,29 +84,45 @@ lctl_plist_path() {
   done
   [[ -n "${plist_path}" ]] && printf "${plist_path}" || return 1
 }
-lctl() {
-  [[ "$#" -ge "2" ]] || return 1 
-  local plist_path="$(lctl_plist_path "$2")"
+
+_lctl() {
+  [[ "$#" -ge "3" ]] || return 1
+
+  local plist_path="$(_lctl_plist_path "$3")"
   if [[ -z "${plist_path}" ]]; then
-    printf >&2 "Error: plist for $2 not found.\n"
+    printf >&2 "Error: plist for $3 not found.\n"
     return 1
   fi
 
-  case "$1" in
+  local cmd
+  if [[ "$1" = "system" ]]; then
+    cmd="sudo launchctl"
+  elif [[ "$1" = "user" ]]; then
+    cmd="launchctl"
+  fi
+
+  case "$2" in
     start)
-      sudo launchctl load -F "${plist_path}"
+      ${cmd} load -F "${plist_path}"
       ;;
     stop)
-      sudo launchctl unload -F "${plist_path}"
+      ${cmd} unload -F "${plist_path}"
       ;;
     restart)
-      lctl stop "$2"
-      lctl start "$2"
+      _lctl "$1" stop "$3"
+      _lctl "$1" start "$3"
       ;;
     *)
       printf >&2 "Error: lctl wrapper only accepts start/stop/restart.\n"
       return 1
   esac
+}
+
+lctl() {
+  _lctl system "$@"
+}
+ulctl() {
+  _lctl user "$@"
 }
 
 # Service wrapper for apsd (Apple Push Service)
