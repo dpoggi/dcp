@@ -88,7 +88,13 @@ _lctl_plist_path() {
 _lctl() {
   [[ "$#" -ge "3" ]] || return 1
 
-  local plist_path="$(_lctl_plist_path "$3")"
+  local plist_path
+  if [[ -e "$3" ]]; then
+    plist_path="$3"
+  else
+    plist_path="$(_lctl_plist_path "$3")"
+  fi
+
   if [[ -z "${plist_path}" ]]; then
     printf >&2 "Error: plist for $3 not found.\n"
     return 1
