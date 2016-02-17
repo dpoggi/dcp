@@ -94,19 +94,17 @@ _lctl() {
     return 1
   fi
 
-  local cmd
+  local sudo_cmd
   if [[ "$1" = "system" ]]; then
-    cmd="sudo launchctl"
-  elif [[ "$1" = "user" ]]; then
-    cmd="launchctl"
+    sudo_cmd="sudo"
   fi
 
   case "$2" in
     start)
-      ${cmd} load -F "${plist_path}"
+      ${sudo_cmd} launchctl load -F "${plist_path}"
       ;;
     stop)
-      ${cmd} unload -F "${plist_path}"
+      ${sudo_cmd} launchctl unload -F "${plist_path}"
       ;;
     restart)
       _lctl "$1" stop "$3"
