@@ -2,6 +2,8 @@
 alias xc="open -a /Applications/Xcode.app ."
 # Dammit Xcode
 alias fuxcode="rm -rf ${HOME}/Library/Developer/Xcode/DerivedData"
+# Homebrew
+alias boop="brew update && brew upgrade && brew cleanup -sf"
 
 # Open a man page in Preview
 pman() {
