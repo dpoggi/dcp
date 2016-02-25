@@ -48,7 +48,8 @@ get_initscript_path() {
 }
 
 initctl() {
-  local service_name="$(basename "$3")"
+  local initctl_config_file="$(basename "$3")"
+  local service_name="${initctl_config_file%.*}"
   local initctl_type="$(basename "$1")"
 
   if [[ "${initctl_type}" = "launchctl" ]]; then
@@ -57,8 +58,10 @@ initctl() {
     elif [[ "$2" = "stop" ]]; then
       sudo "$1" load -F "$3"
     fi
-  elif [[ "${initctl_type}" = "initctl" || "${initctl_type}" = "systemctl" ]]; then
+  elif [[ "${initctl_type}" = "initctl" ]]; then
     sudo "$1" "$2" "${service_name}"
+  elif [[ "${initctl_type}" = "systemctl" ]]; then
+    sudo "$1" "$2" "${initctl_config_file}"
   elif [[ "${initctl_type}" = "service" ]]; then
     sudo "$1" "${service_name}" "$2"
   fi
