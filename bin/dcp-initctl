@@ -1,97 +1,87 @@
 #!/bin/bash
 
-fail() {
-  echo >&2 "$@"
+fatal() {
+  if [[ -n "$1" ]]; then
+    printf >&2 "Fatal: $1\n"
+  else
+    printf >&2 "Fatal error.\n"
+  fi
   exit 1
 }
 
-find_initctl() {
-  local prog
-
-  for prog in launchctl initctl systemctl service; do
-    if hash "${prog}" 2>&-; then
-      printf "$(type -p "${prog}")"
+get_initctl_path() {
+  local initctl initctl_path
+  for initctl in launchctl initctl systemctl service; do
+    initctl_path="$(type -P "${initctl}")"
+    if [[ -x "${initctl_path}" ]]; then
+      printf "${initctl_path}"
       return
     fi
   done
 }
 
-find_ctlscript() {
-  local prog
-
-  for prog in /etc/init.d/$1 /etc/init.d/$1 /etc/init.d/rc.d/$1 \
-              /etc/init.d/rc.d/$1 /etc/rc.d/$1 /etc/rc.d/$1; do
-    if "${sudo_bin}" "${test_bin}" -x "${prog}"; then
-      printf "${prog}"
+get_initctl_config_path() {
+  local config_path
+  for config_path in /System/Library/LaunchDaemons/${1}.plist \
+                     /System/Library/LaunchAgents/${1}.plist \
+                     /Library/LaunchDaemons/${1}.plist \
+                     /Library/LaunchAgents/${1}.plist \
+                     "${HOME}"/Library/LaunchDaemons/${1}.plist \
+                     /usr/lib/systemd/system/${1} \
+                     /usr/lib/systemd/system/${1}.service \
+                     /etc/init/${1}.conf; do
+    if [[ -e "${config_path}" ]]; then
+      printf "${config_path}"
       return
     fi
   done
 }
 
-find_initcfg() {
-  local cfg
-
-  [[ -n "${ctlscript_bin}" ]] && { printf "${ctlscript_bin}"; return; }
-
-  for cfg in /etc/init/${1}.conf /usr/lib/systemd/system/${1}.service \
-             /System/Library/LaunchDaemons/${1}.plist \
-             /Library/LaunchDaemons/${1}.plist; do
-    if [[ -e "${cfg}" ]]; then
-      printf "${cfg}"
+get_initscript_path() {
+  local initscript_path
+  for initscript_path in /etc/init.d/$1 /etc/init.d/rc.d/$1 /etc/rc.d/$1; do
+    if sudo test -x "${initscript_path}"; then
+      printf "${initscript_path}"
       return
     fi
   done
 }
 
-write_globals() {
-  PATH="/usr/bin:/bin:/usr/local/bin:/usr/sbin:/sbin:/usr/local/sbin"
-  hash sudo 2>&- || fail "Error: Couldn't find sudo, quitting."
-  sudo_bin="$(type -p sudo)"
-  hash test 2>&- || fail "Error: Couldn't find test (binary), quitting."
-  test_bin="$(type -P test)"
+initctl() {
+  local service_name="$(basename "$3")"
+  local initctl_type="$(basename "$1")"
 
-  initctl_bin="$(find_initctl)"
-  [[ -n "${initctl_bin}" ]] && initctl_type="$(basename "${initctl_bin}")"
-  ctlscript_bin="$(find_ctlscript "${service}")"
-  init_cfg="$(find_initcfg "${service}")"
-}
-
-
-run_initctl() {
   if [[ "${initctl_type}" = "launchctl" ]]; then
-    if [[ "${action}" = "start" ]]; then
-      "${sudo_bin}" "${initctl_bin}" load -F "${init_cfg}"
-    elif [[ "${action}" = "stop" ]]; then
-      "${sudo_bin}" "${initctl_bin}" unload -F "${init_cfg}"
+    if [[ "$2" = "start" ]]; then
+      sudo "$1" load -F "$3"
+    elif [[ "$2" = "stop" ]]; then
+      sudo "$1" load -F "$3"
     fi
+  elif [[ "${initctl_type}" = "initctl" || "${initctl_type}" = "systemctl" ]]; then
+    sudo "$1" "$2" "${service_name}"
   elif [[ "${initctl_type}" = "service" ]]; then
-    "${sudo_bin}" "${initctl_bin}" "${service}" "${action}"
-  else
-    "${sudo_bin}" "${initctl_bin}" "${action}" "${service}"
+    sudo "$1" "${service_name}" "$2"
   fi
 }
 
-[[ "$#" -ge "2" ]] ||
-  fail "Usage: $(basename "$0") action service"
+run() {
+  PATH="/usr/bin:/bin:/usr/local/bin:/usr/sbin:/sbin:/usr/local/sbin"
 
-action="$1"
-service="$2"
-write_globals
+  local initctl_path="$(get_initctl_path)"
+  local initctl_config_path="$(get_initctl_config_path "$2")"
+  local initscript_path="$(get_initscript_path "$2")"
 
-if [[ -z "${init_cfg}" ]]; then
-  if [[ "${service}" = "ssh" ]]; then
-    service="sshd"
-  elif [[ "${service}" = "sshd" ]]; then
-    service="ssh"
+  if [[ -n "${initctl_path}" && -n "${initctl_config_path}" ]]; then
+    initctl "${initctl_path}" "$1" "${initctl_config_path}"
+  elif [[ -n "${initscript_path}" ]]; then
+    sudo "${initscript_path}" "$1"
+  else
+    fatal "Couldn't find a way to control ${2}."
   fi
+}
 
-  write_globals
-fi
-
-if [[ -n "${initctl_bin}" ]]; then
-  run_initctl
-elif [[ -n "${ctlscript_bin}" ]]; then
-  "${sudo_bin}" "${ctlscript_bin}" "${action}"
+if [[ "$#" -ge "2" ]]; then
+  run "$@"
 else
-  fail "Error: couldn't find a way to control ${service}, quitting."
+  printf >&2 "Usage: $(basename "$0") {action} {service}\n"
 fi
