@@ -68,7 +68,7 @@ initctl() {
 }
 
 run() {
-  PATH="/usr/bin:/bin:/usr/local/bin:/usr/sbin:/sbin:/usr/local/sbin"
+  export PATH="/usr/bin:/bin:/usr/local/bin:/usr/sbin:/sbin:/usr/local/sbin"
 
   local initctl_path="$(get_initctl_path)"
   local initctl_config_path="$(get_initctl_config_path "$2")"
