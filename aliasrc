@@ -88,6 +88,15 @@ twoline() {
   dcp_set_prompt
 }
 
+# For oh-my-zsh jira plugin
+jirabranch() {
+  local branch_name="$(dcp_ps1_git_branch | sed -e 's/[\(\)]//g')"
+
+  if [[ -n "${ZSH}" && "$(whence -w jira)" = "jira: function" ]]; then
+    jira "${branch_name}"
+  fi
+}
+
 # Utility function for alias/function overrides of binaries
 get_bin() {
   [[ "$#" -ge "1" ]] || return 1
