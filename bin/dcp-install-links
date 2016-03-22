@@ -16,6 +16,10 @@ for dotfile in ${HOME}/.dcp/dot/* ${HOME}/.vim/*rc; do
 done
 rm -f "${HOME}/.profile"
 
+if [[ "$(uname)" = "Darwin" ]]; then
+  touch "${HOME}/.hushlogin"
+fi
+
 if hash git 2>&-; then
   git config --global core.editor vim
   git config --global core.excludesfile ~/.gitignore_global
