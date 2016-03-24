@@ -1,4 +1,4 @@
-# Load rbenv
+# Load rbenv + nvm
 [[ -e "${HOME}/.dcp/envrc" ]] &&
   source "${HOME}/.dcp/envrc"
 # Load aliases, local scripts, environment

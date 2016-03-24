@@ -5,3 +5,9 @@ if [[ -d "${HOME}/.rbenv/shims" ]]; then
   export RBENV_ROOT="${HOME}/.rbenv"
 fi
 hash rbenv 2>/dev/null && eval "$(rbenv init -)"
+
+if [[ -d "${HOME}/.nvm" ]]; then
+  export NVM_DIR="${HOME}/.nvm"
+  nvm_path="$(/usr/local/bin/brew --prefix nvm 2>/dev/null)/nvm.sh"
+  [[ -e "${nvm_path}" ]] && source "${nvm_path}"
+fi
