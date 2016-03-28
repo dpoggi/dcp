@@ -1,13 +1,23 @@
-if [[ -d "${HOME}/.rbenv/bin" ]]; then
-  export PATH="${HOME}/.rbenv/bin:${PATH}"
-fi
-if [[ -d "${HOME}/.rbenv/shims" ]]; then
-  export RBENV_ROOT="${HOME}/.rbenv"
-fi
-hash rbenv 2>/dev/null && eval "$(rbenv init -)"
+# <3 for these two having the same init interface
+for manager in rbenv pyenv; do
+  if [[ -d "${HOME}/.${manager}/bin" ]]; then
+    export PATH="${HOME}/.${manager}/bin:${PATH}"
+  fi
+  if [[ -d "${HOME}/.${manager}/shims" ]]; then
+    manager_upper="$(printf "${manager}" | awk '{ print toupper($0) }')"
+    eval "export ${manager_upper}_ROOT=\"${HOME}/.${manager}\""
+  fi
+  hash "${manager}" 2>/dev/null && eval "$("${manager}" init -)"
+done
+unset manager manager_upper
 
 if [[ -d "${HOME}/.nvm" ]]; then
   export NVM_DIR="${HOME}/.nvm"
-  nvm_path="$(/usr/local/bin/brew --prefix nvm 2>/dev/null)/nvm.sh"
-  [[ -e "${nvm_path}" ]] && source "${nvm_path}"
+fi
+if [[ -e "${HOME}/.nvm/nvm.sh" ]]; then
+  source "${HOME}/.nvm/nvm.sh"
+fi
+# Because for some reason this doesn't end up in PATH with Homebrew...
+if [[ -e "/usr/local/opt/nvm/nvm.sh" ]]; then
+  source "/usr/local/opt/nvm/nvm.sh"
 fi
