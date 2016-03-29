@@ -1,13 +1,18 @@
-# Load rbenv + nvm
-[[ -e "${HOME}/.dcp/envrc" ]] &&
-  source "${HOME}/.dcp/envrc"
-# Load aliases, local scripts, environment
-[[ -e "${HOME}/.dcp/initrc" ]] &&
-  source "${HOME}/.dcp/initrc"
+export DCP="${HOME}/.dcp"
 
-# Set prompt
+# Set up environment
+[[ -e "${DCP}/envrc" ]] && source "${DCP}/envrc"
+
+# Load most of dcp
+[[ -e "${DCP}/initrc" ]] && source "${DCP}/initrc"
+
+# Set PS1, etc.
 dcp_set_prompt
 
 # 'Command not found' hook for Arch Linux
-[[ -s "/usr/share/doc/pkgfile/command-not-found.bash" ]] &&
+if [[ -s "/usr/share/doc/pkgfile/command-not-found.bash" ]]; then
   source "/usr/share/doc/pkgfile/command-not-found.bash"
+fi
+
+# Finish up the details
+[[ -e "${DCP}/post-initrc" ]] && source "${DCP}/post-initrc"

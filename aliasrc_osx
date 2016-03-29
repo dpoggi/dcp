@@ -1,14 +1,25 @@
-# Open Xcode for current folder
+#
+# Xcode aliases
+#
+
+# Open Xcode for current folder (prefers workspace to project)
 alias xc="open -a /Applications/Xcode.app ."
-# Dammit Xcode
+# Dammit Xcode (delete derived data twice a day for entire career as needed)
 alias fuxcode="rm -rf ${HOME}/Library/Developer/Xcode/DerivedData"
-# Homebrew
+# Verify Xcode installation
+alias haxcode="spctl --assess --verbose /Applications/Xcode.app"
+
+
+#
+# Homebrew - fully update/upgrade, clean up the mess
+#
+
 alias boop="brew update && brew upgrade && brew cleanup -sf"
 
-# Open a man page in Preview
-pman() {
-  man -t "$1" | open -f -a /Applications/Preview.app
-}
+
+#
+# System-level resets... these come in handy.
+#
 
 # Reset "Open With..." menus after connecting a drive with applications on it
 reset_launch_services() {
@@ -17,139 +28,91 @@ reset_launch_services() {
 }
 
 # Flush DNS cache and reset mDNSResponder
-reset_dns() {
+reset_dns_cache() {
   printf >&2 "Flushing the DNS cache (enter your user password if prompted)...\n"
-  if [[ -n "$(get_bin discoveryutil)" ]]; then
+
+  if hash discoveryutil 2>/dev/null; then
+    # OS X 10.9 - 10.10.3
     sudo discoveryutil mdnsflushcache
     sudo discoveryutil udnsflushcache
   else
+    # Sane versions of OS X
     sudo dscacheutil -flushcache
     sudo killall -HUP mDNSResponder
   fi
 }
 
-# Clear Quick Look's file locks
-alias reset_quicklook="qlmanage -r"
+# Clear Quick Look's file locks (so you can empty the trash)
+alias reset_quick_look="qlmanage -r"
 
-# Convenience wrapper for pg_ctl
-pg_ctl() {
-  [[ "$#" -gt "0" ]] || return 1
-  local cmd="$1"
-  shift
 
-  local bin="$(get_bin pg_ctl)"
-  local log="--log=/usr/local/var/postgres/server.log"
-  local mode="--mode=fast"
-  [[ -n "${PGDATA}" ]] || export PGDATA="/usr/local/var/postgres"
+#
+# Oracle Jabba or: How I Learned to Stop Worrying...
+# and Begrudgingly Accept the State of Multiple Java Installs on OS X
+# Yes, I've seen jenv. No, I don't think I like it.
+#
 
-  case "${cmd}" in
-    start)
-      "${bin}" "${cmd}" "${log}" "$@"
-      ;;
-    stop)
-      "${bin}" "${cmd}" "${mode}" "$@"
-      ;;
-    restart)
-      "${bin}" "${cmd}" "${log}" "${mode}" "$@"
-      ;;
-    *)
-      "${bin}" "${cmd}" "$@"
-  esac
-}
+use_jdk() {
+  [[ "$#" -gt "0" && "${#1}" = "1" ]] || return 1
+  [[ "$1" -ge "7" && "$1" -le "8" ]] || return 1
 
-# launchctl wrappers for setting shell-independent environment
-lctl_getenv() {
-  launchctl getenv "$1"
-}
-lctl_setenv() {
-  local arg="$1"
-  local val
-
-  if [[ -z "${BASH}" ]]; then
-    val="${(P)arg}"
-  else
-    val="${!arg}"
-  fi
-
-  launchctl setenv "${arg}" "${val}"
-}
-
-# Generic launchctl service wrapper
-_lctl_plist_path() {
-  local plist_dirs="/System/Library/LaunchDaemons /System/Library/LaunchAgents /Library/LaunchDaemons /Library/LaunchAgents ${HOME}/Library/LaunchDaemons ${HOME}/Library/LaunchAgents"
-  local plist_dir
-  local plist_path
-
-  for plist_dir in $(printf "${plist_dirs}"); do
-    plist_path="$(find "${plist_dir}" -name "${1}.plist" -print 2>/dev/null)"
-    [[ -e "${plist_path}" ]] && break || plist_path=""
-  done
-  [[ -n "${plist_path}" ]] && printf "${plist_path}" || return 1
-}
-
-_lctl() {
-  [[ "$#" -ge "3" ]] || return 1
-
-  local plist_path
-  if [[ -e "$3" ]]; then
-    plist_path="$3"
-  else
-    plist_path="$(_lctl_plist_path "$3")"
-  fi
-
-  if [[ -z "${plist_path}" ]]; then
-    printf >&2 "Error: plist for $3 not found.\n"
-    return 1
-  fi
-
-  local sudo_cmd
-  if [[ "$1" = "system" ]]; then
-    sudo_cmd="sudo"
-  fi
-
-  case "$2" in
-    start)
-      ${sudo_cmd} launchctl load -F "${plist_path}"
-      ;;
-    stop)
-      ${sudo_cmd} launchctl unload -F "${plist_path}"
-      ;;
-    restart)
-      _lctl "$1" stop "$3"
-      _lctl "$1" start "$3"
-      ;;
-    *)
-      printf >&2 "Error: lctl wrapper only accepts start/stop/restart.\n"
-      return 1
-  esac
-}
-
-lctl() {
-  _lctl system "$@"
-}
-ulctl() {
-  _lctl user "$@"
-}
-
-# Service wrapper for apsd (Apple Push Service)
-aps() {
-  lctl "$1" com.apple.apsd
-}
-# Service wrapper for CoreAudio
-coreaudio() {
-  lctl "$1" com.apple.audio.coreaudiod
-}
-
-# Java switcheroo
-jswitch() {
-  [[ "$#" -gt "0" ]] || return 1
+  # Finds the newest Java _ (first argument) JDK available
   local jdk_dir="$(find "/Library/Java/JavaVirtualMachines" -name "jdk1\.${1}*" -print | tail -n 1)"
 
   if [[ -d "${jdk_dir}" ]]; then
-    printf >&2 "Switching to $(basename "${jdk_dir}") (enter your user password if prompted)...\n"
+    printf >&2 "Using $(basename "${jdk_dir}") (enter your user password if prompted)...\n"
     sudo ln -snfv "${jdk_dir}/Contents/Home" "/Library/Java/Home"
   else
-    printf >&2 "Error: Java $1 not found.\n"
+    printf >&2 "Java $1 not found\n"
     return 1
   fi
+}
+
+
+#
+# Just launchd things (tm)
+#
+
+# Convenience wrapper for globally "exporting" a variable. Similar to setting
+# environment variables in the Control Panel on Windows. Seen by apps like
+# IntelliJ that pick up on certain vars: JAVA_HOME, etc.
+launchd_export() {
+  local var="$1"
+  local val="$(eval "printf \"\${${var}}\"")"
+  launchctl setenv "${var}" "${val}"
+}
+
+# launchctl wrapper for making things feel a little more... right.
+lctl() {
+  case "$1" in
+    start)
+      shift
+      sudo launchctl load -F "$@"
+      ;;
+    stop)
+      shift
+      sudo launchctl unload -F "$@"
+      ;;
+    restart)
+      shift
+      sudo launchctl unload -F "$@"
+      sudo launchctl load -F "$@"
+      ;;
+    "")
+      return 1
+      ;;
+    *)
+      sudo launchctl "$@"
+      ;;
+  esac
+}
+
+# launchctl wrapper for apsd (Apple Push Service: Messages.app, etc.)
+apsctl() {
+  lctl "$1" "/System/Library/LaunchDaemons/com.apple.apsd.plist"
+}
+
+# launchctl wrapper for CoreAudio (because sometimes there be dragons)
+coreaudioctl() {
+  lctl "$1" "/System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist"
 }

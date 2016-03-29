@@ -1,0 +1,42 @@
+#
+# Load pyenv if available
+#
+
+[[ -d "${HOME}/.pyenv/shims" ]] && export PYENV_ROOT="${HOME}/.pyenv"
+[[ -d "${PYENV_ROOT}/bin" ]] && export PATH="${PYENV_ROOT}/bin:${PATH}"
+hash pyenv 2>/dev/null && eval "$(pyenv init -)"
+
+
+#
+# Load nvm if available
+#
+
+[[ -d "${HOME}/.nvm" ]] && export NVM_DIR="${HOME}/.nvm"
+if [[ -e "${NVM_DIR}/nvm.sh" ]]; then
+  source "${NVM_DIR}/nvm.sh"
+elif [[ -e "/usr/local/opt/nvm/nvm.sh" ]]; then
+  # Because for some reason this doesn't end up in PATH with Homebrew...
+  source "/usr/local/opt/nvm/nvm.sh"
+fi
+
+
+#
+# Clean up PATH. This is bound to break something, so uhh... open an issue.
+# My bad in advance. It's just been driving me insane.
+#
+
+export PATH="$(printf "${PATH}" | perl -e 'print join(":", grep { not $seen{$_}++ } split(/:/, scalar <>))')"
+
+
+#
+# Hook for virtualenv "project bookmarks"
+#
+
+if [[ -n "${PIP_VIRTUALENV_BASE}" && -n "${PY_PROJECT}" ]]; then
+  unset PYTHONHOME
+  export VIRTUAL_ENV="${PIP_VIRTUALENV_BASE}/$(basename "${PY_PROJECT}")"
+  export PATH="${VIRTUAL_ENV}/bin:${PATH}"
+  hash -r 2>/dev/null
+  cd "${PY_PROJECT}"
+  [[ -e ".env" ]] && source ".env"
+fi

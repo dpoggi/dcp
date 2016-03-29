@@ -1,31 +1,38 @@
-export ZSH="${HOME}/.oh-my-zsh"
-export DISABLE_AUTO_UPDATE="true"
+#
+# Add oh-my-zsh plugins
+#
 
-# Set oh-my-zsh theme
-if [[ -e "${HOME}/.dcp/conf/theme" ]]; then
-  export ZSH_THEME="$(cat "${HOME}/.dcp/conf/theme")"
-else
-  export ZSH_THEME="dpoggi"
+# Standard plugins
+plugins=( emoji git-extras history jsontools zsh-syntax-highlighting )
+
+# Mac-specific plugins
+if [[ "${DCP_OS}" = "Darwin" ]]; then
+  plugins+=( brew osx )
 fi
 
-# Load oh-my-zsh plugins
-plugins=( brew bundler emoji gem rake rbenv tmuxinator zsh-syntax-highlighting )
-if [[ -e "${HOME}/.dcp/conf/plugins" ]]; then
-  for plugin in $(cat "${HOME}/.dcp/conf/plugins"); do
+# User-specified plugins
+if [[ -e "${DCP}/conf/plugins" ]]; then
+  for plugin in $(cat "${DCP}/conf/plugins"); do
     plugins+=( "${plugin}" )
   done
+  unset plugin
 fi
 
-# Load aliases, local scripts, environment
-[[ -e "${HOME}/.dcp/initrc" ]] &&
-  source "${HOME}/.dcp/initrc"
-# Load oh-my-zsh
-[[ -e "${ZSH}/oh-my-zsh.sh" ]] &&
-  source "${ZSH}/oh-my-zsh.sh"
+
+#
+# Load all the things!
+#
+
+# Load most of dcp
+[[ -e "${DCP}/initrc" ]] && source "${DCP}/initrc"
+
+# Load oh-my-zsh itself
+[[ -e "${ZSH}/oh-my-zsh.sh" ]] && source "${ZSH}/oh-my-zsh.sh"
 
 # 'Command not found' hook for Arch Linux
-[[ -e "/usr/share/doc/pkgfile/command-not-found.zsh" ]] &&
+if [[ -s "/usr/share/doc/pkgfile/command-not-found.zsh" ]]; then
   source "/usr/share/doc/pkgfile/command-not-found.zsh"
+fi
 
 # Completion aliasing for hub command
 if hash hub 2>/dev/null; then
@@ -35,5 +42,5 @@ if hash hub 2>/dev/null; then
   fi
 fi
 
-# Disable nasty % sign at end of output when there's no newline
-export PROMPT_EOL_MARK=""
+# Finish up the details
+[[ -e "${DCP}/post-initrc" ]] && source "${DCP}/post-initrc"

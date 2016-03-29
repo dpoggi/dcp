@@ -1,23 +1,38 @@
-# <3 for these two having the same init interface
-for manager in rbenv pyenv; do
-  if [[ -d "${HOME}/.${manager}/bin" ]]; then
-    export PATH="${HOME}/.${manager}/bin:${PATH}"
-  fi
-  if [[ -d "${HOME}/.${manager}/shims" ]]; then
-    manager_upper="$(printf "${manager}" | awk '{ print toupper($0) }')"
-    eval "export ${manager_upper}_ROOT=\"${HOME}/.${manager}\""
-  fi
-  hash "${manager}" 2>/dev/null && eval "$("${manager}" init -)"
-done
-unset manager manager_upper
+#
+# Set up environment
+#
 
-if [[ -d "${HOME}/.nvm" ]]; then
-  export NVM_DIR="${HOME}/.nvm"
+export PATH="${PATH}:${DCP}/bin"
+export GREP_OPTIONS="--color=auto"
+export LS_OPTIONS="--color=auto"
+export CLICOLOR="1"
+export EDITOR="vim"
+
+
+#
+# OS environment var, check for Homebrew
+#
+
+export DCP_OS="$(uname)"
+# Guard for Darwin because I know nothing about Linuxbrew
+if [[ "${DCP_OS}" = "Darwin" && -x "/usr/local/bin/brew" ]]; then
+  export PATH="/usr/local/bin:/usr/local/sbin:${PATH}"
 fi
-if [[ -e "${HOME}/.nvm/nvm.sh" ]]; then
-  source "${HOME}/.nvm/nvm.sh"
-fi
-# Because for some reason this doesn't end up in PATH with Homebrew...
-if [[ -e "/usr/local/opt/nvm/nvm.sh" ]]; then
-  source "/usr/local/opt/nvm/nvm.sh"
+
+
+#
+# Load rbenv if available
+#
+
+[[ -d "${HOME}/.rbenv/shims" ]] && export RBENV_ROOT="${HOME}/.rbenv"
+[[ -d "${RBENV_ROOT}/bin" ]] && export PATH="${RBENV_ROOT}/bin:${PATH}"
+hash rbenv 2>/dev/null && eval "$(rbenv init -)"
+
+
+#
+# Load local environment if it exists
+#
+
+if [[ -e "${DCP}/localenv" ]]; then
+  source "${DCP}/localenv"
 fi
