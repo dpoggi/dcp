@@ -1,11 +1,18 @@
+#
 # General aliases
+#
+
 alias c="clear"
 alias ll="ls -la"
 alias la="ls -a"
 alias h="history | tail -32"
 alias ip_ext="curl ip.danpoggi.com"
 
+
+#
 # Git aliases
+#
+
 alias ga="git add"
 alias gp="git push"
 alias gpl="git pull"
@@ -28,10 +35,12 @@ alias gn="git init && git add . && git commit -m 'Initial commit.'"
 alias grv="git remote -v"
 alias gcb="git fetch --prune; git branch --merged | colrm 1 2 | grep -v '^master$' | xargs git branch -d"
 alias ggr="git grep --break --heading --line-number"
-gi() { curl "http://www.gitignore.io/api/$@"; }
-gpub() {
-  [[ -n "$1" ]] || return 1
 
+gitignore() {
+  curl -sJL "https://raw.githubusercontent.com/github/gitignore/master/${1}.gitignore"
+}
+
+gpub() {
   git push origin "${1}:refs/heads/$1"
   git fetch origin
   git config "branch.${1}.remote" origin
@@ -39,114 +48,120 @@ gpub() {
   git checkout "$1"
 }
 
-# Mac specifics
-if [[ "$(uname)" = "Darwin" ]]; then
-  [[ -e "${HOME}/.dcp/aliasrc_osx" ]] && source "${HOME}/.dcp/aliasrc_osx"
-fi
+# For oh-my-zsh jira plugin
+gbjira() {
+  if [[ -z "${BASH}" && "$(whence -w jira)" = "jira: function" ]]; then
+    local branch="$("${DCP}/bin/__ps1_git_branch" | sed -e 's/[\(\)]//g')"
+    if [[ -n "${branch}" ]]; then
+      jira "${branch}"
+    else
+      printf >&2 "Unable to get the current branch.\n"
+      return 1
+    fi
+  fi
+}
 
-# Bash PS1 colors
+
+#
+# PS1
+#
+
+# Colors!
 c_red="\[\033[0;31m\]"
 c_green="\[\033[0;32m\]"
 c_white="\[\033[0;37m\]"
 c_cyan="\[\033[0;36m\]"
 c_purple="\[\033[0;35m\]"
-c_yellow="\[\033[1;33m\]"
+c_yellow="\[\033[0;33m\]"
 c_reset="\[\033[0m\]"
 
-# Bash PS1 Functions
-dcp_ps1_preamble() {
-  if [[ "${UID}" -eq "0" ]]; then printf "${c_red}"; else printf "${c_green}"; fi
+# Component functions
+__ps1_preamble() {
+  [[ "${UID}" = "0" ]] && printf "${c_red}" || printf "${c_green}"
   printf "\\\\u${c_white}@${c_cyan}\\h${c_white}:${c_purple}\\w"
 }
-dcp_ps1_git_branch() {
-  git branch 2>&- | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+__ps1_git() {
+  printf "${c_yellow}\$(${DCP}/bin/__ps1_git_branch)"
 }
-dcp_ps1_git() {
-  [[ "${UID}" -eq "0" ]] || printf "${c_yellow}\$(dcp_ps1_git_branch)"
-}
-dcp_ps1_uid() {
-  if [[ -n "${DPOGGI_TWOLINE}" ]]; then printf "\n"; else printf " "; fi
+__ps1_uid() {
+  [[ -n "${DPOGGI_TWOLINE}" ]] && printf "\n" || printf " "
   printf "${c_red}\\\$${c_reset} "
 }
 
 # Set prompt in either shell
-dcp_set_prompt() {
+set_prompt() {
   if [[ -n "${BASH}" ]]; then
-    export PS1="$(dcp_ps1_preamble)$(dcp_ps1_git)$(dcp_ps1_uid)"
+    export PS1="$(__ps1_preamble)$(__ps1_git)$(__ps1_uid)"
   elif [[ -n "${ZSH}" ]]; then
     source "${ZSH}/themes/${ZSH_THEME}.zsh-theme"
   fi
 }
 
-# One-line or two-line prompt (for convenience, these have no prefix)
+# One-line or two-line prompt
 oneline() {
   unset DPOGGI_TWOLINE
-  dcp_set_prompt
+  set_prompt
 }
 twoline() {
   export DPOGGI_TWOLINE="true"
-  dcp_set_prompt
+  set_prompt
 }
 
-# For oh-my-zsh jira plugin
-jirabranch() {
-  local branch_name="$(dcp_ps1_git_branch | sed -e 's/[\(\)]//g')"
 
-  if [[ -n "${ZSH}" && "$(whence -w jira)" = "jira: function" ]]; then
-    jira "${branch_name}"
-  fi
+#
+# Utility functions
+#
+
+# Use shell functions to override binaries whilst respecting $PATH
+__bin_path() {
+  [[ -n "${BASH}" ]] && type -P "$1" || whence -p "$1"
 }
 
-# Utility function for alias/function overrides of binaries
-get_bin() {
-  [[ "$#" -ge "1" ]] || return 1
-  if [[ -z "${BASH}" ]]; then
-    whence -p "$1"
-  else
-    type -P "$1"
-  fi
+# Gets job number from PID after &ing a process
+__jobno() {
+  jobs -l | fgrep "$1" | awk '{ print $1 }' | sed -e 's/[^0-9]//g'
 }
 
-# Utility function to get job number after &ing a process from its PID
-# (for shell functions only unless you're doing something weird and set -m)
-get_jobno() {
-  local sed_opts
-  jobs -l | fgrep "${pid}" | cut -d ' ' -f 1 | sed -e 's/[^0-9]//g'
-}
 
-# Clipboard
+#
+# Clipboard functions
+#
+
+if hash pbcopy 2>/dev/null && hash pbpaste 2>/dev/null; then
+  DCP_CBCOPY="pbcopy"
+  DCP_CBPASTE="pbpaste"
+elif hash xsel 2>/dev/null; then
+  DCP_CBCOPY="xsel --clipboard --input"
+  DCP_CBPASTE="xsel --clipboard --output"
+fi
+
 cbcopy() {
-  local copy
-  if hash pbcopy 2>/dev/null; then
-    copy="pbcopy"
-  elif hash xsel 2>/dev/null; then
-    copy="xsel --clipboard --input"
+  [[ -n "${DCP_CBCOPY}" ]] || return 1
+  if [[ -e "$1" ]]; then
+    local file="$1"
+    shift
+    cat "${file}" | ${DCP_CBCOPY} "$@"
   else
-    printf >&2 "Fatal: neither pbcopy nor xsel found.\n"
-    return 1
-  fi
-
-  if [[ -n "$1" ]]; then
-    cat "$1" | ${copy}
-  else
-    ${copy}
+    ${DCP_CBCOPY} "$@"
   fi
 }
 
 cbpaste() {
-  local paste
-  if hash pbpaste 2>/dev/null; then
-    paste="pbpaste"
-  elif hash xsel 2>/dev/null; then
-    paste="xsel --clipboard --output"
+  [[ -n "${DCP_CBPASTE}" ]] || return 1
+  if [[ -e "$1" ]]; then
+    local file="$1"
+    shift
+    ${DCP_CBPASTE} "$@" >>"${file}"
   else
-    printf >&2 "Fatal: neither pbpaste nor xsel found.\n"
-    return 1
-  fi
-
-  if [[ -n "$1" ]]; then
-    ${paste} >>"$1"
-  else
-    ${paste}
+    ${DCP_CBPASTE} "$@"
   fi
 }
+
+
+#
+# Mac specifics
+#
+
+if [[ "$(uname)" = "Darwin" ]]; then
+  [[ -e "${DCP}/aliasrc_osx" ]] && source "${DCP}/aliasrc_osx"
+fi

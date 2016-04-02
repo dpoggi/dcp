@@ -83,36 +83,41 @@ launchd_export() {
 }
 
 # launchctl wrapper for making things feel a little more... right.
-lctl() {
+__lctl() {
+  if [[ "$1" = "sudo" ]]; then
+    local sudo_cmd="$1"
+    shift
+  fi
+
   case "$1" in
     start)
       shift
-      sudo launchctl load -F "$@"
+      "${sudo_cmd}" launchctl load -F "$@"
       ;;
     stop)
       shift
-      sudo launchctl unload -F "$@"
+      "${sudo_cmd}" launchctl unload -F "$@"
       ;;
     restart)
       shift
-      sudo launchctl unload -F "$@"
-      sudo launchctl load -F "$@"
+      "${sudo_cmd}" launchctl unload -F "$@"
+      "${sudo_cmd}" launchctl load -F "$@"
       ;;
     "")
       return 1
       ;;
     *)
-      sudo launchctl "$@"
+      "${sudo_cmd}" launchctl "$@"
       ;;
   esac
 }
 
 # launchctl wrapper for apsd (Apple Push Service: Messages.app, etc.)
 apsctl() {
-  lctl "$1" "/System/Library/LaunchDaemons/com.apple.apsd.plist"
+  __lctl sudo "$1" "/System/Library/LaunchDaemons/com.apple.apsd.plist"
 }
 
 # launchctl wrapper for CoreAudio (because sometimes there be dragons)
 coreaudioctl() {
-  lctl "$1" "/System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist"
+  __lctl sudo "$1" "/System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist"
 }

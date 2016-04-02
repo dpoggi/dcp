@@ -8,6 +8,17 @@ hash pyenv 2>/dev/null && eval "$(pyenv init -)"
 
 
 #
+# gpip function, if necessary
+#
+
+if [[ -n "${PIP_VIRTUALENV_BASE}" && -n "${PIP_REQUIRE_VIRTUALENV}" ]]; then
+  gpip() {
+    PIP_REQUIRE_VIRTUALENV="" pip "$@"
+  }
+fi
+
+
+#
 # Load nvm if available
 #
 

@@ -1,4 +1,2 @@
-[[ -s "${HOME}/.dcp/localprofile" ]] &&
-  source "${HOME}/.dcp/localprofile"
-[[ -s "${HOME}/.bashrc" ]] &&
-  source "${HOME}/.bashrc"
+[[ -e "${HOME}/.dcp/localprofile" ]] && source "${HOME}/.dcp/localprofile"
+[[ -e "${HOME}/.bashrc" ]] && source "${HOME}/.bashrc"

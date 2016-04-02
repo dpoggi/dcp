@@ -2,6 +2,7 @@
 # their own scripts here.
 /bin/*
 !/bin/dcp-*
+!/bin/__*
 !/bin/yolo
 
 # lib directory so I can sneak PyPI packages onto my CSE account

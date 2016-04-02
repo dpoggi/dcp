@@ -7,7 +7,7 @@ export DCP="${HOME}/.dcp"
 [[ -e "${DCP}/initrc" ]] && source "${DCP}/initrc"
 
 # Set PS1, etc.
-dcp_set_prompt
+set_prompt
 
 # 'Command not found' hook for Arch Linux
 if [[ -s "/usr/share/doc/pkgfile/command-not-found.bash" ]]; then
