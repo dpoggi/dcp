@@ -43,4 +43,4 @@ if hash hub 2>/dev/null; then
 fi
 
 # Finish up the details
-[[ -e "${DCP}/post-initrc" ]] && source "${DCP}/post-initrc"
+[[ -e "${DCP}/postrc" ]] && source "${DCP}/postrc"

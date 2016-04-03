@@ -1,13 +1,4 @@
 #
-# Load pyenv if available
-#
-
-[[ -d "${HOME}/.pyenv/shims" ]] && export PYENV_ROOT="${HOME}/.pyenv"
-[[ -d "${PYENV_ROOT}/bin" ]] && export PATH="${PYENV_ROOT}/bin:${PATH}"
-hash pyenv 2>/dev/null && eval "$(pyenv init -)"
-
-
-#
 # Load nvm if available
 #
 
@@ -17,6 +8,29 @@ if [[ -e "${NVM_DIR}/nvm.sh" ]]; then
 elif [[ -e "/usr/local/opt/nvm/nvm.sh" ]]; then
   # Because for some reason this doesn't end up in PATH with Homebrew...
   source "/usr/local/opt/nvm/nvm.sh"
+fi
+
+
+#
+# Load pyenv if available
+#
+
+[[ -d "${HOME}/.pyenv/shims" ]] && export PYENV_ROOT="${HOME}/.pyenv"
+[[ -d "${PYENV_ROOT}/bin" ]] && export PATH="${PYENV_ROOT}/bin:${PATH}"
+hash pyenv 2>/dev/null && eval "$(pyenv init -)"
+
+
+#
+# Load rbenv or RVM (if you have to, I guess) if available
+#
+
+if [[ -d "${HOME}/.rbenv" ]]; then
+  [[ -d "${HOME}/.rbenv/shims" ]] && export RBENV_ROOT="${HOME}/.rbenv"
+  [[ -d "${RBENV_ROOT}/bin" ]] && export PATH="${RBENV_ROOT}/bin:${PATH}"
+  hash rbenv 2>/dev/null && eval "$(rbenv init -)"
+elif [[ -d "${HOME}/.rvm" ]]; then
+  export PATH="${PATH}:${HOME}/.rvm/bin"
+  [[ -e "${HOME}/.rvm/scripts/rvm" ]] && source "${HOME}/.rvm/scripts/rvm"
 fi
 
 

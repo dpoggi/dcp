@@ -21,18 +21,7 @@ fi
 
 
 #
-# Load rbenv if available
-#
-
-[[ -d "${HOME}/.rbenv/shims" ]] && export RBENV_ROOT="${HOME}/.rbenv"
-[[ -d "${RBENV_ROOT}/bin" ]] && export PATH="${RBENV_ROOT}/bin:${PATH}"
-hash rbenv 2>/dev/null && eval "$(rbenv init -)"
-
-
-#
 # Load local environment if it exists
 #
 
-if [[ -e "${DCP}/localenv" ]]; then
-  source "${DCP}/localenv"
-fi
+[[ -e "${DCP}/localenv" ]] && source "${DCP}/localenv"
