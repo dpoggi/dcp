@@ -122,6 +122,11 @@ __jobno() {
   jobs -l | fgrep "$1" | awk '{ print $1 }' | sed -e 's/[^0-9]//g'
 }
 
+# virtualenv-independent pip
+gpip() {
+  PIP_REQUIRE_VIRTUALENV="" pip "$@"
+}
+
 
 #
 # Clipboard functions
