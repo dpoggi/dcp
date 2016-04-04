@@ -14,11 +14,16 @@ maybe_git_config() {
   git config --global "$1" >/dev/null || git config --global "$1" "$2"
 }
 
+os="$(uname -s)"
+
 for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*rc; do
-  link_dotfile "${dotfile}"
+  if [[ "${os}" != "Darwin" && "$(basename "${dotfile}")" = "osx" ]]; then
+    [[ -h "${HOME}/.osx" ]] && rm -f "${HOME}/.osx"
+  else
+    link_dotfile "${dotfile}"
+  fi
 done
 
-os="$(uname -s)"
 [[ "${os}" = "Darwin" ]] && touch "${HOME}/.hushlogin"
 [[ -s "${HOME}/.profile" ]] || rm -f "${HOME}/.profile"
 
