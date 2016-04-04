@@ -1,7 +1,8 @@
 #!/bin/bash
 
 link_dotfile() {
-  local link="${HOME}/.$(basename "${1##*-}")"
+  local link="$(basename "$1")"
+  link="${HOME}/.${link##*-}"
   if [[ ! -h "${link}" && -s "${link}" ]]; then
     printf >&2 "Warning: ~/$(basename "${link}") is a file of non-zero size, skipping.\n"
   else
