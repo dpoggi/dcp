@@ -30,7 +30,7 @@ update_repo() {
 
   if [[ -n "$(git status --porcelain --ignore-submodules --untracked-files=all 2>/dev/null)" ]]; then
     log_msg "Attempting to stash uncommitted changes:"
-    git status --short --untracked-files=all
+    git status --short --ignore-submodules --untracked-files=all
     git merge --abort &>/dev/null
     git -c "user.name=dcp update" \
         -c "user.email=dcp-update@localhost" \
