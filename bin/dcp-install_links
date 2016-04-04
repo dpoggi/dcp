@@ -25,7 +25,7 @@ for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*rc; do
 done
 
 [[ "${os}" = "Darwin" ]] && touch "${HOME}/.hushlogin"
-[[ -s "${HOME}/.profile" ]] || rm -f "${HOME}/.profile"
+[[ ! -h "${HOME}/.profile" && -s "${HOME}/.profile" ]] || rm -f "${HOME}/.profile"
 
 if hash git 2>/dev/null; then
   maybe_git_config "color.ui" "true"
