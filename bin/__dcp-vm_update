@@ -36,7 +36,7 @@ install_dir="~/$(basename "${repo_dirs[0]}")"
 [[ "${UID}" != "0" ]] || fatal "Cannot run as root."
 [[ -d "${repo_dirs[0]}" ]] || fatal "${install_dir} does not exist."
 
-if [[ "$(uname -s)" = "Darwi" ]] && hash brew 2>/dev/null; then
+if [[ "$(uname -s)" = "Darwin" ]] && hash brew 2>/dev/null; then
   printf >&2 "Updating via Homebrew...\n\n"
   brew update
   brew upgrade "${formulae[@]}"
