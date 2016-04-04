@@ -1,26 +1,93 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
+log_msg() {
+  printf >&2 "\033[0;37m[%s]:\033[0m %s\n" "$(date +"%H:%M:%S")" "$1"
+}
+
+fatal() {
+  printf >&2 "\033[1;37;41m[FATAL]:\033[0m %s\n" "$1"
+  exit 1
+}
+
+# Thank you based Homebrew, no way I would've thought of some of this...
 update_repo() {
-  [[ -d "$1" ]] || return 1
-  cd "$1"
-  git fetch --all
-  git checkout master
-  git rebase refs/remotes/origin/master
-  git submodule update --init --recursive
+  local repo try_tag
+  while [[ "$#" -gt "0" ]]; do
+    [[ "$1" = "--try-tag" ]] && try_tag="true" || repo="$1"
+    shift
+  done
+
+  pushd "${repo}" >/dev/null
+  local name="$(basename "$(git remote get-url origin)")"
+  name="${name%.*}"
+  log_msg "Updating ${name}..."
+
+  log_msg "Fetching origin..."
+  local initial_branch="$(git symbolic-ref --short HEAD 2>/dev/null)"
+  git fetch --quiet --force origin \
+            "refs/heads/master:refs/remotes/origin/master" ||
+    fatal "Unable to fetch origin."
+
+  if [[ -n "$(git status --porcelain --untracked-files=all 2>/dev/null)" ]]; then
+    log_msg "Attempting to stash uncommitted changes:"
+    git status --short --untracked-files=all
+    git merge --abort &>/dev/null
+    git -c "user.name=dcp update" \
+        -c "user.email=dcp-update@localhost" \
+        stash save --quiet --include-untracked
+    git reset --hard --quiet
+    local stashed="true"
+  fi
+
+  if [[ "${initial_branch}" != "master" ]]; then
+    log_msg "Checking out master..."
+    if git merge-base --is-ancestor master origin/master &>/dev/null; then
+      git checkout --quiet --force master
+    else
+      git checkout --quiet --force -B master origin/master
+    fi
+  fi
+
+  log_msg "Updating master..."
+  git merge --quiet --ff-only --no-edit origin/master \
+            --strategy=recursive \
+            --strategy-option=ours \
+            --strategy-option=ignore-all-space ||
+    fatal "Unable to update master using a fast-forward."
+
+  if [[ "${try_tag}" = "true" ]]; then
+    local tag="$(git describe --abbrev=0 --tags 2>/dev/null)"
+    if [[ -n "${tag}" ]]; then
+      log_msg "Checking out tag for latest version..."
+      git checkout --quiet --force "${tag}"
+    fi
+  fi
+
+  if [[ -s ".gitmodules" ]]; then
+    log_msg "Updating submodules..."
+    git submodule update --quiet --init --recursive
+  fi
+
+  log_msg "Finished updating ${name}."
+  if [[ "${stashed}" = "true" ]]; then
+    log_msg "To restore the stashed changes to ${name},"
+    log_msg "cd \"${repo}\" && git stash pop"
+  fi
+  printf >&2 "\n"
+  popd >/dev/null
 }
 
 update_repo "${HOME}/.dcp"
-update_repo "${HOME}/.oh-my-zsh"
-
 update_repo "${HOME}/.vim"
-clang_complete_dir="${HOME}/.vim/bundle/clang_complete"
-[[ -d "${clang_complete_dir}" ]] && rm -rf "${clang_complete_dir}"
 
-omz_plugins_dir="${HOME}/.oh-my-zsh/custom/plugins"
-update_repo "${omz_plugins_dir}/zsh-syntax-highlighting"
-if [[ "$?" -gt "0" ]]; then
-  mkdir -p "${omz_plugins_dir}"
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${omz_plugins_dir}/zsh-syntax-highlighting"
-fi
+update_repo "${HOME}/.oh-my-zsh"
+plugins_dir="${HOME}/.oh-my-zsh/custom/plugins"
+for plugin in \
+  $(find "${plugins_dir}" -maxdepth 1 -type d -print 2>/dev/null | tail -n +2)
+do
+  [[ "${plugin}" != */example ]] && update_repo --try-tag "${plugin}"
+done
 
+log_msg "Updating symlinks..."
 "${HOME}/.dcp/bin/dcp-install_links"
+log_msg "Done."
