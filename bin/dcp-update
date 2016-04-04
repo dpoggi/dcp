@@ -36,7 +36,8 @@ update_repo() {
         -c "user.email=dcp-update@localhost" \
         stash save --quiet --include-untracked
     git reset --hard --quiet
-    local stashed="true"
+    [[ -n "${stashed}" ]] && stashed="${stashed}, "
+    stashed="${stashed}${name}"
   fi
 
   if [[ "${initial_branch}" != "master" ]]; then
@@ -69,13 +70,11 @@ update_repo() {
   fi
 
   log_msg "Finished updating ${name}."
-  if [[ "${stashed}" = "true" ]]; then
-    log_msg "To restore the stashed changes to ${name},"
-    log_msg "cd \"${repo}\" && git stash pop"
-  fi
   printf >&2 "\n"
   popd >/dev/null
 }
+
+stashed=""
 
 update_repo "${HOME}/.dcp"
 update_repo "${HOME}/.vim"
@@ -91,3 +90,10 @@ done
 log_msg "Updating symlinks..."
 "${HOME}/.dcp/bin/dcp-install_links"
 log_msg "Done."
+
+if [[ -n "${stashed}" ]]; then
+  printf >&2 "\n"
+  log_msg "You may want to restore stashed changes to: ${stashed}"
+  log_msg "To do so, use git stash pop. Changes may not have been stashed (but"
+  log_msg "are still intact) if they were inside submodules."
+fi
