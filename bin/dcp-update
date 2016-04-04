@@ -93,6 +93,7 @@ log_msg "Done."
 
 if [[ -n "${stashed}" ]]; then
   printf >&2 "\n"
-  log_msg "You may want to restore stashed changes to: ${stashed}"
-  log_msg "To do so, use git stash pop."
+  log_msg "You may want to restore stashed changes to:"
+  log_msg "${stashed}"
+  log_msg "Use \`git stash pop' to do so."
 fi
