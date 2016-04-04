@@ -18,7 +18,7 @@ update_repo() {
   done
 
   pushd "${repo}" >/dev/null
-  local name="$(basename "$(git remote get-url origin)")"
+  local name="$(basename "$(git remote get-url origin 2>/dev/null)")"
   name="${name%.*}"
   log_msg "Updating ${name}..."
 
