@@ -6,7 +6,7 @@ export PROMPT_EOL_MARK=""
 
 # Set oh-my-zsh theme
 if [[ -e "${DCP}/conf/theme" ]]; then
-  export ZSH_THEME="$(cat "${DCP}/conf/theme")"
+  export ZSH_THEME=$(cat "${DCP}/conf/theme")
 else
   export ZSH_THEME="dpoggi"
 fi

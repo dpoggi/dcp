@@ -8,19 +8,15 @@
 # lib directory so I can sneak PyPI packages onto my CSE account
 /lib/*
 
-# localrc contains your custom aliases/environment variables
-localrc
-
-# localprofile contains local login shell stuff
-localprofile
-
-# localenv contains local environment
+# local environment variables
 localenv
+# local login shell things (may/may not run)
+localprofile
+# local aliases and init things
+localrc
+# local logout things
+localexit
 
 # conf directory contains configuration for scripts
 /conf/*
 !/conf/.gitkeep
-
-# Ignore Gemfile.lock, Gemfile is really just to make sure you have everything
-# to run the Ruby stuff in bin/
-Gemfile.lock

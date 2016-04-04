@@ -161,12 +161,3 @@ cbpaste() {
     ${DCP_CBPASTE} "$@"
   fi
 }
-
-
-#
-# Mac specifics
-#
-
-if [[ "$(uname)" = "Darwin" ]]; then
-  [[ -e "${DCP}/aliasrc_osx" ]] && source "${DCP}/aliasrc_osx"
-fi

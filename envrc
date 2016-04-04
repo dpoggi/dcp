@@ -13,7 +13,7 @@ export EDITOR="vim"
 # OS environment var, check for Homebrew
 #
 
-export DCP_OS="$(uname)"
+export DCP_OS="$(uname -s)"
 # Guard for Darwin because I know nothing about Linuxbrew
 if [[ "${DCP_OS}" = "Darwin" && -x "/usr/local/bin/brew" ]]; then
   export PATH="/usr/local/bin:/usr/local/sbin:${PATH}"

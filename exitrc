@@ -1,3 +1,5 @@
 if [[ "${SHLVL}" = "1" ]]; then
   [[ -x "/usr/bin/clear_console" ]] && /usr/bin/clear_console
 fi
+
+[[ -e "${DCP}/localexit" ]] && source "${DCP}/localexit"
