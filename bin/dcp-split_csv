@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 if ARGV.count < 1
-  $stderr.puts "Usage: dcp-split-csv file.csv chunksize"
+  $stderr.puts "Usage: dcp-split_csv file.csv chunksize"
   exit 1
 end
 if ARGV.count == 1

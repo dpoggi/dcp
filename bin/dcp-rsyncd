@@ -2,7 +2,7 @@
 
 config_path="${HOME}/.dcp/conf/rsyncd.conf"
 if [[ "$1" = "--help" ]]; then
-  echo "Usage: $(basename "$0") [--help] [--write-config]"
+  printf >&2 "Usage: $(basename "$0") [--help] [--write-config]\n"
 elif [[ "$1" = "--write-config" ]]; then
   for group in $(groups); do break; done
   cat <<EOF | tee ${config_path} >/dev/null
@@ -20,6 +20,6 @@ syslog facility = local5
   readonly = yes
 EOF
 else
-  sudo echo "Starting rsync daemon, Ctrl-C to quit..."
-  sudo rsync --daemon --no-detach --config=${config_path}
+  printf >&2 "Starting rsync daemon, Ctrl-C to quit...\n"
+  sudo rsync --daemon --no-detach --config="${config_path}"
 fi

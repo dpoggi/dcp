@@ -51,7 +51,7 @@ if [[ ! -e "${vim_dir}" ]]; then
 fi
 
 # Install symlinks to dotfiles (if we installed dotfiles or Vim config)
-[[ -n "${do_links}" ]] && "${dcp_dir}/bin/dcp-install-links"
+[[ -n "${do_links}" ]] && "${dcp_dir}/bin/dcp-install_links"
 
 # Report.
 if [[ -z "${action}" ]]; then

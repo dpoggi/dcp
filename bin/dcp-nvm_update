@@ -1,0 +1,4 @@
+#!/bin/bash
+
+exec __dcp-vm_update "https://github.com/creationix/nvm.git" \
+                     "${HOME}/.nvm"

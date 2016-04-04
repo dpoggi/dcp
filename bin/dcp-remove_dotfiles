@@ -1,11 +1,11 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 for file in ackrc bash_logout bash_profile bashrc gemrc gitignore_global \
             gvimrc inputrc irbrc osx profile rvmrc tmux.conf vimrc xvimrc \
             zprofile zshenv zshrc; do
   dotfile="${HOME}/.${file}"
   if [[ -e "${dotfile}" ]]; then
-    echo "Deleting ${dotfile}"
+    printf >&2 "Deleting ${dotfile}...\n"
     rm -f "${dotfile}"
   fi
 done

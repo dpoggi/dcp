@@ -1,0 +1,13 @@
+#!/bin/bash
+
+install_dir="${HOME}/.rbenv"
+git_base="https://github.com/rbenv"
+
+exec __dcp-vm_install "${git_base}/rbenv.git"             \
+                      "${install_dir}"                    \
+                                                          \
+                      "${git_base}/ruby-build.git"        \
+                      "${install_dir}/plugins/ruby-build" \
+                                                          \
+                      "${git_base}/rbenv-vars.git"        \
+                      "${install_dir}/plugins/rbenv-vars"

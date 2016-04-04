@@ -1,17 +1,20 @@
 #!/bin/bash
 
+#
+# WIP - me trying to get a better handle on the workings of the major
+#       init systems.
+#
+
 fatal() {
-  if [[ -n "$1" ]]; then
-    printf >&2 "Fatal: $1\n"
-  else
-    printf >&2 "Fatal error.\n"
-  fi
-  exit 1
+  printf >&2 "\033[1;37;41m[FATAL]:\033[0m "
+  [[ -n "$1" ]] && printf >&2 "%s" "$1" || printf >&2 "Unrecoverable error."
+  printf >&2 "\n"
+  exit "${2:-1}"
 }
 
 get_initctl_path() {
   local initctl initctl_path
-  for initctl in launchctl initctl systemctl service; do
+  for initctl in launchctl systemctl initctl service; do
     initctl_path="$(type -P "${initctl}")"
     if [[ -x "${initctl_path}" ]]; then
       printf "${initctl_path}"
@@ -20,26 +23,65 @@ get_initctl_path() {
   done
 }
 
+find_config_path() {
+  find "$1" -name "$2" -print 2>/dev/null | head -n 1
+}
+
 get_initctl_config_path() {
-  local config_path
-  for config_path in /System/Library/LaunchDaemons/${1}.plist \
-                     /System/Library/LaunchAgents/${1}.plist \
-                     /Library/LaunchDaemons/${1}.plist \
-                     /Library/LaunchAgents/${1}.plist \
-                     "${HOME}"/Library/LaunchDaemons/${1}.plist \
-                     /usr/lib/systemd/system/${1} \
-                     /usr/lib/systemd/system/${1}.service \
-                     /etc/init/${1}.conf; do
+  local path_name_pair config_path unit_type
+  local -a pair
+  # launchd, then systemd, then upstart
+  for path_name_pair in \
+    "/System/Library/LaunchDaemons;$1.plist"  \
+    "/System/Library/LaunchAgents;$1.plist"   \
+    "/Library/LaunchDaemons;$1.plist"         \
+    "/Library/LaunchAgents;$1.plist"          \
+    "${HOME}/Library/LaunchAgents;$1.plist"   \
+                                              \
+    "/etc/systemd/system;$1"                  \
+    "/run/systemd/system;$1"                  \
+    "/usr/lib/systemd/system;$1"              \
+    "${XDG_CONFIG_HOME}/systemd/user;$1"      \
+    "${HOME}/.config/systemd/user;$1"         \
+    "/etc/systemd/user;$1"                    \
+    "${XDG_RUNTIME_DIR}/systemd/user;$1"      \
+    "/run/systemd/user;$1"                    \
+    "${XDG_DATA_HOME}/systemd/user;$1"        \
+    "${HOME}/.local/share/systemd/user;$1"    \
+    "/usr/lib/systemd/user;$1"                \
+                                              \
+    "/etc/init;$1.conf"                       \
+    "${HOME}/.init;$1.conf"
+  do
+    IFS=';' read -ra pair <<<"${path_name_pair}"
+
+    config_path="$(find_config_path "${pair[0]}" "${pair[1]}")"
     if [[ -e "${config_path}" ]]; then
       printf "${config_path}"
       return
+    fi
+
+    if [[ "${pair[0]}" = */systemd/* ]]; then
+      for unit_type in service socket device mount automount swap \
+                       target path timer slice scope
+      do
+        config_path="$(find_config_path "${pair[0]}" "${pair[1]}.${unit_type}")"
+        if [[ -e "${config_path}" ]]; then
+          printf "${config_path}"
+          return
+        fi
+      done
     fi
   done
 }
 
 get_initscript_path() {
   local initscript_path
-  for initscript_path in /etc/init.d/$1 /etc/init.d/rc.d/$1 /etc/rc.d/$1; do
+  for initscript_path in \
+    "/etc/init.d/$1"      \
+    "/etc/init.d/rc.d/$1" \
+    "/etc/rc.d/$1"
+  do
     if sudo test -x "${initscript_path}"; then
       printf "${initscript_path}"
       return
@@ -48,26 +90,43 @@ get_initscript_path() {
 }
 
 initctl() {
+  [[ "$3" = "${HOME}"* ]] && local sudo_cmd="sudo"
   local initctl_config_file="$(basename "$3")"
   local service_name="${initctl_config_file%.*}"
   local initctl_type="$(basename "$1")"
 
-  if [[ "${initctl_type}" = "launchctl" ]]; then
-    if [[ "$2" = "start" ]]; then
-      sudo "$1" load -F "$3"
-    elif [[ "$2" = "stop" ]]; then
-      sudo "$1" load -F "$3"
-    fi
-  elif [[ "${initctl_type}" = "initctl" ]]; then
-    sudo "$1" "$2" "${service_name}"
-  elif [[ "${initctl_type}" = "systemctl" ]]; then
-    sudo "$1" "$2" "${initctl_config_file}"
-  elif [[ "${initctl_type}" = "service" ]]; then
-    sudo "$1" "${service_name}" "$2"
-  fi
+  case "${initctl_type}" in
+    launchctl)
+      case "$2" in
+        start)
+          "${sudo_cmd}" "$1" load -F "$3"
+          ;;
+        stop)
+          "${sudo_cmd}" "$1" unload -F "$3"
+          ;;
+        restart)
+          "${sudo_cmd}" "$1" unload -F "$3"
+          "${sudo_cmd}" "$1" load -F "$3"
+          ;;
+      esac
+      ;;
+    initctl)
+      "${sudo_cmd}" "$1" "$2" "${service_name}"
+      ;;
+    systemctl)
+      "${sudo_cmd}" "$1" "$2" "${initctl_config_file}"
+      ;;
+    service)
+      "${sudo_cmd}" "$1" "${service_name}" "$2"
+      ;;
+  esac
 }
 
-run() {
+print_usage() {
+  printf >&2 "Usage: $(basename "$0") <action> <service>\n"
+}
+
+main() {
   export PATH="/usr/bin:/bin:/usr/local/bin:/usr/sbin:/sbin:/usr/local/sbin"
 
   local initctl_path="$(get_initctl_path)"
@@ -83,8 +142,16 @@ run() {
   fi
 }
 
+for arg; do
+  if [[ "${arg}" = "-h" || "${arg}" = "--help" ]]; then
+    print_usage
+    exit
+  fi
+done
+
 if [[ "$#" -ge "2" ]]; then
-  run "$@"
+  main "$@"
 else
-  printf >&2 "Usage: $(basename "$0") {action} {service}\n"
+  print_usage
+  exit 1
 fi

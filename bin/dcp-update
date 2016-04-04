@@ -6,7 +6,7 @@ update_repo() {
   git fetch --all
   git checkout master
   git rebase refs/remotes/origin/master
-  git submodule update --init
+  git submodule update --init --recursive
 }
 
 update_repo "${HOME}/.dcp"
@@ -23,4 +23,4 @@ if [[ "$?" -gt "0" ]]; then
   git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${omz_plugins_dir}/zsh-syntax-highlighting"
 fi
 
-"${HOME}/.dcp/bin/dcp-install-links"
+"${HOME}/.dcp/bin/dcp-install_links"

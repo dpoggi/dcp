@@ -1,0 +1,31 @@
+#!/bin/bash
+
+link_dotfile() {
+  local link="${HOME}/.${1##*-}"
+  if [[ -s "${link}" ]]; then
+    printf >&2 "Warning: ~/$(basename "${link}") is a file of non-zero size, skipping.\n"
+  else
+    ln -snfv "$1" "${link}"
+  fi
+}
+
+maybe_git_config() {
+  git config --global "$1" >/dev/null || git config --global "$1" "$2"
+}
+
+for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*rc; do
+  link_dotfile "${dotfile}"
+done
+
+os="$(uname -s)"
+[[ "${os}" = "Darwin" ]] && touch "${HOME}/.hushlogin"
+[[ -s "${HOME}/.profile" ]] || rm -f "${HOME}/.profile"
+
+if hash git 2>/dev/null; then
+  maybe_git_config "color.ui" "true"
+  maybe_git_config "core.editor" "vim"
+  maybe_git_config "push.default" "matching"
+  maybe_git_config "grep.lineNumber" "true"
+  git config --global "core.excludesfile" "${HOME}/.gitignore_global"
+  [[ "${os}" = "Darwin" ]] && maybe_git_config "core.trustctime" "false"
+fi

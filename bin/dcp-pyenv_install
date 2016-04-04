@@ -1,0 +1,4 @@
+#!/bin/bash
+
+exec __dcp-vm_install "https://github.com/yyuu/pyenv.git" \
+                      "${HOME}/.pyenv"

@@ -1,0 +1,53 @@
+#!/bin/bash
+set -e
+
+fatal() {
+  printf >&2 "\033[1;37;41m[FATAL]:\033[0m %s\n" "$1"
+  exit "${2:-1}"
+}
+
+update_repo() {
+  local name="$(basename "${1%.*}")"
+  printf >&2 "Updating ${name}...\n"
+  pushd "$2" >/dev/null
+  git fetch --quiet origin
+  git checkout --quiet --force master
+  git pull --quiet --ff-only origin master
+  local tag="$(git describe --abbrev=0 --tags 2>/dev/null)"
+  if [[ -n "${tag}" ]]; then
+    printf >&2 "Checking out the latest version of ${name}...\n"
+    git checkout --quiet --force "${tag}"
+  fi
+  printf "\n"
+  popd >/dev/null
+}
+
+declare -a git_urls repo_dirs formulae
+while [[ "$#" -gt "0" ]]; do
+  git_urls+=( "$1" )
+  repo_dirs+=( "$2" )
+  formulae+=( "$(basename "${1%.*}")" )
+  shift 2 || true
+done
+
+vm="${formulae[0]}"
+install_dir="~/$(basename "${repo_dirs[0]}")"
+
+[[ "${UID}" != "0" ]] || fatal "Cannot run as root."
+[[ -d "${repo_dirs[0]}" ]] || fatal "${install_dir} does not exist."
+
+if [[ "$(uname -s)" = "Darwi" ]] && hash brew 2>/dev/null; then
+  printf >&2 "Updating via Homebrew...\n\n"
+  brew update
+  brew upgrade "${formulae[@]}"
+  printf >&2 "Update via Homebrew successful!\n"
+else
+  printf >&2 "Updating via Git at ${install_dir}...\n\n"
+  for (( i=0; i<${#git_urls[@]}; i++ )); do
+    update_repo "${git_urls[$i]}" "${repo_dirs[$i]}"
+  done
+  printf >&2 "Update via Git at ${install_dir} successful!\n"
+fi
+
+[[ "${vm}" != *env ]] || mkdir -p "${repo_dirs[0]}/shims"
+printf >&2 "Open a new terminal or exec $(basename "${SHELL}") to activate.\n"

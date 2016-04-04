@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
-rm_link() {
-  local dotfile="${HOME}/.$(basename "$1")"
-  [[ -h "${dotfile}" ]] && rm -f "${dotfile}"
+rm_if_link() {
+  local link="${HOME}/.$(basename "$1")"
+  [[ -h "${link}" ]] && rm -f "${link}"
 }
 
-echo "Are you sure? This will remove ~/.dcp, ~/.vim, ~/.oh-my-zsh, and all associated symlinks!"
-read -r -p "Anything but YES will abort: "
-echo
+printf >&2 "Are you sure? This will remove ~/.dcp, ~/.vim, ~/.oh-my-zsh, and\nall associated symlinks!\n"
+read -p "Anything but YES will abort: "
+printf >&2 "\n"
 
 if [[ "${REPLY}" = "YES" ]]; then
   for dotfile in ${HOME}/.dcp/dot/* ${HOME}/.vim/*rc; do
-    rm_link "${dotfile}"
+    rm_if_link "${dotfile}"
   done
   rm -rf "${HOME}/.dcp" "${HOME}/.vim" "${HOME}/.oh-my-zsh"
 
-  echo "Done."
+  printf >&2 "Done.\n"
 fi

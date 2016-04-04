@@ -1,18 +1,12 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-fail() {
-  echo >&2 "$@"
-  exit 1
+fatal() {
+  printf >&2 "\033[1;37;41m[FATAL]:\033[0m %s\n" "$1"
+  exit "${2:-1}"
 }
 
 config="${HOME}/.dcp/conf/pushover"
-if [[ ! -e "${config}" ]]; then
-  printf >&2 "Error: ~/.dcp/conf/pushover is missing, "
-  fail "need it to set \$PUSHOVER_TOKEN and \$PUSHOVER_USER"
-fi
-source "${config}"
+[[ -e "${config}" ]] && source "${config}" || fatal "Missing ${config} file."
+[[ "$#" -gt "0" ]] || fatal "Message required."
 
-[[ "$#" -ge "1" ]] ||
-  fail "Usage: $(basename "$0") 'message'"
-
-curl -s --data "token=${PUSHOVER_TOKEN}&user=${PUSHOVER_USER}&message=$1" https://api.pushover.net/1/messages.json
+curl --silent --data "token=${PUSHOVER_TOKEN}&user=${PUSHOVER_USER}&message=$1" "https://api.pushover.net/1/messages.json"

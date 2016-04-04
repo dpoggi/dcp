@@ -1,0 +1,51 @@
+#!/bin/bash
+
+fatal() {
+  printf >&2 "%s\n" "$1"
+  exit 1
+}
+
+clone_repo() {
+  mkdir -p "$2"
+  git clone "$1" "$2"
+}
+
+cleanup() {
+  printf >&2 "Cleaning up...\n"
+  [[ -d "${dir}" ]] && rm -rf "${dir}"
+  exit "${1:-2}"
+}
+
+git_base="https://github.com/dpoggi"
+
+[[ "$#" -gt "0" ]] || fatal "Usage: $(basename "$0") <archive.tar.xz>"
+[[ ! -e "$1" ]] || fatal "Archive already exists."
+dir="$(mktemp -q -d dcp-package-XXXXXX)"
+[[ -n "${dir}" ]] || fatal "Couldn't create temporary directory."
+
+# Resolve path
+pushd "$(dirname "${dir}")" >/dev/null
+dir="$(pwd -P)/$(basename "${dir}")"
+popd >/dev/null
+
+trap cleanup SIGINT
+
+pushd "${dir}" >/dev/null
+clone_repo "${git_base}/oh-my-zsh.git" \
+           ".oh-my-zsh"
+clone_repo "https://github.com/zsh-users/zsh-syntax-highlighting.git" \
+           ".oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+clone_repo "${git_base}/dcp.git" \
+           ".dcp"
+clone_repo "${git_base}/dotvim.git" \
+           ".vim"
+
+pushd ".vim" >/dev/null
+git submodule update --init
+popd >/dev/null
+
+tar -cJf "$(basename "$1")" ".oh-my-zsh" ".dcp" ".vim"
+popd >/dev/null
+
+mv "${dir}/$(basename "$1")" .
+cleanup 0

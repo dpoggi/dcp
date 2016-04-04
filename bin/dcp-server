@@ -1,7 +1,7 @@
 #!/bin/bash
 
 start_message() {
-  echo "$1 starting on ${bind_address}:9000..."
+  printf >&2 "$1 starting on ${bind_address}:9000...\n"
 }
 
 webrick() {
@@ -16,8 +16,11 @@ EOF
 }
 
 if [[ "$#" -gt "0" ]]; then
+  hash ruby 2>/dev/null || {
+    printf >&2 "Error: couldn't find a Ruby interpreter.\n"
+    exit 1
+  }
   bind_address="$1"
-  hash ruby 2>&- || { echo >&2 "Error: couldn't find a Ruby interpreter."; exit 1; }
   webrick
   exit
 else
@@ -33,6 +36,6 @@ elif hash python 2>&-; then
   start_message "SimpleHTTPServer"
   exec python -m SimpleHTTPServer 9000
 else
-  echo >&2 "Error: couldn't find a Ruby or Python interpreter."
+  printf >&2 "Error: couldn't find a Ruby or Python interpreter.\n"
   exit 1
 fi
