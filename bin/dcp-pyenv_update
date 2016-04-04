@@ -1,4 +1,10 @@
 #!/bin/bash
 
-exec __dcp-vm_update "https://github.com/yyuu/pyenv.git" \
-                     "${HOME}/.pyenv"
+install_dir="${HOME}/.pyenv"
+git_base="https://github.com/yyuu"
+
+exec __dcp-vm_update "${git_base}/pyenv.git"                   \
+                     "${install_dir}"                          \
+                                                               \
+                     "${git_base}/pyenv-virtualenv.git"        \
+                     "${install_dir}/plugins/pyenv-virtualenv"
