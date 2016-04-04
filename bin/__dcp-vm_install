@@ -36,7 +36,7 @@ install_dir="~/$(basename "${clone_dirs[0]}")"
 hash "${vm}" 2>/dev/null && fatal "${vm} found in \$PATH." || true
 [[ ! -d "${clone_dirs[0]}" ]] || fatal "${install_dir} already exists."
 
-if [[ "$(uname -s)" = "Darwi" ]] && hash brew 2>/dev/null; then
+if [[ "$(uname -s)" = "Darwin" ]] && hash brew 2>/dev/null; then
   printf >&2 "Installing via Homebrew...\n\n"
   brew update
   brew install "${formulae[@]}"
