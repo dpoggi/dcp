@@ -28,7 +28,7 @@ update_repo() {
             "refs/heads/master:refs/remotes/origin/master" ||
     fatal "Unable to fetch origin."
 
-  if [[ -n "$(git status --porcelain --untracked-files=all 2>/dev/null)" ]]; then
+  if [[ -n "$(git status --porcelain --ignore-submodules --untracked-files=all 2>/dev/null)" ]]; then
     log_msg "Attempting to stash uncommitted changes:"
     git status --short --untracked-files=all
     git merge --abort &>/dev/null
@@ -94,6 +94,5 @@ log_msg "Done."
 if [[ -n "${stashed}" ]]; then
   printf >&2 "\n"
   log_msg "You may want to restore stashed changes to: ${stashed}"
-  log_msg "To do so, use git stash pop. Changes may not have been stashed (but"
-  log_msg "are still intact) if they were inside submodules."
+  log_msg "To do so, use git stash pop."
 fi
