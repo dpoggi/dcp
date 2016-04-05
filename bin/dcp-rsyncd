@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 config_path="${HOME}/.dcp/conf/rsyncd.conf"
 if [[ "$1" = "--help" ]]; then

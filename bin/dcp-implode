@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 rm_if_link() {
   local link="${HOME}/.$(basename "$1")"
