@@ -1,64 +1,56 @@
-#!/usr/bin/env bash
+#!/bin/bash
+set -e
 
-fail() {
-  echo >&2 "$@"
+log_msg() {
+  printf >&2 "\033[0;37m[%s]:\033[0m %s\n" "$(date +"%H:%M:%S")" "$1"
+}
+
+fatal() {
+  printf >&2 "\033[1;37;41m[FATAL]:\033[0m %s\n" "$1"
   exit 1
 }
 
-# Freak out and quit if we don't have Git and/or cURL.
-hash git 2>&- || fail "Error: git must be installed"
-hash curl 2>&- || fail "Error: curl must be installed"
+clone_repo() {
+  local name="$(basename "$1")"
+  name="${name%.*}"
 
-# Install directories
-omz_dir="${HOME}/.oh-my-zsh"
-omz_plugins_dir="${HOME}/.oh-my-zsh/custom/plugins"
-syntax_dir="${omz_plugins_dir}/zsh-syntax-highlighting"
-dcp_dir="${HOME}/.dcp"
-vim_dir="${HOME}/.vim"
+  if [[ ! -e "$2" ]]; then
+    log_msg "Cloning ${name} into $2..."
+    git clone --quiet --recursive "$1" "$2" &>/dev/null
+    log_msg "Finished."
+  else
+    log_msg "$2 already exists, skipping..."
+  fi
+  printf >&2 "\n"
+}
 
-# If it's me, I want to be able to change my dotfiles,
-# otherwise clone the public repos.
-git_prefix="https://github.com/dpoggi"
-[[ -n "${DCP_YEAH_YOU_KNOW_ME}" ]] && git_prefix="git@github.com:dpoggi"
+DCP="${HOME}/.dcp"
+dotvim_dir="${HOME}/.vim"
+ZSH="${HOME}/.oh-my-zsh"
+zsh_highlight_dir="${ZSH}/custom/plugins/zsh-syntax-highlighting"
 
-# Clone my fork of oh-my-zsh
-if [[ ! -e "${omz_dir}" ]]; then
-  git clone "${git_prefix}/oh-my-zsh.git" "${omz_dir}"
-  action="true"
-fi
+[[ "${USER}" = "danpoggi" ]] &&
+  git_base="git@github.com:dpoggi" ||
+  git_base="https://github.com/dpoggi"
+dcp_git="${git_base}/dcp.git"
+dotvim_git="${git_base}/dotvim.git"
+zsh_git="${git_base}/oh-my-zsh.git"
+zsh_highlight_git="https://github.com/zsh-users/zsh-syntax-highlighting.git"
 
-# oh-my-zsh syntax highlighter
-if [[ ! -e "${syntax_dir}" ]]; then
-  mkdir -p "${omz_plugins_dir}"
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${syntax_dir}"
-  action="true"
-fi
+hash git 2>/dev/null || fatal "Unable to find Git."
 
-# Dotfiles
-if [[ ! -e "${dcp_dir}" ]]; then
-  git clone "${git_prefix}/dcp.git" "${dcp_dir}"
-  action="true"
-  do_links="true"
-fi
+clone_repo "${dcp_git}" "${DCP}"
+clone_repo "${dotvim_git}" "${dotvim_dir}"
 
-# Vim configuration
-if [[ ! -e "${vim_dir}" ]]; then
-  git clone "${git_prefix}/dotvim.git" "${vim_dir}"
-  cd "${vim_dir}"
-  git submodule update --init
-  action="true"
-  do_links="true"
-fi
+clone_repo "${zsh_git}" "${ZSH}"
+clone_repo "${zsh_highlight_git}" "${zsh_highlight_dir}"
 
-# Install symlinks to dotfiles (if we installed dotfiles or Vim config)
-[[ -n "${do_links}" ]] && "${dcp_dir}/bin/dcp-install_links"
+log_msg "Running update script..."
+export PATH="${PATH}:${DCP}/bin"
+printf >&2 "\n"
+"${DCP}/bin/dcp-update"
 
-# Report.
-if [[ -z "${action}" ]]; then
-  echo "It looks like we didn't do anything, you probably already have this installed."
-else
-  echo
-  echo "Tip: restart your shell now. To get Command-T working in Vim, do:"
-  echo "cd ~/.vim/bundle/command-t && rake make"
-  echo "Make sure you're set up to use the system Ruby first."
-fi
+printf >&2 "\n"
+log_msg "Tip: restart your terminal, or do \`exec $(basename "${SHELL}")' now."
+log_msg "To compile Command-T for Vim, after \`rbenv shell system' if necessary, do:"
+log_msg "\`cd ~/.vim/bundle/command-t && /usr/bin/rake make'"
