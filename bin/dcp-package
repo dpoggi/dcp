@@ -55,6 +55,7 @@ log_msg "Finished."
 printf >&2 "\n"
 popd >/dev/null
 
+log_msg "Compressing archive..."
 tar -cJf "$(basename "$1")" ".oh-my-zsh" ".dcp" ".vim"
 popd >/dev/null
 
