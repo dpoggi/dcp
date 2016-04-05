@@ -4,7 +4,7 @@ link_dotfile() {
   local link="$(basename "$1")"
   link="${HOME}/.${link##*-}"
   if [[ ! -h "${link}" && -s "${link}" ]]; then
-    printf >&2 "Warning: ~/$(basename "${link}") is a file of non-zero size, skipping.\n"
+    printf >&2 "\033[0;33m[WARNING]:\033[0m ~/$(basename "${link}") is a file of non-zero size, skipping.\n"
   else
     ln -snfv "$1" "${link}"
   fi
