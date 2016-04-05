@@ -6,7 +6,24 @@ alias c="clear"
 alias ll="ls -la"
 alias la="ls -a"
 alias h="history | tail -32"
-alias ip_ext="curl ip.danpoggi.com"
+
+ext_ip() {
+  local version
+  local json="false"
+
+  while [[ "$#" -gt "0" ]]; do
+    [[ "$1" = "--json" ]] && json="true" || version="$1"
+    shift
+  done
+  [[ "${version}" = "4" || "${version}" = "6" ]] || version="4"
+
+  if [[ "${json}" = "true" ]]; then
+    curl --silent "--ipv${version}" --header "Accept: application/json" \
+         "https://ip.danpoggi.com"
+  else
+    curl --silent "--ipv${version}" "https://ip.danpoggi.com"
+  fi
+}
 
 
 #
@@ -84,7 +101,7 @@ __ps1_git() {
   printf "${c_yellow}\$(${DCP}/bin/__ps1_git_branch)"
 }
 __ps1_uid() {
-  [[ -n "${DPOGGI_TWOLINE}" ]] && printf "\n" || printf " "
+  [[ "${DPOGGI_TWOLINE}" = "true" ]] && printf "\n" || printf " "
   printf "${c_red}\\\$${c_reset} "
 }
 
@@ -99,7 +116,7 @@ set_prompt() {
 
 # One-line or two-line prompt
 oneline() {
-  unset DPOGGI_TWOLINE
+  export DPOGGI_TWOLINE="false"
   set_prompt
 }
 twoline() {

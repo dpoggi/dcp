@@ -5,6 +5,7 @@
 export PATH="${PATH}:${DCP}/bin"
 export GREP_OPTIONS="--color=auto"
 export LS_OPTIONS="--color=auto"
+export DPOGGI_TWOLINE="true"
 export CLICOLOR="1"
 export EDITOR="vim"
 
