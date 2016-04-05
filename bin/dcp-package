@@ -1,19 +1,22 @@
 #!/bin/bash
 
+log_msg() {
+  printf >&2 "\033[0;37m[%s]:\033[0m %s\n" "$(date +"%H:%M:%S")" "$1"
+}
+
 fatal() {
-  printf >&2 "%s\n" "$1"
+  printf >&2 "\033[1;37;41m[FATAL]:\033[0m %s\n" "$1"
   exit 1
 }
 
 clone_repo() {
-  mkdir -p "$2"
-  git clone "$1" "$2"
-}
+  local name="$(basename "$1")"
+  name="${name%.*}"
 
-cleanup() {
-  printf >&2 "Cleaning up...\n"
-  [[ -d "${dir}" ]] && rm -rf "${dir}"
-  exit "${1:-2}"
+  log_msg "Cloning ${name} into $2..."
+  git clone --quiet --recursive "$1" "$2" &>/dev/null
+  log_msg "Finished."
+  printf >&2 "\n"
 }
 
 git_base="https://github.com/dpoggi"
@@ -28,24 +31,36 @@ pushd "$(dirname "${dir}")" >/dev/null
 dir="$(pwd -P)/$(basename "${dir}")"
 popd >/dev/null
 
-trap cleanup SIGINT
-
 pushd "${dir}" >/dev/null
-clone_repo "${git_base}/oh-my-zsh.git" \
-           ".oh-my-zsh"
-clone_repo "https://github.com/zsh-users/zsh-syntax-highlighting.git" \
-           ".oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
 clone_repo "${git_base}/dcp.git" \
            ".dcp"
 clone_repo "${git_base}/dotvim.git" \
            ".vim"
+clone_repo "${git_base}/oh-my-zsh.git" \
+           ".oh-my-zsh"
+clone_repo "https://github.com/zsh-users/zsh-syntax-highlighting.git" \
+           ".oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
 
 pushd ".vim" >/dev/null
-git submodule update --init
+log_msg "Updating submodules for dotvim..."
+git submodule update --init --quiet --recursive
+log_msg "Finished."
+printf >&2 "\n"
+popd >/dev/null
+
+pushd ".oh-my-zsh/custom/plugins/zsh-syntax-highlighting" >/dev/null
+log_msg "Checking out latest version of zsh-syntax-highlighting..."
+git checkout --quiet --force "$(git describe --abbrev=0 --tags)"
+log_msg "Finished."
+printf >&2 "\n"
 popd >/dev/null
 
 tar -cJf "$(basename "$1")" ".oh-my-zsh" ".dcp" ".vim"
 popd >/dev/null
 
+log_msg "Moving archive..."
 mv "${dir}/$(basename "$1")" .
-cleanup 0
+
+log_msg "Cleaning up..."
+[[ -d "${dir}" ]] && rm -rf "${dir}"
+log_msg "Done."
