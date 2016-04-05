@@ -4,7 +4,7 @@ Dotfiles. Sensible defaults. Lots of them. Very opinionated.
 ## Installation
 If you already have dotfiles, you'll need to get them out of the way for this to work as intended. You can run a script for deleting them (make backups first!) by doing this (THIS KILLS EVERYTHING! BE CAREFUL!):
 ```
-curl -sL https://raw.githubusercontent.com/dpoggi/dcp/master/bin/dcp-remove-dotfiles | bash
+curl -sL https://raw.githubusercontent.com/dpoggi/dcp/master/bin/dcp-remove_dotfiles | bash
 ```
 
 Once you've got that handled, the installation script can be used as follows:
