@@ -42,17 +42,3 @@ fi
 #
 
 export PATH="$(printf "${PATH}" | perl -e 'print join(":", grep { not $seen{$_}++ } split(/:/, scalar <>))')"
-
-
-#
-# Hook for virtualenv "project bookmarks"
-#
-
-if [[ -n "${PIP_VIRTUALENV_BASE}" && -n "${PY_PROJECT}" ]]; then
-  unset PYTHONHOME
-  export VIRTUAL_ENV="${PIP_VIRTUALENV_BASE}/$(basename "${PY_PROJECT}")"
-  export PATH="${VIRTUAL_ENV}/bin:${PATH}"
-  hash -r 2>/dev/null
-  cd "${PY_PROJECT}"
-  [[ -e ".env" ]] && source ".env"
-fi
