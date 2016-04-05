@@ -18,6 +18,7 @@ clone_repo() {
     log_msg "Cloning ${name} into $2..."
     git clone --quiet --recursive "$1" "$2" &>/dev/null
     log_msg "Finished."
+    did_something="yep"
   else
     log_msg "$2 already exists, skipping..."
   fi
@@ -39,6 +40,8 @@ zsh_highlight_git="https://github.com/zsh-users/zsh-syntax-highlighting.git"
 
 hash git 2>/dev/null || fatal "Unable to find Git."
 
+did_something="nope"
+
 clone_repo "${dcp_git}" "${DCP}"
 clone_repo "${dotvim_git}" "${dotvim_dir}"
 
@@ -50,7 +53,9 @@ export PATH="${PATH}:${DCP}/bin"
 printf >&2 "\n"
 "${DCP}/bin/dcp-update"
 
-printf >&2 "\n"
-log_msg "Tip: restart your terminal, or do \`exec $(basename "${SHELL}")' now."
-log_msg "To compile Command-T for Vim, after \`rbenv shell system' if necessary, do:"
-log_msg "\`cd ~/.vim/bundle/command-t && /usr/bin/rake make'"
+if [[ "${did_something}" = "yep" ]]; then
+  printf >&2 "\n"
+  log_msg "Tip: restart your terminal, or do \`exec $(basename "${SHELL}")' now."
+  log_msg "To compile Command-T for Vim, after \`rbenv shell system' if necessary, do:"
+  log_msg "\`cd ~/.vim/bundle/command-t && /usr/bin/rake make'"
+fi
