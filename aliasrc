@@ -170,7 +170,7 @@ cbcopy() {
 
 cbpaste() {
   [[ -n "${DCP_CBPASTE}" ]] || return 1
-  if [[ -e "$1" ]]; then
+  if [[ -n "$1" ]]; then
     local file="$1"
     shift
     ${DCP_CBPASTE} "$@" >>"${file}"
