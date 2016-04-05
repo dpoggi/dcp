@@ -23,7 +23,7 @@ git_base="https://github.com/dpoggi"
 
 [[ "$#" -gt "0" ]] || fatal "Usage: $(basename "$0") <archive.tar.xz>"
 [[ ! -e "$1" ]] || fatal "Archive already exists."
-dir="$(mktemp -q -d dcp-package-XXXXXX)"
+dir="$(mktemp -q -d /tmp/dcp-package-XXXXXX)"
 [[ -n "${dir}" ]] || fatal "Couldn't create temporary directory."
 
 # Resolve path
