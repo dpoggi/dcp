@@ -144,6 +144,11 @@ gpip() {
   PIP_REQUIRE_VIRTUALENV="" pip "$@"
 }
 
+# docker-machine environment
+dm_env() {
+  eval "$(docker-machine env "$1")"
+}
+
 
 #
 # Clipboard functions
