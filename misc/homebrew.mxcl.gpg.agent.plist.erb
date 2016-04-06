@@ -7,6 +7,11 @@
 
 	<key>RunAtLoad</key>
 	<true/>
+        <key>KeepAlive</key>
+        <dict>
+		<key>SuccessfulExit</key>
+		<false/>
+        </dict>
 	<key>EnableTransactions</key>
 	<true/>
 	<key>Umask</key>
@@ -19,7 +24,6 @@
 		<string>/usr/local/bin/gpg-agent</string>
 
 		<string>--daemon</string>
-		<string>--enable-ssh-support</string>
 
 		<string>--options</string>
 		<string><%= @home %>/.gnupg/gpg-agent.conf</string>
@@ -30,14 +34,5 @@
 		<string>--write-env-file</string>
 		<string><%= @home %>/.gnupg/gpg-agent-info</string>
 	</array>
-
-	<key>Sockets</key>
-	<dict>
-		<key>Listeners</key>
-		<dict>
-			<key>SecureSocketWithKey</key>
-			<string>SSH_AUTH_SOCK</string>
-		</dict>
-	</dict>
 </dict>
 </plist>

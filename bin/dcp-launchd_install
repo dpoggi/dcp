@@ -2,48 +2,52 @@
 require 'erb'
 require 'fileutils'
 
-class HomeDirTemplate
+class Template
   TEMPLATES_BASE = File.expand_path(File.join("..", "..", "misc"), __FILE__)
-  attr_reader :home, :basename
+  attr_reader :basename, :dir, :user, :home
 
-  def initialize(filename)
-    @home = ENV["HOME"]
+  def initialize(filename, dir)
     template_path = File.join(TEMPLATES_BASE, filename)
     @basename = File.basename(template_path.sub(/\.erb$/, ""))
     raise ArgumentError unless File.exist?(template_path)
     @template = ERB.new(File.read(template_path))
+    @dir = dir
+
+    @user = ENV["USER"]
+    @home = ENV["HOME"]
   end
 
   def render
     @template.result(binding)
   end
 
-  def path(dir)
+  def path
     File.join(dir, basename)
   end
 
-  def write(dir)
-    File.open(path(dir), "w") { |f| f.write(render) }
+  def write
+    File.open(path, "w") { |f| f.write(render) }
   end
 end
 
 class GpgAgent
   def initialize
-    @plist_tmpl = HomeDirTemplate.new("homebrew.mxcl.gpg.agent.plist.erb")
     @plist_dir = File.join(ENV["HOME"], "Library", "LaunchAgents")
-    @config_tmpl = HomeDirTemplate.new("gpg-agent.conf.erb")
+    @plist_tmpl = Template.new("homebrew.mxcl.gpg.agent.plist.erb", @plist_dir)
     @config_dir = File.join(ENV["HOME"], ".gnupg")
+    @config_tmpl = Template.new("gpg-agent.conf.erb", @config_dir)
     FileUtils.mkdir_p(@config_dir)
   end
 
   def write
-    @plist_tmpl.write(@plist_dir)
-    @config_tmpl.write(@config_dir)
-    File.chmod(0600, @config_tmpl.path(@config_dir))
+    @plist_tmpl.write
+    @config_tmpl.write
+    File.chmod(0600, @config_tmpl.path)
   end
 
   def print_info
-    STDERR.puts "launchctl load -w #{@plist_dir}/#{@plist_tmpl.basename}"
+    STDERR.puts "To use:"
+    STDERR.puts "`launchctl load -w #{@plist_tmpl.path}'\n"
     STDERR.puts "Make sure gpg, gpg-agent, and pinentry-mac formulae are installed."
   end
 end
