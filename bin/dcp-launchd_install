@@ -54,10 +54,15 @@ if ARGV.length < 1
   exit 1
 end
 
+program_names = %w(GpgAgent)
+unless program_names.include?(ARGV.first)
+  STDERR.puts "Invalid ProgramName."
+  exit 1
+end
+
 begin
   klass = Kernel.const_get(ARGV.first)
 rescue NameError
-  STDERR.puts "Invalid ProgramName."
   exit 1
 end
 
