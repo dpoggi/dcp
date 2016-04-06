@@ -46,19 +46,19 @@ class GpgAgent
   end
 
   def print_info
-    STDERR.puts "To use:"
-    STDERR.puts "`launchctl load -w #{@plist_tmpl.path}'\n"
-    STDERR.puts "Make sure gpg, gpg-agent, and pinentry-mac formulae are installed."
+    STDERR.puts "To start and enable:"
+    STDERR.puts "launchctl load -S Aqua -w #{@plist_tmpl.path}"
+    STDERR.puts "\nEnsure gpg, gpg-agent, and pinentry-mac formulae are installed."
   end
 end
 
+program_names = %w(GpgAgent)
 if ARGV.length < 1
   STDERR.puts "Usage: dcp-launchd_install <ProgramName>\n\n"
-  STDERR.puts "ProgramName: [GpgAgent]"
+  STDERR.puts "ProgramName: {#{program_names.join("|")}}"
   exit 1
 end
 
-program_names = %w(GpgAgent)
 unless program_names.include?(ARGV.first)
   STDERR.puts "Invalid ProgramName."
   exit 1
