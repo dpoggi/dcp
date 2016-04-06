@@ -1,0 +1,55 @@
+#!/usr/bin/env ruby
+require 'erb'
+require 'fileutils'
+
+class HomeDirTemplate
+  TEMPLATES_BASE = File.expand_path(File.join("..", "..", "misc"), __FILE__)
+  attr_reader :home, :basename
+
+  def initialize(filename)
+    @home = ENV["HOME"]
+    template_path = File.join(TEMPLATES_BASE, filename)
+    @basename = File.basename(template_path.sub(/\.erb$/, ""))
+    raise ArgumentError unless File.exist?(template_path)
+    @template = ERB.new(File.read(template_path))
+  end
+
+  def render
+    @template.result(binding)
+  end
+
+  def write(dir)
+    File.open(File.join(dir, basename), "w") { |f| f.write(render) }
+  end
+end
+
+class GpgAgent
+  def initialize
+    @plist_tmpl = HomeDirTemplate.new("homebrew.mxcl.gpg.agent.plist.erb")
+    @plist_dir = File.join(ENV["HOME"], "Library", "LaunchAgents")
+    @config_tmpl = HomeDirTemplate.new("gpg-agent.conf.erb")
+    @config_dir = File.join(ENV["HOME"], ".gnupg")
+    FileUtils.mkdir_p(@config_dir)
+  end
+
+  def write
+    @plist_tmpl.write(@plist_dir)
+    @config_tmpl.write(@config_dir)
+  end
+
+  def print_info
+    STDERR.puts "launchctl load -w #{@plist_dir}/#{@plist_tmpl.basename}"
+    STDERR.puts "Make sure gpg, gpg-agent, and pinentry-mac formulae are installed."
+  end
+end
+
+if ARGV.length < 1
+  STDERR.puts "Usage: dcp-launchd_install <ProgramName>\n\n"
+  STDERR.puts "ProgramName: [GpgAgent]"
+  exit 1
+end
+
+klass = Kernel.const_get(ARGV.first) or exit 1
+program = klass.new
+program.write
+program.print_info

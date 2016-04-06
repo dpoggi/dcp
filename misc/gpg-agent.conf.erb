@@ -1,0 +1,7 @@
+use-standard-socket
+enable-ssh-support
+default-cache-ttl 14400
+max-cache-ttl 86400
+pinentry-program /usr/local/bin/pinentry-mac
+log-file <%= @home %>/.gnupg/gpg-agent.log
+write-env-file <%= @home %>/.gnupg/gpg-agent-info

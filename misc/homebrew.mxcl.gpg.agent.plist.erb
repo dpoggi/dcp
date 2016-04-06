@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>homebrew.mxcl.gpg.agent</string>
+
+	<key>KeepAlive</key>
+	<true/>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>EnableTransactions</key>
+	<true/>
+	<key>Umask</key>
+	<integer>63</integer>
+	<key>LimitLoadToSessionType</key>
+	<string>Aqua</string>
+
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/local/bin/gpg-agent</string>
+
+		<string>--daemon</string>
+		<string>--enable-ssh-support</string>
+
+		<string>--options</string>
+		<string><%= @home %>/.gnupg/gpg-agent.conf</string>
+
+		<string>--log-file</string>
+		<string><%= @home %>/.gnupg/gpg-agent.log</string>
+
+		<string>--write-env-file</string>
+		<string><%= @home %>/.gnupg/gpg-agent-info</string>
+	</array>
+
+	<key>Sockets</key>
+	<dict>
+		<key>Listeners</key>
+		<dict>
+			<key>SecureSocketWithKey</key>
+			<string>SSH_AUTH_SOCK</string>
+		</dict>
+	</dict>
+
+	<key>StandardOutPath</key>
+	<string><%= @home %>/.gnupg/gpg-agent.stdout.log</string>
+	<key>StandardErrorPath</key>
+	<string><%= @home %>/.gnupg/gpg-agent.stderr.log</string>
+</dict>
+</plist>
