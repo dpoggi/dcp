@@ -18,8 +18,12 @@ class HomeDirTemplate
     @template.result(binding)
   end
 
+  def path(dir)
+    File.join(dir, basename)
+  end
+
   def write(dir)
-    File.open(File.join(dir, basename), "w") { |f| f.write(render) }
+    File.open(path(dir), "w") { |f| f.write(render) }
   end
 end
 
@@ -35,6 +39,7 @@ class GpgAgent
   def write
     @plist_tmpl.write(@plist_dir)
     @config_tmpl.write(@config_dir)
+    File.chmod(0600, @config_tmpl.path(@config_dir))
   end
 
   def print_info
@@ -49,7 +54,13 @@ if ARGV.length < 1
   exit 1
 end
 
-klass = Kernel.const_get(ARGV.first) or exit 1
+begin
+  klass = Kernel.const_get(ARGV.first)
+rescue NameError
+  STDERR.puts "Invalid ProgramName."
+  exit 1
+end
+
 program = klass.new
 program.write
 program.print_info
