@@ -11,10 +11,24 @@ alias haxcode="spctl --assess --verbose /Applications/Xcode.app"
 
 
 #
-# Homebrew - fully update/upgrade, clean up the mess
+# Homebrew - fully update/upgrade, clean up the mess, optionally
+#            install something in between. Boop!
 #
 
-alias boop="brew update && brew upgrade && brew cleanup -sf"
+boop() {
+  local -a formulae
+  local purge="-s"
+  while [[ "$#" -gt "0" ]]; do
+    [[ "$1" = "--purge" ]] && purge="--purge=all" || formulae+=("$1")
+    shift
+  done
+
+  brew update && \
+  brew upgrade && \
+  [[ -n "${formulae[@]}" ]] && \
+    brew install "${formulae[@]}" || true && \
+  brew cleanup --force "${purge}"
+}
 
 
 #
