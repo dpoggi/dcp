@@ -7,7 +7,7 @@ plugins=( emoji git-extras history jsontools zsh-syntax-highlighting )
 
 # Mac-specific plugins
 if [[ "${DCP_OS}" = "Darwin" ]]; then
-  plugins+=( brew osx )
+  plugins+=( brew brew-cask osx )
 fi
 
 # User-specified plugins
