@@ -3,11 +3,12 @@ require 'erb'
 require 'fileutils'
 
 class Template
-  TEMPLATES_BASE = File.expand_path(File.join("..", "..", "misc"), __FILE__)
+  PLIST_BASE = File.join(ENV["HOME"], "Library", "LaunchAgents")
+  TEMPLATE_BASE = File.expand_path(File.join("..", "..", "misc"), __FILE__)
   attr_reader :basename, :dir, :user, :home
 
-  def initialize(filename, dir)
-    template_path = File.join(TEMPLATES_BASE, filename)
+  def initialize(filename, dir = PLIST_BASE)
+    template_path = File.join(TEMPLATE_BASE, filename)
     @basename = File.basename(template_path.sub(/\.erb$/, ""))
     raise ArgumentError unless File.exist?(template_path)
     @template = ERB.new(File.read(template_path))
@@ -30,13 +31,36 @@ class Template
   end
 end
 
+module Installable
+  def enable
+    return unless @should_enable
+    system(@cmd)
+    STDERR.puts "Service started and enabled."
+  end
+
+  def print_info
+    unless @should_enable
+      STDERR.puts "To start and enable:"
+      STDERR.puts @cmd
+    end
+    if @formulae
+      STDERR.puts "\nEnsure the following Homebrew formulae are installed: #{@formulae.join(", ")}"
+    end
+  end
+end
+
 class GpgAgent
-  def initialize
-    @plist_dir = File.join(ENV["HOME"], "Library", "LaunchAgents")
-    @plist_tmpl = Template.new("homebrew.mxcl.gpg.agent.plist.erb", @plist_dir)
-    @config_dir = File.join(ENV["HOME"], ".gnupg")
-    @config_tmpl = Template.new("gpg-agent.conf.erb", @config_dir)
-    FileUtils.mkdir_p(@config_dir)
+  include Installable
+
+  def initialize(should_enable)
+    @plist_tmpl = Template.new("homebrew.mxcl.gpg.agent.plist.erb")
+    config_dir = File.join(ENV["HOME"], ".gnupg")
+    FileUtils.mkdir_p(config_dir)
+    @config_tmpl = Template.new("gpg-agent.conf.erb", config_dir)
+
+    @should_enable = should_enable
+    @cmd = "launchctl load -S Aqua -w \"#{@plist_tmpl.path}\""
+    @formulae = %w(gnupg2 gpg-agent pinentry-mac)
   end
 
   def write
@@ -44,32 +68,54 @@ class GpgAgent
     @config_tmpl.write
     File.chmod(0600, @config_tmpl.path)
   end
+end
 
-  def print_info
-    STDERR.puts "To start and enable:"
-    STDERR.puts "launchctl load -S Aqua -w #{@plist_tmpl.path}"
-    STDERR.puts "\nEnsure gpg, gpg-agent, and pinentry-mac formulae are installed."
+class ExportVars
+  include Installable
+
+  def initialize(should_enable)
+    @plist_tmpl = Template.new("com.danpoggi.vars.plist.erb")
+
+    @should_enable = should_enable
+    @cmd = "launchctl load -w \"#{@plist_tmpl.path}\""
+  end
+
+  def write
+    @plist_tmpl.write
   end
 end
 
-program_names = %w(GpgAgent)
+installables = %w(GpgAgent ExportVars)
 if ARGV.length < 1
-  STDERR.puts "Usage: dcp-launchd_install <ProgramName>\n\n"
-  STDERR.puts "ProgramName: {#{program_names.join("|")}}"
+  STDERR.puts "Usage: dcp-launchd_install [--enable] <installable>\n\n"
+  STDERR.puts "Installables: {#{installables.join("|")}}"
   exit 1
 end
 
-unless program_names.include?(ARGV.first)
-  STDERR.puts "Invalid ProgramName."
+installable = nil
+enable = false
+while ARGV.length > 0 do
+  case ARGV[0]
+  when "--enable"
+    enable = true
+    ARGV.shift
+  else
+    installable = ARGV.shift
+  end
+end
+
+unless installable && installables.include?(installable)
+  STDERR.puts "Invalid installable."
   exit 1
 end
 
 begin
-  klass = Kernel.const_get(ARGV.first)
+  klass = Kernel.const_get(installable)
 rescue NameError
   exit 1
 end
 
-program = klass.new
-program.write
-program.print_info
+install = klass.new(enable)
+install.write
+install.enable
+install.print_info

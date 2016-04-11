@@ -1,0 +1,17 @@
+#!/bin/bash
+
+launchd_export() {
+  local var="$1"
+  local val="$(eval "printf \"\${${var}}\"")"
+  launchctl setenv "${var}" "${val}"
+}
+
+config_path="${DCP}/conf/vars"
+
+[[ -e "${config_path}" ]] || exit 1
+[[ -e "${DCP}/envrc" ]] && source "${DCP}/envrc" || exit 1
+
+read -ra vars <<< $(cat "${config_path}")
+for var in "${vars[@]}"; do
+  launchd_export "${var}"
+done
