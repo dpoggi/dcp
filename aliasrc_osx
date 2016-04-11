@@ -19,7 +19,7 @@ boop() {
   local -a formulae
   local purge="-s"
   while [[ "$#" -gt "0" ]]; do
-    [[ "$1" = "--purge" ]] && purge="--purge=all" || formulae+=("$1")
+    [[ "$1" = "--purge" ]] && purge="--prune=all" || formulae+=("$1")
     shift
   done
 
