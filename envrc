@@ -1,5 +1,5 @@
 #
-# Set up environment
+# Common environment
 #
 
 export PATH="${PATH}:${DCP}/bin"
@@ -11,7 +11,7 @@ export EDITOR="vim"
 
 
 #
-# OS environment var, check for Homebrew
+# DCP_OS var, check for Homebrew
 #
 
 export DCP_OS="$(uname -s)"
@@ -22,7 +22,10 @@ fi
 
 
 #
-# Load local environment if it exists
+# Local environment
 #
 
 [[ -e "${DCP}/localenv" ]] && source "${DCP}/localenv"
+
+# Extend PATH with $JAVA_HOME/bin if one was set in localenv
+[[ -n "${JAVA_HOME}" ]] && export PATH="${PATH}:${JAVA_HOME}/bin"
