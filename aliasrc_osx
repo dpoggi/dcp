@@ -135,3 +135,13 @@ apsctl() {
 coreaudioctl() {
   __lctl sudo "$1" "/System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist"
 }
+
+
+#
+# Misc
+#
+
+# Holy crap an Emacs alias.
+if [[ -e "/Applications/Emacs.app" ]]; then
+  alias guemacs="open -a /Applications/Emacs.app"
+fi
