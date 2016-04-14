@@ -85,7 +85,26 @@ class ExportVars
   end
 end
 
-installables = %w(GpgAgent ExportVars)
+class EmacsMac
+  include Installable
+
+  def initialize(should_enable)
+    @plist_tmpl = Template.new("homebrew.mxcl.emacs-mac.plist.erb")
+    bin_dir = File.join(ENV["HOME"], ".dcp", "bin")
+    @ctl_tmpl = Template.new("kill-emacs.erb", bin_dir)
+
+    @should_enable = should_enable
+    @cmd = "launchctl load -w \"#{@plist_tmpl.path}\""
+  end
+
+  def write
+    @plist_tmpl.write
+    @ctl_tmpl.write
+    File.chmod(0755, @ctl_tmpl.path)
+  end
+end
+
+installables = %w(GpgAgent ExportVars EmacsMac)
 if ARGV.length < 1
   STDERR.puts "Usage: dcp-launchd_install [--enable] <installable>\n\n"
   STDERR.puts "Installables: {#{installables.join("|")}}"
