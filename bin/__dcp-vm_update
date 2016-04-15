@@ -7,6 +7,7 @@ fatal() {
 }
 
 update_repo() {
+  [[ -d "$2" ]] || return
   local name="$(basename "${1%.*}")"
   printf >&2 "Updating ${name}...\n"
   pushd "$2" >/dev/null

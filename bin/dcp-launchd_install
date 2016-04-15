@@ -2,28 +2,33 @@
 require 'erb'
 require 'fileutils'
 
+HOME_DIR = ENV["HOME"]
+DCP_DIR = File.join(HOME_DIR, ".dcp")
+
 class Template
-  PLIST_BASE = File.join(ENV["HOME"], "Library", "LaunchAgents")
-  TEMPLATE_BASE = File.expand_path(File.join("..", "..", "misc"), __FILE__)
+  TEMPLATES_DIR = File.join(DCP_DIR, "share", "templates")
+  LAUNCHD_DIR = File.join(HOME_DIR, "Library", "LaunchAgents")
+
   attr_reader :basename, :dir, :user, :home
 
-  def initialize(filename, dir = PLIST_BASE)
-    template_path = File.join(TEMPLATE_BASE, filename)
-    @basename = File.basename(template_path.sub(/\.erb$/, ""))
+  def initialize(filename, dir = LAUNCHD_DIR)
+    template_path = File.join(TEMPLATES_DIR, filename)
     raise ArgumentError unless File.exist?(template_path)
-    @template = ERB.new(File.read(template_path))
-    @dir = dir
 
+    @dir = dir
     @user = ENV["USER"]
-    @home = ENV["HOME"]
+    @home = HOME_DIR
+
+    @basename = File.basename(template_path.sub(/\.erb$/, ""))
+    @template = ERB.new(File.read(template_path))
   end
 
   def render
-    @template.result(binding)
+    @render ||= @template.result(binding)
   end
 
   def path
-    File.join(dir, basename)
+    @path ||= File.join(dir, basename)
   end
 
   def write
@@ -31,34 +36,37 @@ class Template
   end
 end
 
-module Installable
-  def enable
-    return unless @should_enable
+class Installable
+  def initialize(activate = false)
+    @activate = activate
+  end
+
+  def activate
+    return unless @activate == true
     system(@cmd)
     STDERR.puts "Service started and enabled."
   end
 
   def print_info
-    unless @should_enable
+    unless @activate
       STDERR.puts "To start and enable:"
       STDERR.puts @cmd
     end
-    if @formulae
-      STDERR.puts "\nEnsure the following Homebrew formulae are installed: #{@formulae.join(", ")}"
+
+    if @formulae && @formulae.count > 0
+      STDERR.puts "\nEnsure the following Homebrew formulae are installed: [#{@formulae.join(", ")}]"
     end
   end
 end
 
-class GpgAgent
-  include Installable
-
-  def initialize(should_enable)
+class GpgAgent < Installable
+  def initialize(activate)
+    super
     @plist_tmpl = Template.new("homebrew.mxcl.gpg.agent.plist.erb")
     config_dir = File.join(ENV["HOME"], ".gnupg")
     FileUtils.mkdir_p(config_dir)
     @config_tmpl = Template.new("gpg-agent.conf.erb", config_dir)
 
-    @should_enable = should_enable
     @cmd = "launchctl load -S Aqua -w \"#{@plist_tmpl.path}\""
     @formulae = %w(gnupg2 gpg-agent pinentry-mac)
   end
@@ -70,13 +78,11 @@ class GpgAgent
   end
 end
 
-class ExportVars
-  include Installable
-
-  def initialize(should_enable)
+class ExportVars < Installable
+  def initialize(activate)
+    super
     @plist_tmpl = Template.new("com.danpoggi.vars.plist.erb")
 
-    @should_enable = should_enable
     @cmd = "launchctl load -w \"#{@plist_tmpl.path}\""
   end
 
@@ -85,15 +91,13 @@ class ExportVars
   end
 end
 
-class EmacsMac
-  include Installable
-
-  def initialize(should_enable)
+class EmacsMac < Installable
+  def initialize(activate)
+    super
     @plist_tmpl = Template.new("homebrew.mxcl.emacs-mac.plist.erb")
     bin_dir = File.join(ENV["HOME"], ".dcp", "bin")
     @ctl_tmpl = Template.new("kill-emacs.erb", bin_dir)
 
-    @should_enable = should_enable
     @cmd = "launchctl load -w \"#{@plist_tmpl.path}\""
   end
 
@@ -112,11 +116,11 @@ if ARGV.length < 1
 end
 
 installable = nil
-enable = false
+activate = false
 while ARGV.length > 0 do
   case ARGV[0]
   when "--enable"
-    enable = true
+    activate = true
     ARGV.shift
   else
     installable = ARGV.shift
@@ -134,7 +138,7 @@ rescue NameError
   exit 1
 end
 
-install = klass.new(enable)
+install = klass.new(activate)
 install.write
-install.enable
+install.activate
 install.print_info

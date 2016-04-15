@@ -9,6 +9,16 @@ fatal() {
   exit 1
 }
 
+checkout_tag() {
+  pushd "$1" >/dev/null
+  local tag="$(git describe --abbrev=0 --tags 2>/dev/null)"
+  if [[ -n "${tag}" ]]; then
+    log_msg "Checking out tag for latest version of $2..."
+    git checkout --quiet --force "${tag}"
+  fi
+  popd >/dev/null
+}
+
 # Thank you based Homebrew, no way I would've thought of some of this...
 update_repo() {
   local repo try_tag
@@ -57,11 +67,7 @@ update_repo() {
     fatal "Unable to update master using a fast-forward."
 
   if [[ "${try_tag}" = "true" ]]; then
-    local tag="$(git describe --abbrev=0 --tags 2>/dev/null)"
-    if [[ -n "${tag}" ]]; then
-      log_msg "Checking out tag for latest version..."
-      git checkout --quiet --force "${tag}"
-    fi
+    checkout_tag "${repo}" "${name}"
   fi
 
   if [[ -s ".gitmodules" ]]; then
@@ -78,6 +84,9 @@ stashed=""
 
 update_repo "${HOME}/.dcp"
 update_repo "${HOME}/.vim"
+checkout_tag "${HOME}/.vim/pathogen" "pathogen"
+cleanup_script="${HOME}/.vim/scripts/cleanup_submodules.sh"
+[[ -e "${cleanup_script}" ]] && "${cleanup_script}"
 
 update_repo "${HOME}/.oh-my-zsh"
 plugins_dir="${HOME}/.oh-my-zsh/custom/plugins"
