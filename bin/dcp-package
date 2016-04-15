@@ -14,6 +14,7 @@ clone_repo() {
   name="${name%.*}"
 
   log_msg "Cloning ${name} into $2..."
+  export GIT_DIR="$(basename "$2")/.git"
   git clone --quiet --recursive "$1" "$2" &>/dev/null
   log_msg "Finished."
   printf >&2 "\n"
@@ -43,6 +44,7 @@ clone_repo "https://github.com/zsh-users/zsh-syntax-highlighting.git" \
 
 pushd ".vim" >/dev/null
 log_msg "Updating submodules for dotvim..."
+export GIT_DIR=".git"
 git submodule update --init --quiet --recursive
 log_msg "Finished."
 printf >&2 "\n"
