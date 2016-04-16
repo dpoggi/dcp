@@ -19,11 +19,13 @@ boop() {
   local -a formulae
   local purge="-s"
   local cask=""
+  local cask_purge="--outdated"
 
   while [[ "$#" -gt "0" ]]; do
     case "$1" in
       --purge)
         purge="--prune=all"
+        cask_purge=""
         ;;
       cask)
         cask="cask"
@@ -37,9 +39,11 @@ boop() {
 
   brew update && \
   brew upgrade && \
-  [[ -n "${formulae[@]}" ]] && \
+  [[ -n "${formulae[@]}" ]] &&
     brew "${cask}" install "${formulae[@]}" || true && \
-  brew cleanup --force "${purge}"
+  [[ -n "${cask}" ]] &&
+    brew cask cleanup "${cask_purge}" || \
+  brew cleanup --force "${purge}" || true
 }
 
 
