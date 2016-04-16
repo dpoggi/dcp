@@ -5,8 +5,8 @@ warning() {
 }
 
 link_dotfile() {
-  local link="$(basename "$1")"
-  link="${HOME}/.${link##*-}"
+  local link="${HOME}/.$(basename "$1")"
+
   if [[ ! -h "${link}" && -s "${link}" ]]; then
     warning "~/$(basename "${link}") is a file of non-zero size, skipping."
   else
@@ -18,28 +18,7 @@ maybe_git_config() {
   git config --global "$1" >/dev/null || git config --global "$1" "$2"
 }
 
-os="$(uname -s)"
-
-for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*rc; do
-  if [[ "${os}" != "Darwin" && "$(basename "${dotfile}")" = "osx" ]]; then
-    [[ -h "${HOME}/.osx" ]] && rm -f "${HOME}/.osx"
-  else
-    link_dotfile "${dotfile}"
-  fi
-done
-
-[[ "${os}" = "Darwin" ]] && touch "${HOME}/.hushlogin"
-
-non_dcp_dotfiles=(.profile .bash_login .zlogin)
-has_non_dcp_dotfiles="false"
-for dotfile in "${non_dcp_dotfiles[@]}"; do
-  if [[ -e "${HOME}/${dotfile}" ]]; then
-    [[ "${has_non_dcp_dotfiles}" = "true" ]] || printf "\n"
-    has_non_dcp_dotfiles="true"
-    warning "~/${dotfile} exists but is not provided by ~/.dcp."
-  fi
-done
-if [[ "${has_non_dcp_dotfiles}" = "true" ]]; then
+print_warning() {
   cat >&2 <<EOT
 
 Having any of [${non_dcp_dotfiles[*]}] should (in theory) be harmless.
@@ -50,8 +29,40 @@ For example, RVM will persistently try to create ~/.zlogin to ensure that
 it gets loaded, but this already happens in ~/.dcp/postrc, and the code they
 put in ~/.zlogin will cause zsh to both start and exit with return code 1 for
 login shells if you ever uninstall RVM. Not good!
+
+This wall of warning text will only be shown once, unless you get rid of these
+files then create them again at some point.
 EOT
+}
+
+DCP_OS="$(uname -s)"
+non_dcp_dotfiles=(.profile .bash_login .zlogin)
+has_non_dcp_dotfiles="false"
+warning_shown_path="${HOME}/.dcp/conf/install_links_warning_shown"
+
+for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*rc; do
+  if [[ "${DCP_OS}" != "Darwin" && "$(basename "${dotfile}")" = "osx" ]]; then
+    [[ -h "${HOME}/.osx" ]] && rm -f "${HOME}/.osx"
+  else
+    link_dotfile "${dotfile}"
+  fi
+done
+
+[[ "${DCP_OS}" = "Darwin" ]] && touch "${HOME}/.hushlogin"
+
+for dotfile in "${non_dcp_dotfiles[@]}"; do
+  if [[ -e "${HOME}/${dotfile}" ]]; then
+    [[ "${has_non_dcp_dotfiles}" = "true" ]] || printf "\n"
+    has_non_dcp_dotfiles="true"
+    warning "~/${dotfile} exists but is not provided by ~/.dcp."
+  fi
+done
+
+if [[ "${has_non_dcp_dotfiles}" = "true" && ! -e "${warning_shown_path}" ]]; then
+  print_warning
+  touch "${warning_shown_path}"
 fi
+[[ "${has_non_dcp_dotfiles}" = "false" ]] && rm -f "${warning_shown_path}"
 
 if hash git 2>/dev/null; then
   maybe_git_config "color.ui" "true"
@@ -59,5 +70,5 @@ if hash git 2>/dev/null; then
   maybe_git_config "push.default" "matching"
   maybe_git_config "grep.lineNumber" "true"
   git config --global "core.excludesfile" "${HOME}/.gitignore_global"
-  [[ "${os}" = "Darwin" ]] && maybe_git_config "core.trustctime" "false"
+  [[ "${DCP_OS}" = "Darwin" ]] && maybe_git_config "core.trustctime" "false"
 fi
