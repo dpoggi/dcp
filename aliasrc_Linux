@@ -10,13 +10,37 @@ __net_open_things() {
 
 # List open TCP/UDP ports.
 net_open_ports() {
+  printf "======== Open TCP/UDP Ports ========\n"
+  __net_open_things "PID ProgramName Protocol BoundAddress" '{
+    if ($1 ~ /(tcp)6?/ && $6 == "LISTEN")
+    {
+      sub("/", " ", $7)
+      sub(":", "", $7)
+      print $7, $1, $4
+    }
+    else if ($1 ~ /(udp)6?/ && $6 != "ESTABLISHED")
+    {
+      sub("/", " ", $6)
+      print $6, $1, $4
+    }
+  }'
 }
 
 # List open Unix sockets.
 net_open_sockets() {
-  __net_open_things "PID ProgramName Path" \
-    '$1 == "unix" && $7 == "LISTENING" { sub("/", " ", $9); print $9, $10 }'
+  printf "======== Open Unix Sockets ========\n"
+  __net_open_things "PID ProgramName Path" '{
+    if ($1 == "unix" && $7 == "LISTENING") {
+      sub("/", " ", $9)
+      print $9, $10
+    }
+  }'
 }
 
+
+# List all of it. List it all.
 net_open_all() {
+  net_open_ports
+  printf "\n"
+  net_open_sockets
 }
