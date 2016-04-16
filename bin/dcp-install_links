@@ -1,10 +1,14 @@
 #!/bin/bash
 
+warning() {
+  printf >&2 "\033[0;33m[WARNING]:\033[0m %s\n" "$1"
+}
+
 link_dotfile() {
   local link="$(basename "$1")"
   link="${HOME}/.${link##*-}"
   if [[ ! -h "${link}" && -s "${link}" ]]; then
-    printf >&2 "\033[0;33m[WARNING]:\033[0m ~/$(basename "${link}") is a file of non-zero size, skipping.\n"
+    warning "~/$(basename "${link}") is a file of non-zero size, skipping."
   else
     ln -snfv "$1" "${link}"
   fi
@@ -25,7 +29,29 @@ for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*rc; do
 done
 
 [[ "${os}" = "Darwin" ]] && touch "${HOME}/.hushlogin"
-[[ ! -h "${HOME}/.profile" && -s "${HOME}/.profile" ]] || rm -f "${HOME}/.profile"
+
+non_dcp_dotfiles=(.profile .bash_login .zlogin)
+has_non_dcp_dotfiles="false"
+for dotfile in "${non_dcp_dotfiles[@]}"; do
+  if [[ -e "${HOME}/${dotfile}" ]]; then
+    [[ "${has_non_dcp_dotfiles}" = "true" ]] || printf "\n"
+    has_non_dcp_dotfiles="true"
+    warning "~/${dotfile} exists but is not provided by ~/.dcp."
+  fi
+done
+if [[ "${has_non_dcp_dotfiles}" = "true" ]]; then
+  cat >&2 <<EOT
+
+Having any of [${non_dcp_dotfiles[*]}] should (in theory) be harmless.
+That said, it can also really mess things up. It's good to examine their
+contents and evaluate if they need to exist.
+
+For example, RVM will persistently try to create ~/.zlogin to ensure that
+it gets loaded, but this already happens in ~/.dcp/postrc, and the code they
+put in ~/.zlogin will cause zsh to both start and exit with return code 1 for
+login shells if you ever uninstall RVM. Not good!
+EOT
+fi
 
 if hash git 2>/dev/null; then
   maybe_git_config "color.ui" "true"
