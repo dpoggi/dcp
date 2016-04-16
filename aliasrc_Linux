@@ -44,7 +44,6 @@ net_open_sockets() {
   }'
 }
 
-
 # List all of it. List it all.
 net_open_all() {
   net_open_ports
