@@ -2,15 +2,20 @@
 # Network admin things.
 #
 
+__net_open_things() {
+  printf "$1\n%s\n" \
+    "$(sudo -H netstat --all --listening --program --numeric --wide | \
+       awk "$2" | sort -g)" | column -t -o "    "
+}
+
 # List open TCP/UDP ports.
 net_open_ports() {
 }
 
 # List open Unix sockets.
 net_open_sockets() {
-  sudo -H netstat --program --listening --all --numeric --wide | \
-     awk '$1 == "unix" && $7 == "LISTENING" { print $9, $10 }' | \
-     sort -g | column -t
+  __net_open_things "PID ProgramName Path" \
+    '$1 == "unix" && $7 == "LISTENING" { sub("/", " ", $9); print $9, $10 }'
 }
 
 net_open_all() {
