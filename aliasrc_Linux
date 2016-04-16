@@ -3,6 +3,11 @@
 #
 
 __net_open_things() {
+  if ! hash netstat 2>/dev/null; then
+    printf >&2 "netstat is not installed!\n"
+    return 1
+  fi
+
   printf "$1\n%s\n" \
     "$(sudo -H netstat --all --listening --program --numeric --wide | \
        awk "$2" | sort -g)" | column -t -o "    "
