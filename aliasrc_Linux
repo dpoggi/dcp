@@ -1,0 +1,10 @@
+#
+# Network admin things.
+#
+
+list_open_ports() {
+  # Long options of netstat -plan for clarity? Never knew what they stood for :x
+  sudo -H netstat --program --listening --all --numeric | \
+    fgrep --ignore-case 'listen' | \
+    fgrep --ignore-case --invert-match 'listening'
+}

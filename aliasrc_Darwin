@@ -1,4 +1,3 @@
-#!/bin/bash
 #
 # Xcode aliases
 #
@@ -111,8 +110,9 @@ launchd_export() {
 
 # launchctl wrapper for making things feel a little more... right.
 __lctl() {
+  local -a sudo_cmd
   if [[ "$1" = "sudo" ]]; then
-    local sudo_cmd="sudo -H"
+    sudo_cmd+=(sudo -H)
     shift
   fi
 

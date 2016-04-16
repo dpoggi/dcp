@@ -1,10 +1,8 @@
 # Load aliases
 [[ -e "${DCP}/aliasrc" ]] && source "${DCP}/aliasrc"
 
-# Load Mac aliases, if appropriate
-if [[ "${DCP_OS}" = "Darwin" ]]; then
-  [[ -e "${DCP}/aliasrc_osx" ]] && source "${DCP}/aliasrc_osx"
-fi
+# Load OS-specific aliases, if appropriate
+[[ -e "${DCP}/aliasrc_${DCP_OS}" ]] && source "${DCP}/aliasrc_${DCP_OS}"
 
 # Load local modifications
 [[ -e "${DCP}/localrc" ]] && source "${DCP}/localrc"
