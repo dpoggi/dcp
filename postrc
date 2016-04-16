@@ -47,4 +47,4 @@ fi
 # My bad in advance. It's just been driving me insane.
 #
 
-export PATH="$(printf "${PATH}" | perl -e 'print join(":", grep { not $seen{$_}++ } split(/:/, scalar <>))')"
+export PATH="$(printf "%s" "${PATH}" | perl -e 'print join(":", grep { not $seen{$_}++ } split(/:/, scalar <>))')"
