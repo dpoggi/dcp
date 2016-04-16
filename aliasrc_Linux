@@ -2,9 +2,16 @@
 # Network admin things.
 #
 
-list_open_ports() {
-  # Long options of netstat -plan for clarity? Never knew what they stood for :x
-  sudo -H netstat --program --listening --all --numeric | \
-    fgrep --ignore-case 'listen' | \
-    fgrep --ignore-case --invert-match 'listening'
+# List open TCP/UDP ports.
+net_open_ports() {
+}
+
+# List open Unix sockets.
+net_open_sockets() {
+  sudo -H netstat --program --listening --all --numeric --wide | \
+     awk '$1 == "unix" && $7 == "LISTENING" { print $9, $10 }' | \
+     sort -g | column -t
+}
+
+net_open_all() {
 }

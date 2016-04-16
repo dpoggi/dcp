@@ -136,7 +136,7 @@ __bin_path() {
 
 # Gets job number from PID after &ing a process
 __jobno() {
-  jobs -l | fgrep "$1" | awk '{ print $1 }' | sed -e 's/[^0-9]//g'
+  jobs -l | grep -F "$1" | awk '{ print $1 }' | sed -e 's/[^0-9]//g'
 }
 
 # virtualenv-independent pip
