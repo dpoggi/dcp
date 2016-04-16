@@ -10,6 +10,7 @@ __net_open_things() {
 
 # List open TCP/UDP ports.
 net_open_ports() {
+  sudo -H true
   printf "======== Open TCP/UDP Ports ========\n"
   __net_open_things "PID ProgramName Protocol BoundAddress" '{
     if ($1 ~ /(tcp)6?/ && $6 == "LISTEN")
@@ -28,6 +29,7 @@ net_open_ports() {
 
 # List open Unix sockets.
 net_open_sockets() {
+  sudo -H true
   printf "======== Open Unix Sockets ========\n"
   __net_open_things "PID ProgramName Path" '{
     if ($1 == "unix" && $7 == "LISTENING") {
