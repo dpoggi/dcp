@@ -5,7 +5,7 @@
 # Open Xcode for current folder (prefers workspace to project)
 alias xc="open -a /Applications/Xcode.app ."
 # Dammit Xcode (delete derived data twice a day for entire career as needed)
-alias fuxcode="rm -rf ${HOME}/Library/Developer/Xcode/DerivedData"
+alias fuxcode='rm -rf "${HOME}/Library/Developer/Xcode/DerivedData"'
 # Verify Xcode installation
 alias haxcode="spctl --assess --verbose /Applications/Xcode.app"
 
@@ -84,10 +84,12 @@ alias reset_quick_look="qlmanage -r"
 
 use_jdk() {
   [[ "$#" -gt "0" && "${#1}" = "1" ]] || return 1
-  [[ "$1" -ge "7" && "$1" -le "8" ]] || return 1
+  [[ "$1" -ge "7" && "$1" -le "9" ]] || return 1
 
   # Finds the newest Java _ (first argument) JDK available
-  local jdk_dir="$(find "/Library/Java/JavaVirtualMachines" -name "jdk1\.${1}*" -print | tail -n 1)"
+  local pattern
+  [[ "$1" = "9" ]] && pattern="jdk${1}*" || pattern="jdk1\.${1}*"
+  local jdk_dir="$(find "/Library/Java/JavaVirtualMachines" -name "${pattern}" -print | tail -n 1)"
 
   if [[ -d "${jdk_dir}" ]]; then
     printf >&2 "Using $(basename "${jdk_dir}") (enter your user password if prompted)...\n"
@@ -123,22 +125,22 @@ __lctl() {
   case "$1" in
     start)
       shift
-      ${sudo_cmd} launchctl load -F "$@"
+      ${sudo_cmd[*]} launchctl load -F "$@"
       ;;
     stop)
       shift
-      ${sudo_cmd} launchctl unload -F "$@"
+      ${sudo_cmd[*]} launchctl unload -F "$@"
       ;;
     restart)
       shift
-      ${sudo_cmd} launchctl unload -F "$@"
-      ${sudo_cmd} launchctl load -F "$@"
+      ${sudo_cmd[*]} launchctl unload -F "$@"
+      ${sudo_cmd[*]} launchctl load -F "$@"
       ;;
     "")
       return 1
       ;;
     *)
-      ${sudo_cmd} launchctl "$@"
+      ${sudo_cmd[*]} launchctl "$@"
       ;;
   esac
 }
