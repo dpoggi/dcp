@@ -8,9 +8,10 @@ __net_open_things() {
     return 1
   fi
 
-  printf "$1\n%s\n" \
+  printf "%s\n%s\n" "$1" \
     "$(sudo -H netstat --all --listening --program --numeric --wide | \
-       awk "$2" | sort -g)" | column -t -o "    "
+       awk "$2" | sort -g)" | column -t -o "    " | \
+       sed -r -e 's/^([0-9]+)(\s+)(\w+):(\w+) (.*)$/\1\2\3: \4\5/'
 }
 
 # List open TCP/UDP ports.
@@ -21,8 +22,7 @@ net_open_ports() {
     if ($1 ~ /(tcp)6?/ && $6 == "LISTEN")
     {
       sub("/", " ", $7)
-      sub(":", "", $7)
-      print $7, $1, $4
+      print $7 $8, $1, $4
     }
     else if ($1 ~ /(udp)6?/ && $6 != "ESTABLISHED")
     {
