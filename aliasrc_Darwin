@@ -83,21 +83,18 @@ alias reset_quick_look="qlmanage -r"
 #
 
 use_jdk() {
-  [[ "$#" -gt "0" && "${#1}" = "1" ]] || return 1
-  [[ "$1" -ge "7" && "$1" -le "9" ]] || return 1
+  [[ "$#" -gt "0" ]] || return 1
 
   # Finds the newest Java _ (first argument) JDK available
   local pattern
-  [[ "$1" = "9" ]] && pattern="jdk${1}*" || pattern="jdk1\.${1}*"
-  local jdk_dir="$(find "/Library/Java/JavaVirtualMachines" -name "${pattern}" -print | tail -n 1)"
+  [[ "$1" -ge "9" ]] && pattern="jdk${1}*" || pattern="jdk1\.${1}*"
 
-  if [[ -d "${jdk_dir}" ]]; then
-    printf >&2 "Using $(basename "${jdk_dir}") (enter your user password if prompted)...\n"
-    sudo ln -snfv "${jdk_dir}/Contents/Home" "/Library/Java/Home"
-  else
-    printf >&2 "Java $1 not found\n"
-    return 1
-  fi
+  local jdk_dir="$(command find "/Library/Java/JavaVirtualMachines" \
+    -maxdepth 1 -name "${pattern}" -print | tail -n 1)"
+  [[ -d "${jdk_dir}" ]] || { printf >&2 "Java $1 not found.\n"; return 1; }
+
+  printf >&2 "Using $(basename "${jdk_dir}") (enter your user password if prompted)...\n"
+  sudo ln -snfv "${jdk_dir}/Contents/Home" "/Library/Java/Home"
 }
 
 
