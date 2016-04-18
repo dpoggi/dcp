@@ -40,7 +40,7 @@ boop() {
   brew update && \
   brew upgrade && \
   [[ -n "${formulae[@]}" ]] &&
-    brew "${cask}" install "${formulae[@]}" || true && \
+    brew ${cask} install "${formulae[@]}" || true && \
   [[ -n "${cask}" ]] &&
     brew cask cleanup "${cask_purge}" || \
   brew cleanup --force "${purge}" || true
