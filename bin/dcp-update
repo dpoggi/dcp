@@ -77,7 +77,7 @@ update_repo() {
   if [[ "${name}" = "dotvim" ]]; then
     checkout_tag "${HOME}/.vim/pathogen" "pathogen"
     cleanup_script="${HOME}/.vim/scripts/cleanup_submodules.sh"
-    [[ -e "${cleanup_script}" ]] && "${cleanup_script}"
+    [[ -x "${cleanup_script}" ]] && "${cleanup_script}"
   fi
 
   log_msg "Finished updating ${name}."

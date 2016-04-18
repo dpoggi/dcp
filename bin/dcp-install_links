@@ -40,7 +40,7 @@ non_dcp_dotfiles=(.profile .bash_login .zlogin)
 has_non_dcp_dotfiles="false"
 warning_shown_path="${HOME}/.dcp/conf/install_links_warning_shown"
 
-for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*rc; do
+for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*vimrc; do
   if [[ "${DCP_OS}" != "Darwin" && "$(basename "${dotfile}")" = "osx" ]]; then
     [[ -h "${HOME}/.osx" ]] && rm -f "${HOME}/.osx"
   else

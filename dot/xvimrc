@@ -1,9 +1,0 @@
-set ignorecase
-set smartcase
-set gdefault
-
-set incsearch
-set hlsearch
-
-"" Return types for Swift
-imap <C-l> <space>-><space>
