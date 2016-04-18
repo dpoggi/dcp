@@ -183,3 +183,14 @@ cbpaste() {
     ${DCP_CBPASTE} "$@"
   fi
 }
+
+
+#
+# Easter egg!
+#
+
+if hash cowsay 2>/dev/null; then
+  cornholio() {
+    cowsay -f beavis.zen "hehehehehehehehe"
+  }
+fi
