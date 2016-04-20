@@ -152,6 +152,14 @@ coreaudioctl() {
   __lctl sudo "$1" "/System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist"
 }
 
+# launchctl wrapper for gpg-agent, if the plist is installed
+DCP_GPG_AGENT_PLIST="${HOME}/Library/LaunchAgents/homebrew.mxcl.gpg.agent.plist"
+if [[ -e "${DCP_GPG_AGENT_PLIST}" ]]; then
+  gpgagentctl() {
+    __lctl "$1" "${DCP_GPG_AGENT_PLIST}"
+  }
+fi
+
 
 #
 # Misc
