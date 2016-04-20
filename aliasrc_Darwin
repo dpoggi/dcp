@@ -156,6 +156,7 @@ coreaudioctl() {
 DCP_GPG_AGENT_PLIST="${HOME}/Library/LaunchAgents/homebrew.mxcl.gpg.agent.plist"
 if [[ -e "${DCP_GPG_AGENT_PLIST}" ]]; then
   gpgagentctl() {
+    [[ "$1" = "stop" || "$1" = "restart" ]] && killall gpg-agent
     __lctl "$1" "${DCP_GPG_AGENT_PLIST}"
   }
 fi
