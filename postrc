@@ -43,6 +43,18 @@ fi
 
 
 #
+# GPG Agent
+#
+
+if [[ -e "${HOME}/.gnupg/gpg-agent-info" && -e "${HOME}/.gnupg/S.gpg-agent.ssh" ]]; then
+  source "${HOME}/.gnupg/gpg-agent-info"
+  export GPG_AGENT_INFO
+  export SSH_AUTH_SOCK
+  export SSH_AGENT_PID
+fi
+
+
+#
 # Clean up PATH. This is bound to break something, so uhh... open an issue.
 # My bad in advance. It's just been driving me insane.
 #

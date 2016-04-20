@@ -153,11 +153,10 @@ coreaudioctl() {
 }
 
 # launchctl wrapper for gpg-agent, if the plist is installed
-DCP_GPG_AGENT_PLIST="${HOME}/Library/LaunchAgents/homebrew.mxcl.gpg.agent.plist"
-if [[ -e "${DCP_GPG_AGENT_PLIST}" ]]; then
+if [[ -e "${HOME}/Library/LaunchAgents/homebrew.mxcl.gpg.agent.plist" ]]; then
   gpgagentctl() {
     [[ "$1" = "stop" || "$1" = "restart" ]] && killall gpg-agent
-    __lctl "$1" "${DCP_GPG_AGENT_PLIST}"
+    __lctl "$1" -S Aqua "${HOME}/Library/LaunchAgents/homebrew.mxcl.gpg.agent.plist"
   }
 fi
 
