@@ -1,44 +1,49 @@
-#
-# Load nvm if available
-#
+# Conditional for hard reset back to system versions
+if [[ -z "${DCP_NO_MANAGERS}" ]]; then
+  #
+  # Load nvm if available
+  #
 
-[[ -d "${HOME}/.nvm" ]] && export NVM_DIR="${HOME}/.nvm"
-if [[ -e "${NVM_DIR}/nvm.sh" ]]; then
-  source "${NVM_DIR}/nvm.sh"
-elif [[ -e "/usr/local/opt/nvm/nvm.sh" ]]; then
-  # Because for some reason this doesn't end up in PATH with Homebrew...
-  source "/usr/local/opt/nvm/nvm.sh"
-fi
-
-
-#
-# Load pyenv + pyenv-virtualenv if available
-#
-
-if [[ -d "${HOME}/.pyenv/shims" ]]; then
-  export PYENV_ROOT="${HOME}/.pyenv"
-  [[ -d "${PYENV_ROOT}/bin" ]] && export PATH="${PYENV_ROOT}/bin:${PATH}"
-fi
-hash pyenv 2>/dev/null && eval "$(pyenv init -)"
-if hash pyenv-virtualenv-init 2>/dev/null; then
-  export PYENV_VIRTUALENV_DISABLE_PROMPT="1"
-  eval "$(pyenv-virtualenv-init -)"
-fi
-
-
-#
-# Load rbenv or RVM (if you have to, I guess) if available
-#
-
-if [[ -d "${HOME}/.rvm" ]]; then
-  export PATH="${PATH}:${HOME}/.rvm/bin"
-  [[ -e "${HOME}/.rvm/scripts/rvm" ]] && source "${HOME}/.rvm/scripts/rvm"
-else
-  if [[ -d "${HOME}/.rbenv/shims" ]]; then
-    export RBENV_ROOT="${HOME}/.rbenv"
-    [[ -d "${RBENV_ROOT}/bin" ]] && export PATH="${RBENV_ROOT}/bin:${PATH}"
+  [[ -d "${HOME}/.nvm" ]] && export NVM_DIR="${HOME}/.nvm"
+  if [[ -e "${NVM_DIR}/nvm.sh" ]]; then
+    source "${NVM_DIR}/nvm.sh"
+  elif [[ -e "/usr/local/opt/nvm/nvm.sh" ]]; then
+    # Because for some reason this doesn't end up in PATH with Homebrew...
+    source "/usr/local/opt/nvm/nvm.sh"
   fi
-  hash rbenv 2>/dev/null && eval "$(rbenv init -)"
+
+
+  #
+  # Load pyenv + pyenv-virtualenv if available
+  #
+
+  if [[ -d "${HOME}/.pyenv/shims" ]]; then
+    export PYENV_ROOT="${HOME}/.pyenv"
+    [[ -d "${PYENV_ROOT}/bin" ]] && export PATH="${PYENV_ROOT}/bin:${PATH}"
+  fi
+  hash pyenv 2>/dev/null && eval "$(pyenv init -)"
+  if hash pyenv-virtualenv-init 2>/dev/null; then
+    export PYENV_VIRTUALENV_DISABLE_PROMPT="1"
+    eval "$(pyenv-virtualenv-init -)"
+  fi
+
+
+  #
+  # Load rbenv or RVM (if you have to, I guess) if available
+  #
+
+  if [[ -d "${HOME}/.rvm" ]]; then
+    export PATH="${PATH}:${HOME}/.rvm/bin"
+    [[ -e "${HOME}/.rvm/scripts/rvm" ]] && source "${HOME}/.rvm/scripts/rvm"
+  else
+    if [[ -d "${HOME}/.rbenv/shims" ]]; then
+      export RBENV_ROOT="${HOME}/.rbenv"
+      [[ -d "${RBENV_ROOT}/bin" ]] && export PATH="${RBENV_ROOT}/bin:${PATH}"
+    fi
+    hash rbenv 2>/dev/null && eval "$(rbenv init -)"
+  fi
+else
+  __strip_path nvm pyenv rvm rbenv
 fi
 
 

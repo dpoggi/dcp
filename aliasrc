@@ -139,6 +139,20 @@ __jobno() {
   jobs -l | grep -F "$1" | awk '{ print $1 }' | sed -e 's/[^0-9]//g'
 }
 
+# Strip components from PATH
+__strip_path() {
+  local ifs="${IFS}"; IFS="|"
+  local args="($*)"; IFS="${ifs}"
+
+  local stripped_path="$( \
+    printf "%s" "${PATH}" | perl -p \
+      -e "s#:[^:]*${args}[^:]*:#:#g;" \
+      -e "s#:[^:]*${args}[^:]*##g;" \
+      -e "s#[^:]*${args}[^:]*:##g;" \
+  )"
+  export PATH="${stripped_path}"
+}
+
 # virtualenv-independent pip
 gpip() {
   PIP_REQUIRE_VIRTUALENV="" pip "$@"
