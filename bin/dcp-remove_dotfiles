@@ -1,11 +1,33 @@
 #!/bin/bash
 
-for file in ackrc bash_logout bash_profile bashrc gemrc gitignore_global \
-            gvimrc inputrc irbrc osx profile rvmrc tmux.conf vimrc xvimrc \
-            zprofile zshenv zshrc; do
-  dotfile="${HOME}/.${file}"
-  if [[ -e "${dotfile}" ]]; then
-    printf >&2 "Deleting ${dotfile}...\n"
-    rm -f "${dotfile}"
+printf >&2 "Are you sure you want to delete all dotfiles that would conflict with ~/.dcp?\n"
+read -r -p "Only YES will continue: "
+[[ "${REPLY}" = "YES" ]] || true && exit
+
+for dotfile in \
+  ackrc \
+  bash_login \
+  bash_logout \
+  bash_profile \
+  bashrc \
+  gemrc \
+  gitignore_global \
+  inputrc \
+  irbrc \
+  osx \
+  profile \
+  rvmrc \
+  tmux.conf \
+  zlogin \
+  zlogout \
+  zprofile \
+  zshenv \
+  zshrc
+do
+  name="~/.${dotfile}"
+  path="${HOME}/.${dotfile}"
+  if [[ -e "${path}" ]]; then
+    printf >&2 "Deleting ${name}...\n"
+    rm -f "${path}"
   fi
 done

@@ -60,7 +60,7 @@ class Installable
 end
 
 class GpgAgent < Installable
-  def initialize(activate)
+  def initialize(activate = false)
     super
     @plist_tmpl = Template.new("homebrew.mxcl.gpg.agent.plist.erb")
     config_dir = File.join(ENV["HOME"], ".gnupg")
@@ -79,10 +79,9 @@ class GpgAgent < Installable
 end
 
 class ExportVars < Installable
-  def initialize(activate)
+  def initialize(activate = false)
     super
     @plist_tmpl = Template.new("com.danpoggi.vars.plist.erb")
-
     @cmd = "launchctl load -w \"#{@plist_tmpl.path}\""
   end
 
@@ -92,19 +91,14 @@ class ExportVars < Installable
 end
 
 class EmacsMac < Installable
-  def initialize(activate)
+  def initialize(activate = false)
     super
     @plist_tmpl = Template.new("homebrew.mxcl.emacs-mac.plist.erb")
-    bin_dir = File.join(ENV["HOME"], ".dcp", "bin")
-    @ctl_tmpl = Template.new("kill-emacs.erb", bin_dir)
-
     @cmd = "launchctl load -w \"#{@plist_tmpl.path}\""
   end
 
   def write
     @plist_tmpl.write
-    @ctl_tmpl.write
-    File.chmod(0755, @ctl_tmpl.path)
   end
 end
 

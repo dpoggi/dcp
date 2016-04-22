@@ -169,3 +169,13 @@ fi
 if [[ -e "/Applications/Emacs.app" ]]; then
   alias guemacs="open -a /Applications/Emacs.app"
 fi
+
+# Kill running Emacs
+kill_emacs() {
+  __kill_emacs
+
+  local plist="${HOME}/Library/LaunchAgents/homebrew.mxcl.emacs-mac.plist"
+  if [[ -e "${plist}" ]]; then
+    launchctl unload -F "${plist}"
+  fi
+}
