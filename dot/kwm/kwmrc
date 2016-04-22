@@ -98,3 +98,6 @@ kwmc config prefix-border radius 6
 
 # Include keybinds
 include binds
+
+# Include local modifications
+include local
