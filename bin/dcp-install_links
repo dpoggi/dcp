@@ -6,9 +6,8 @@ warning() {
 
 link_dotfile() {
   local link="${HOME}/.$(basename "$1")"
-
-  if [[ ! -h "${link}" && -s "${link}" ]]; then
-    warning "~/$(basename "${link}") is a file of non-zero size, skipping."
+  if [[ ! -h "${link}" ]] && [[ -s "${link}" || -d "${link}" ]]; then
+    warning "~/$(basename "${link}") is a directory or file of non-zero size, skipping."
   else
     ln -snfv "$1" "${link}"
   fi
@@ -43,6 +42,8 @@ warning_shown_path="${HOME}/.dcp/conf/install_links_warning_shown"
 for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*vimrc; do
   if [[ "${DCP_OS}" != "Darwin" && "$(basename "${dotfile}")" = "osx" ]]; then
     [[ -h "${HOME}/.osx" ]] && rm -f "${HOME}/.osx"
+  elif [[ "${DCP_OS}" != "Darwin" && "$(basename "${dotfile}")" = "kwm" ]]; then
+    :
   else
     link_dotfile "${dotfile}"
   fi

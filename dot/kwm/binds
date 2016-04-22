@@ -1,0 +1,65 @@
+#
+# Prefix and metakey configuration
+#
+
+# Set prefix hotkey
+kwmc config prefix-key ctrl-s
+
+# Prefix is not applied globally
+kwmc config prefix-global off
+
+# Time in seconds before prefix must be reactivated
+kwmc config prefix-timeout 0.5
+
+# Metakeys
+define super alt+cmd
+define hyper ctrl+alt+cmd
+
+
+#
+# Keybinds
+#
+
+# Launch iTerm
+kwmc bind hyper-t sys /usr/bin/open -na /Applications/iTerm.app
+
+# Rotate window-tree of current space 90 degrees clockwise
+kwmc bind hyper-r tree rotate 90
+
+# Toggle fullscreen on focused container
+kwmc bind super-f window -z fullscreen
+
+# Set space tiling mode to BSP
+kwmc bind hyper-b space -t bsp
+# Set space tiling mode to floating
+kwmc bind hyper-f space -t float
+
+# Toggle floating for focused container
+kwmc bind super-t window -t focused
+
+# Shrink focused container
+kwmc bind prefix-down window -c expand 0.05
+# Expand focused container
+kwmc bind prefix-up window -c reduce 0.05
+
+# Move focus counter-clockwise
+kwmc bind prefix-k window -f next
+# Move focus clockwise
+kwmc bind prefix-j window -f prev
+
+# Move screen focus counter-clockwise
+kwmc bind prefix-h display -f prev
+# Move screen focus clockwise
+kwmc bind prefix-l display -f next
+# Because I'm a klutz
+kwmc bind prefix-; display -f next
+
+# Swap focused container counter-clockwise
+kwmc bind super-left window -s prev
+# Swap focused container clockwise
+kwmc bind super-right window -s next
+
+# Swap focused container one screen left
+kwmc bind hyper-left window -m display prev
+# Swap focused container one screen right
+kwmc bind hyper-right window -m display next
