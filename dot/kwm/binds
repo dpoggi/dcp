@@ -42,6 +42,9 @@ kwmc bind prefix-down window -c expand 0.05
 # Expand focused container
 kwmc bind prefix-up window -c reduce 0.05
 
+# Toggle split-mode
+kwmc bind prefix-s window -c split-mode toggle
+
 # Move focus counter-clockwise
 kwmc bind prefix-k window -f next
 # Move focus clockwise
