@@ -44,6 +44,8 @@ kwmc bind super-f window -z fullscreen
 
 # Set space tiling mode to BSP
 kwmc bind hyper-b space -t bsp
+# Set space tiling mode to monocle
+kwmc bind hyper-m space -t monocle
 # Set space tiling mode to floating
 kwmc bind hyper-f space -t float
 
