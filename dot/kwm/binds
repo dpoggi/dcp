@@ -12,7 +12,12 @@ kwmc config prefix-global off
 kwmc config prefix-timeout 0.5
 
 # Metakeys
+#
+# For same-space, same-screen window moves
 define super alt+cmd
+# Every super key needs a sidekick, right? RIGHT?! (for space moves)
+define sidekick alt+shift
+# For screen moves and other stuff n' things
 define hyper ctrl+alt+cmd
 
 
@@ -20,8 +25,16 @@ define hyper ctrl+alt+cmd
 # Keybinds
 #
 
-# Launch iTerm
-kwmc bind hyper-t sys /usr/bin/open -na /Applications/iTerm.app
+# After some digging through the kwm source, sys commands are run by system(3),
+# thus anything after the word 'sys' itself is passed along to /bin/sh. kwm
+# does (as of v2.2.0 at latest) perform this execution on a dedicated thread.
+#
+# Launch iTerm (launch if not running, else create new window)
+kwmc bind hyper-t sys osascript -e 'if application "iTerm" is running' -e 'tell application "iTerm" to create window with default profile' -e 'else' -e 'tell application "iTerm" to activate' -e 'end if'
+# Launch Emacs
+kwmc bind hyper-e sys open -a /Applications/Emacs.app
+# Launch MacVim
+kwmc bind hyper-v sys open -a /Applications/MacVim.app
 
 # Rotate window-tree of current space 90 degrees clockwise
 kwmc bind hyper-r tree rotate 90
@@ -37,13 +50,16 @@ kwmc bind hyper-f space -t float
 # Toggle floating for focused container
 kwmc bind super-t window -t focused
 
+# Not using the new commands from v2.2.0 yet because I haven't thought of an
+# intuitive way to lay out their keybinds.
+#
 # Shrink focused container
-kwmc bind prefix-down window -c expand 0.05
+kwmc bind prefix-w window -c expand 0.05
 # Expand focused container
-kwmc bind prefix-up window -c reduce 0.05
+kwmc bind prefix-s window -c reduce 0.05
 
 # Toggle split-mode
-kwmc bind prefix-s window -c split-mode toggle
+kwmc bind prefix-m window -c split-mode toggle
 
 # Move focus counter-clockwise
 kwmc bind prefix-k window -f next
@@ -62,7 +78,12 @@ kwmc bind super-left window -s prev
 # Swap focused container clockwise
 kwmc bind super-right window -s next
 
-# Swap focused container one screen left
+# Swap focused container one space left
+kwmc bind sidekick-left window -m space left
+# Swap focused container one space right
+kwmc bind sidekick-right window -m space right
+
+# Swap focused container one display counter-clockwise
 kwmc bind hyper-left window -m display prev
-# Swap focused container one screen right
+# Swap focused container one display clockwise
 kwmc bind hyper-right window -m display next

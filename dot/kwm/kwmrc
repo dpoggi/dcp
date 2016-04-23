@@ -47,12 +47,14 @@ kwmc rule owner="Archiver" properties={float="true"}
 kwmc rule owner="Calendar" properties={float="true"}
 kwmc rule owner="Dash" properties={float="true"}
 kwmc rule owner="Dropbox" properties={float="true"}
+kwmc rule owner="Firefox" name="Library" properties={float="true"}
 kwmc rule owner="League of Legends" properties={float="true"}
-kwmc rule name="Library" owner="Firefox" properties={float="true"}
 kwmc rule owner="Messages" properties={float="true"}
 kwmc rule owner="Photoshop" properties={float="true"}
 kwmc rule name="Preferences" properties={float="true"}
 kwmc rule owner="Screenhero" properties={float="true"}
+kwmc rule owner="Script Editor" name="Library" properties={float="true"}
+kwmc rule owner="Script Editor" name="sdef" properties={float="true"}
 kwmc rule owner="Simulator" properties={float="true"}
 kwmc rule owner="Simulator (Watch)" properties={float="true"}
 kwmc rule owner="Steam" properties={float="true"}
