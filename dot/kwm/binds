@@ -37,6 +37,8 @@ kwmc bind hyper-e sys open -a "/Applications/Emacs.app"
 kwmc bind hyper-v sys /usr/local/bin/mvim
 # Launch Sublime
 kwmc bind hyper-s sys open -a "/Applications/Sublime Text.app"
+# Launch Atom
+kwmc bind hyper-a sys open -a "/Applications/Atom.app"
 
 # Rotate window-tree of current space 90 degrees clockwise
 kwmc bind hyper-r tree rotate 90
