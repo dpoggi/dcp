@@ -1,9 +1,15 @@
-# Conditional for hard reset back to system versions
-if [[ -z "${DCP_NO_MANAGERS}" ]]; then
-  #
-  # Load nvm if available
-  #
+if [[ -n "${DCP_DISABLE_MANAGERS}" ]]; then
+  DCP_DISABLE_NVM="true"
+  DCP_DISABLE_PYENV="true"
+  DCP_DISABLE_RVM="true"
+  DCP_DISABLE_RBENV="true"
+fi
 
+#
+# Load nvm if available
+#
+
+if [[ -z "${DCP_DISABLE_NVM}" ]]; then
   [[ -d "${HOME}/.nvm" ]] && export NVM_DIR="${HOME}/.nvm"
   if [[ -e "${NVM_DIR}/nvm.sh" ]]; then
     source "${NVM_DIR}/nvm.sh"
@@ -11,12 +17,16 @@ if [[ -z "${DCP_NO_MANAGERS}" ]]; then
     # Because for some reason this doesn't end up in PATH with Homebrew...
     source "/usr/local/opt/nvm/nvm.sh"
   fi
+else
+  __strip_path nvm
+fi
 
 
-  #
-  # Load pyenv + pyenv-virtualenv if available
-  #
+#
+# Load pyenv + pyenv-virtualenv if available
+#
 
+if [[ -z "${DCP_DISABLE_PYENV}" ]]; then
   if [[ -d "${HOME}/.pyenv/shims" ]]; then
     export PYENV_ROOT="${HOME}/.pyenv"
     [[ -d "${PYENV_ROOT}/bin" ]] && export PATH="${PYENV_ROOT}/bin:${PATH}"
@@ -26,24 +36,32 @@ if [[ -z "${DCP_NO_MANAGERS}" ]]; then
     export PYENV_VIRTUALENV_DISABLE_PROMPT="1"
     eval "$(pyenv-virtualenv-init -)"
   fi
+else
+  __strip_path pyenv
+fi
 
 
-  #
-  # Load rbenv or RVM (if you have to, I guess) if available
-  #
+#
+# Load rbenv or RVM (if you have to, I guess) if available
+#
 
-  if [[ -d "${HOME}/.rvm" ]]; then
+if [[ -d "${HOME}/.rvm" ]]; then
+  if [[ -z "${DCP_DISABLE_RVM}" ]]; then
     export PATH="${PATH}:${HOME}/.rvm/bin"
     [[ -e "${HOME}/.rvm/scripts/rvm" ]] && source "${HOME}/.rvm/scripts/rvm"
   else
+    __strip_path rvm
+  fi
+else
+  if [[ -z "${DCP_DISABLE_RBENV}" ]]; then
     if [[ -d "${HOME}/.rbenv/shims" ]]; then
       export RBENV_ROOT="${HOME}/.rbenv"
       [[ -d "${RBENV_ROOT}/bin" ]] && export PATH="${RBENV_ROOT}/bin:${PATH}"
     fi
     hash rbenv 2>/dev/null && eval "$(rbenv init -)"
+  else
+    __strip_path rbenv
   fi
-else
-  __strip_path nvm pyenv rvm rbenv
 fi
 
 
