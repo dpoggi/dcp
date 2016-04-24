@@ -78,6 +78,13 @@ fi
 
 
 #
+# Base16 colors, if the script path has been set locally
+#
+
+[[ -s "${BASE16_SHELL}" ]] && source "${BASE16_SHELL}"
+
+
+#
 # Clean up PATH. This is bound to break something, so uhh... open an issue.
 # My bad in advance. It's just been driving me insane.
 #
