@@ -1,50 +1,52 @@
 ! Base16 Railscasts
 ! Scheme: Ryan Bates (http://railscasts.com)
 
-#define base00 #2b2b2b
-#define base01 #272935
-#define base02 #3a4055
-#define base03 #5a647e
-#define base04 #d4cfc9
-#define base05 #e6e1dc
-#define base06 #f4f1ed
-#define base07 #f9f7f3
-#define base08 #da4939
-#define base09 #cc7833
-#define base0A #ffc66d
-#define base0B #a5c261
-#define base0C #519f50
-#define base0D #6d9cbe
-#define base0E #b6b3eb
-#define base0F #bc9458
+! URxvt*tintColor:                      color
+! URxvt*fadeColor:                      color
 
-*.foreground:   base05
-*.background:   base00
-*.cursorColor:  base05
+URxvt*background:                     #2b2b2b
+URxvt*foreground:                     #e6e1dc
+URxvt*cursorColor:                    #e6e1dc
 
-*.color0:       base00
-*.color1:       base08
-*.color2:       base0B
-*.color3:       base0A
-*.color4:       base0D
-*.color5:       base0E
-*.color6:       base0C
-*.color7:       base05
+! URxvt*colorBD:                        color
+! URxvt*colorIT:                        color
+! URxvt*colorUL:                        color
+! URxvt*colorRV:                        color
+! URxvt*underlineColor:                 color
+URxvt*scrollColor:                    #e6e1dc
+! URxvt*troughColor:                    color
+URxvt*highlightColor:                 #3a4055
+URxvt*highlightTextColor:             #d4cfc9
+! URxvt*cursorColor2:                   color
+! URxvt*pointerColor:                   color
+! URxvt*pointerColor2:                  color
+! URxvt*borderColor:                    color
+! URxvt*tab-bg:                         colour
+! URxvt*tab-fg:                         colour
+! URxvt*tabbar-bg:                      colour
+! URxvt*tabbar-fg:                      colour
 
-*.color8:       base03
-*.color9:       base08
-*.color10:      base0B
-*.color11:      base0A
-*.color12:      base0D
-*.color13:      base0E
-*.color14:      base0C
-*.color15:      base07
+URxvt*color0:                         #2b2b2b
+URxvt*color1:                         #da4939
+URxvt*color2:                         #a5c261
+URxvt*color3:                         #ffc66d
+URxvt*color4:                         #6d9cbe
+URxvt*color5:                         #b6b3eb
+URxvt*color6:                         #519f50
+URxvt*color7:                         #e6e1dc
+URxvt*color8:                         #5a647e
+URxvt*color9:                         #da4939
+URxvt*color10:                        #a5c261
+URxvt*color11:                        #ffc66d
+URxvt*color12:                        #6d9cbe
+URxvt*color13:                        #b6b3eb
+URxvt*color14:                        #519f50
+URxvt*color15:                        #f9f7f3
 
-! Note: colors beyond 15 might not be loaded (e.g., xterm, urxvt),
-! use 'shell' template to set these if necessary
-*.color16:      base09
-*.color17:      base0F
-*.color18:      base01
-*.color19:      base02
-*.color20:      base04
-*.color21:      base06
+! 256 color space
+URxvt*color16:                        #cc7833
+URxvt*color17:                        #bc9458
+URxvt*color18:                        #272935
+URxvt*color19:                        #3a4055
+URxvt*color20:                        #d4cfc9
+URxvt*color21:                        #f4f1ed
