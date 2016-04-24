@@ -32,9 +32,11 @@ define hyper ctrl+alt+cmd
 # Launch iTerm (launch if not running, else create new window)
 kwmc bind hyper-t sys osascript -e 'if application "iTerm" is running' -e 'tell application "iTerm" to create window with default profile' -e 'else' -e 'tell application "iTerm" to activate' -e 'end if'
 # Launch Emacs
-kwmc bind hyper-e sys open -a /Applications/Emacs.app
+kwmc bind hyper-e sys open -a "/Applications/Emacs.app"
 # Launch MacVim
 kwmc bind hyper-v sys /usr/local/bin/mvim
+# Launch Sublime
+kwmc bind hyper-s sys open -a "/Applications/Sublime Text.app"
 
 # Rotate window-tree of current space 90 degrees clockwise
 kwmc bind hyper-r tree rotate 90
