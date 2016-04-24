@@ -34,7 +34,7 @@ kwmc bind hyper-t sys osascript -e 'if application "iTerm" is running' -e 'tell 
 # Launch Emacs
 kwmc bind hyper-e sys open -a /Applications/Emacs.app
 # Launch MacVim
-kwmc bind hyper-v sys open -a /Applications/MacVim.app
+kwmc bind hyper-v sys /usr/local/bin/mvim
 
 # Rotate window-tree of current space 90 degrees clockwise
 kwmc bind hyper-r tree rotate 90
