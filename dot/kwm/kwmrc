@@ -58,6 +58,7 @@ kwmc rule owner="Simulator" properties={float="true"}
 kwmc rule owner="Simulator (Watch)" properties={float="true"}
 kwmc rule owner="Steam" properties={float="true"}
 kwmc rule owner="System Preferences" properties={float="true"}
+kwmc rule owner="Transmission" properties={float="true"}
 kwmc rule owner="VirtualBox" properties={float="true"}
 kwmc rule owner="VMware Fusion" properties={float="true"}
 kwmc rule owner="Zandronum" properties={float="true"}
