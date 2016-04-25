@@ -4,6 +4,8 @@ kwmc config gap 4 4
 
 # Default tiling mode for Kwm (bsp | monocle | float | off)
 kwmc config tiling bsp
+# Tiling mode for space 1 on screen 0
+kwmc config space 0 1 mode monocle
 
 # Let Kwm listen for hotkeys
 kwmc config hotkeys on
