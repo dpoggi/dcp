@@ -49,6 +49,7 @@ kwmc rule owner="Archiver" properties={float="true"}
 kwmc rule owner="Calendar" properties={float="true"}
 kwmc rule owner="Dash" properties={float="true"}
 kwmc rule owner="Dropbox" properties={float="true"}
+kwmc rule owner="Firefox" name="Launch Application" properties={float="true"}
 kwmc rule owner="Firefox" name="Library" properties={float="true"}
 kwmc rule owner="League of Legends" properties={float="true"}
 kwmc rule owner="Messages" properties={float="true"}
