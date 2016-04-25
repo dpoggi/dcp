@@ -56,6 +56,4 @@ printf >&2 "\n"
 if [[ "${did_something}" = "yep" ]]; then
   printf >&2 "\n"
   log_msg "Tip: restart your terminal, or do \`exec $(basename "${SHELL}")' now."
-  log_msg "To compile Command-T for Vim, after \`rbenv shell system' if necessary, do:"
-  log_msg "\`cd ~/.vim/bundle/command-t && /usr/bin/rake make'"
 fi
