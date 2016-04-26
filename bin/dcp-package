@@ -46,6 +46,7 @@ pushd ".vim" >/dev/null
 log_msg "Updating submodules for dotvim..."
 export GIT_DIR=".git"
 git submodule update --init --quiet --recursive
+scripts/post_update.sh
 log_msg "Finished."
 printf >&2 "\n"
 popd >/dev/null
