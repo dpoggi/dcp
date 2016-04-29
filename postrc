@@ -81,7 +81,9 @@ fi
 # Base16 colors, if the script path has been set locally
 #
 
-[[ -s "${BASE16_SHELL}" ]] && source "${BASE16_SHELL}"
+if [[ -s "${BASE16_SHELL}" && -z "${INSIDE_EMACS}" ]]; then
+  source "${BASE16_SHELL}"
+fi
 
 
 #
