@@ -5,8 +5,9 @@
 !/bin/__*
 !/bin/yolo
 
-# lib directory so I can sneak PyPI packages onto my CSE account
-/lib/*
+# shims directory for wrapping scripts from bin/
+/shims/*
+!/shims/.keep
 
 # local environment variables
 localenv
@@ -19,7 +20,7 @@ localexit
 
 # conf directory contains configuration for scripts
 /conf/*
-!/conf/.gitkeep
+!/conf/.keep
 
 # kwm config is wide open besides the two provided files
 /dot/kwm/*
