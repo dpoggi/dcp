@@ -139,18 +139,16 @@ __jobno() {
   jobs -l | grep -F "$1" | awk '{ print $1 }' | sed -e 's/[^0-9]//g'
 }
 
-# Strip components from PATH
-__strip_path() {
+# Filter components from PATH-like var
+__path_filter() {
+  local arr="$1"; shift
   local ifs="${IFS}"; IFS="|"
   local args="($*)"; IFS="${ifs}"
 
-  local stripped_path="$( \
-    printf "%s" "${PATH}" | perl -p \
+  printf "%s" "$(printf "%s" "${arr}" | perl -p \
       -e "s#:[^:]*${args}[^:]*:#:#g;" \
       -e "s#:[^:]*${args}[^:]*##g;" \
-      -e "s#[^:]*${args}[^:]*:##g;" \
-  )"
-  export PATH="${stripped_path}"
+      -e "s#[^:]*${args}[^:]*:##g;")"
 }
 
 # virtualenv-independent pip

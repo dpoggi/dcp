@@ -2,7 +2,7 @@
 # Common environment
 #
 
-export PATH="${PATH}:${DCP}/bin"
+export PATH="${PATH}:${DCP}/shims:${DCP}/bin"
 export GREP_OPTIONS="--color=auto"
 export LS_OPTIONS="--color=auto"
 export DPOGGI_TWOLINE="true"
@@ -15,9 +15,10 @@ export EDITOR="vim"
 #
 
 export DCP_OS="$(uname -s)"
-# Guard for Darwin because I know nothing about Linuxbrew
+# Guard for Darwin because I know nothing about Linuxbrew, and this PATH order
+# would be inappropriate for most distros.
 if [[ "${DCP_OS}" = "Darwin" && -x "/usr/local/bin/brew" ]]; then
-  export PATH="/usr/local/bin:/usr/local/sbin:${PATH}"
+  export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH}:/usr/local/sbin"
 fi
 
 
@@ -25,7 +26,22 @@ fi
 # Local environment
 #
 
-[[ -e "${DCP}/localenv" ]] && source "${DCP}/localenv"
+[[ -s "${DCP}/localenv" ]] && source "${DCP}/localenv"
 
-# Extend PATH with $JAVA_HOME/bin if one was set in localenv
+# Extend PATH with $JAVA_HOME/bin if one was set in localenv. Doesn't need to be
+# prepended thanks to the wrappers in /usr/bin, but there are a couple programs
+# (at least for Java 8) without wrappers in 10.11.
 [[ -n "${JAVA_HOME}" ]] && export PATH="${PATH}:${JAVA_HOME}/bin"
+
+
+#
+# Simplify PATH down to its earliest distinct elements. That is, remove
+# duplicates without altering behavior.
+#
+
+__path_distinct() {
+  printf "%s" "$1" | \
+    perl -e 'print join(":", grep { not $seen{$_}++ } split(/:/, scalar <>))'
+}
+
+export PATH="$(__path_distinct "${PATH}")"

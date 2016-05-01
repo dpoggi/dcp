@@ -11,14 +11,14 @@ fi
 
 if [[ -z "${DCP_DISABLE_NVM}" ]]; then
   [[ -d "${HOME}/.nvm" ]] && export NVM_DIR="${HOME}/.nvm"
-  if [[ -e "${NVM_DIR}/nvm.sh" ]]; then
+  if [[ -s "${NVM_DIR}/nvm.sh" ]]; then
     source "${NVM_DIR}/nvm.sh"
-  elif [[ -e "/usr/local/opt/nvm/nvm.sh" ]]; then
+  elif [[ -s "/usr/local/opt/nvm/nvm.sh" ]]; then
     # Because for some reason this doesn't end up in PATH with Homebrew...
     source "/usr/local/opt/nvm/nvm.sh"
   fi
 else
-  __strip_path nvm
+  export PATH="$(__path_filter "${PATH}" "nvm")"
 fi
 
 
@@ -37,7 +37,7 @@ if [[ -z "${DCP_DISABLE_PYENV}" ]]; then
     eval "$(pyenv-virtualenv-init -)"
   fi
 else
-  __strip_path pyenv
+  export PATH="$(__path_filter "${PATH}" "pyenv")"
 fi
 
 
@@ -48,9 +48,9 @@ fi
 if [[ -d "${HOME}/.rvm" ]]; then
   if [[ -z "${DCP_DISABLE_RVM}" ]]; then
     export PATH="${PATH}:${HOME}/.rvm/bin"
-    [[ -e "${HOME}/.rvm/scripts/rvm" ]] && source "${HOME}/.rvm/scripts/rvm"
+    [[ -s "${HOME}/.rvm/scripts/rvm" ]] && source "${HOME}/.rvm/scripts/rvm"
   else
-    __strip_path rvm
+    export PATH="$(__path_filter "${PATH}" "rvm")"
   fi
 else
   if [[ -z "${DCP_DISABLE_RBENV}" ]]; then
@@ -60,35 +60,27 @@ else
     fi
     hash rbenv 2>/dev/null && eval "$(rbenv init -)"
   else
-    __strip_path rbenv
+    export PATH="$(__path_filter "${PATH}" "rbenv")"
   fi
 fi
 
 
 #
-# GPG Agent
+# Final steps
 #
 
-if [[ -e "${HOME}/.gnupg/gpg-agent-info" && -e "${HOME}/.gnupg/S.gpg-agent.ssh" ]]; then
+# GPG Agent
+if [[ -s "${HOME}/.gnupg/gpg-agent-info" && -S "${HOME}/.gnupg/S.gpg-agent.ssh" ]]; then
   source "${HOME}/.gnupg/gpg-agent-info"
   export GPG_AGENT_INFO
   export SSH_AUTH_SOCK
   export SSH_AGENT_PID
 fi
 
-
-#
 # Base16 colors, if the script path has been set locally
-#
+[[ -s "${BASE16_SHELL}" && -z "${INSIDE_EMACS}" ]] && source "${BASE16_SHELL}"
 
-if [[ -s "${BASE16_SHELL}" && -z "${INSIDE_EMACS}" ]]; then
-  source "${BASE16_SHELL}"
+# Another round of PATH deduplification after version managers load
+if [[ -z "${DCP_DISABLE_MANAGERS}" ]]; then
+  export PATH="$(__path_distinct "${PATH}")"
 fi
-
-
-#
-# Clean up PATH. This is bound to break something, so uhh... open an issue.
-# My bad in advance. It's just been driving me insane.
-#
-
-export PATH="$(printf "%s" "${PATH}" | perl -e 'print join(":", grep { not $seen{$_}++ } split(/:/, scalar <>))')"
