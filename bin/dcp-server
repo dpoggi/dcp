@@ -1,13 +1,23 @@
 #!/bin/bash
 
-start_message() {
-  printf >&2 "$1 starting on ${bind_address}:9000...\n"
+listen_msg() {
+  printf >&2 "$1 listening on ${2:-0.0.0.0}:9000...\n"
+}
+
+twisted() {
+  listen_msg "Twisted"
+  if [[ "$1" = "--text" ]]; then
+    exec twistd --nodaemon --pidfile="" web --port="9000" --path="." --mime="text/plain"
+  else
+    exec twistd --nodaemon --pidfile="" web --port="9000" --path="."
+  fi
 }
 
 webrick() {
-  start_message "WEBrick"
+  local addr="${1:-0.0.0.0}"
+  listen_msg "WEBrick" "${addr}"
   exec ruby -r webrick <<-EOF
-    server = WEBrick::HTTPServer.new(:BindAddress   => '${bind_address}',
+    server = WEBrick::HTTPServer.new(:BindAddress   => '${addr}',
                                      :Port          => 9000,
                                      :DocumentRoot  => Dir.pwd)
     trap('INT') { server.shutdown }
@@ -15,25 +25,20 @@ webrick() {
 EOF
 }
 
-if [[ "$#" -gt "0" ]]; then
-  hash ruby 2>/dev/null || {
-    printf >&2 "Error: couldn't find a Ruby interpreter.\n"
-    exit 1
-  }
-  bind_address="$1"
-  webrick
-  exit
-else
-  bind_address="0.0.0.0"
+if [[ "$1" = "--text" ]]; then
+  hash twistd 2>/dev/null || { printf >&2 "Error: couldn't find Twisted\n"; exit 1; }
+  twisted "$1"
+elif [[ "$#" -gt "0" ]]; then
+  hash ruby 2>/dev/null || { printf >&2 "Error: couldn't find Ruby\n"; exit 1; }
+  webrick "$1"
 fi
 
-if hash twistd 2>&-; then
-  start_message "Twisted"
-  exec twistd -n --pidfile= web --path . --port 9000
-elif hash ruby 2>&-; then
+if hash twistd 2>/dev/null; then
+  twisted
+elif hash ruby 2>/dev/null; then
   webrick
-elif hash python 2>&-; then
-  start_message "SimpleHTTPServer"
+elif hash python 2>/dev/null; then
+  listen_msg "SimpleHTTPServer"
   exec python -m SimpleHTTPServer 9000
 else
   printf >&2 "Error: couldn't find a Ruby or Python interpreter.\n"
