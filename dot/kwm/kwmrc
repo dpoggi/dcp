@@ -48,12 +48,22 @@ kwmc rule owner="Archive Utility" properties={float="true"}
 kwmc rule owner="Archiver" properties={float="true"}
 kwmc rule owner="Calculator" properties={float="true"}
 kwmc rule owner="Calendar" properties={float="true"}
+kwmc rule owner="CLion" name="Preferences" properties={float="true"}
+kwmc rule owner="CLion" name="Project Structure" properties={float="true"}
 kwmc rule owner="Dash" properties={float="true"}
+kwmc rule owner="DataGrip" name="Preferences" properties={float="true"}
+kwmc rule owner="DataGrip" name="Project Structure" properties={float="true"}
 kwmc rule owner="Dropbox" properties={float="true"}
 kwmc rule owner="Firefox" name="Launch Application" properties={float="true"}
+kwmc rule owner="IntelliJ IDEA" name="Preferences" properties={float="true"}
+kwmc rule owner="IntelliJ IDEA" name="Project Structure" properties={float="true"}
 kwmc rule owner="League of Legends" properties={float="true"}
 kwmc rule owner="Messages" properties={float="true"}
 kwmc rule owner="Photoshop" properties={float="true"}
+kwmc rule owner="PyCharm" name="Preferences" properties={float="true"}
+kwmc rule owner="PyCharm" name="Project Structure" properties={float="true"}
+kwmc rule owner="RubyMine" name="Preferences" properties={float="true"}
+kwmc rule owner="RubyMine" name="Project Structure" properties={float="true"}
 kwmc rule owner="Screenhero" properties={float="true"}
 kwmc rule owner="Script Editor" name="Library" properties={float="true"}
 kwmc rule owner="Script Editor" name="sdef" properties={float="true"}
@@ -64,14 +74,16 @@ kwmc rule owner="System Preferences" properties={float="true"}
 kwmc rule owner="Transmission" properties={float="true"}
 kwmc rule owner="VirtualBox" properties={float="true"}
 kwmc rule owner="VMware Fusion" properties={float="true"}
+kwmc rule owner="WebStorm" name="Preferences" properties={float="true"}
+kwmc rule owner="WebStorm" name="Project Structure" properties={float="true"}
 kwmc rule owner="Zandronum" properties={float="true"}
 
 # The following command creates a rule that
 # captures an application to the given screen,
 # if the screen exists.
 kwmc rule owner="Audirvana Plus" properties={display="0"}
-kwmc rule owner="DataGrip" properties={display="1"}
 kwmc rule owner="CLion" properties={display="1"}
+kwmc rule owner="DataGrip" properties={display="1"}
 kwmc rule owner="IntelliJ IDEA" properties={display="1"}
 kwmc rule owner="iTunes" properties={display="0"}
 kwmc rule owner="Messages" properties={display="0"}
