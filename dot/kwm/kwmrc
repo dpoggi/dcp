@@ -44,6 +44,7 @@ kwmc config add-role AXDialog iTerm
 
 # The following commands create rules that
 # blacklists an application from Kwms tiling
+kwmc rule owner="App Store" properties={float="true"}
 kwmc rule owner="Archive Utility" properties={float="true"}
 kwmc rule owner="Archiver" properties={float="true"}
 kwmc rule owner="Calculator" properties={float="true"}
