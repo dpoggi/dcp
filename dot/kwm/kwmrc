@@ -92,7 +92,6 @@ kwmc rule owner="Audirvana Plus" properties={display="0"}
 kwmc rule owner="CLion" properties={display="1"}
 kwmc rule owner="DataGrip" properties={display="1"}
 kwmc rule owner="IntelliJ IDEA" properties={display="1"}
-kwmc rule owner="iTunes" properties={display="0"}
 kwmc rule owner="Messages" properties={display="0"}
 kwmc rule owner="PyCharm" properties={display="1"}
 kwmc rule owner="RubyMine" properties={display="1"}
