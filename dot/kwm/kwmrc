@@ -52,24 +52,29 @@ kwmc rule owner="Calendar" properties={float="true"}
 kwmc rule owner="CLion" name="Platform and Plugin Updates" properties={float="true"}
 kwmc rule owner="CLion" name="Preferences" properties={float="true"}
 kwmc rule owner="CLion" name="Project Structure" properties={float="true"}
+kwmc rule owner="CLion" name="Welcome to CLion" properties={float="true"}
 kwmc rule owner="Dash" properties={float="true"}
 kwmc rule owner="DataGrip" name="Platform and Plugin Updates" properties={float="true"}
 kwmc rule owner="DataGrip" name="Preferences" properties={float="true"}
 kwmc rule owner="DataGrip" name="Project Structure" properties={float="true"}
+kwmc rule owner="DataGrip" name="Welcome to DataGrip" properties={float="true"}
 kwmc rule owner="Dropbox" properties={float="true"}
 kwmc rule owner="Firefox" name="Launch Application" properties={float="true"}
 kwmc rule owner="IntelliJ IDEA" name="Platform and Plugin Updates" properties={float="true"}
 kwmc rule owner="IntelliJ IDEA" name="Preferences" properties={float="true"}
 kwmc rule owner="IntelliJ IDEA" name="Project Structure" properties={float="true"}
+kwmc rule owner="IntelliJ IDEA" name="Welcome to IntelliJ IDEA" properties={float="true"}
 kwmc rule owner="League of Legends" properties={float="true"}
 kwmc rule owner="Messages" properties={float="true"}
 kwmc rule owner="Photoshop" properties={float="true"}
 kwmc rule owner="PyCharm" name="Platform and Plugin Updates" properties={float="true"}
 kwmc rule owner="PyCharm" name="Preferences" properties={float="true"}
 kwmc rule owner="PyCharm" name="Project Structure" properties={float="true"}
+kwmc rule owner="PyCharm" name="Welcome to PyCharm" properties={float="true"}
 kwmc rule owner="RubyMine" name="Platform and Plugin Updates" properties={float="true"}
 kwmc rule owner="RubyMine" name="Preferences" properties={float="true"}
 kwmc rule owner="RubyMine" name="Project Structure" properties={float="true"}
+kwmc rule owner="RubyMine" name="Welcome to RubyMine" properties={float="true"}
 kwmc rule owner="Screenhero" properties={float="true"}
 kwmc rule owner="Script Editor" name="Library" properties={float="true"}
 kwmc rule owner="Script Editor" name="sdef" properties={float="true"}
@@ -83,6 +88,7 @@ kwmc rule owner="VMware Fusion" properties={float="true"}
 kwmc rule owner="WebStorm" name="Platform and Plugin Updates" properties={float="true"}
 kwmc rule owner="WebStorm" name="Preferences" properties={float="true"}
 kwmc rule owner="WebStorm" name="Project Structure" properties={float="true"}
+kwmc rule owner="WebStorm" name="Welcome to WebStorm" properties={float="true"}
 kwmc rule owner="Zandronum" properties={float="true"}
 
 # The following command creates a rule that
