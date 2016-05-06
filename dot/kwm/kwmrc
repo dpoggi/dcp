@@ -45,6 +45,10 @@ kwmc config add-role AXDialog iTerm
 # The following commands create rules that
 # blacklists an application from Kwms tiling
 kwmc rule owner="App Store" properties={float="true"}
+kwmc rule owner="AppCode" name="Platform and Plugin Updates" properties={float="true"}
+kwmc rule owner="AppCode" name="Preferences" properties={float="true"}
+kwmc rule owner="AppCode" name="Project Structure" properties={float="true"}
+kwmc rule owner="AppCode" name="Welcome to AppCode" properties={float="true"}
 kwmc rule owner="Archive Utility" properties={float="true"}
 kwmc rule owner="Archiver" properties={float="true"}
 kwmc rule owner="Calculator" properties={float="true"}
@@ -67,14 +71,6 @@ kwmc rule owner="IntelliJ IDEA" name="Welcome to IntelliJ IDEA" properties={floa
 kwmc rule owner="League of Legends" properties={float="true"}
 kwmc rule owner="Messages" properties={float="true"}
 kwmc rule owner="Photoshop" properties={float="true"}
-kwmc rule owner="PyCharm" name="Platform and Plugin Updates" properties={float="true"}
-kwmc rule owner="PyCharm" name="Preferences" properties={float="true"}
-kwmc rule owner="PyCharm" name="Project Structure" properties={float="true"}
-kwmc rule owner="PyCharm" name="Welcome to PyCharm" properties={float="true"}
-kwmc rule owner="RubyMine" name="Platform and Plugin Updates" properties={float="true"}
-kwmc rule owner="RubyMine" name="Preferences" properties={float="true"}
-kwmc rule owner="RubyMine" name="Project Structure" properties={float="true"}
-kwmc rule owner="RubyMine" name="Welcome to RubyMine" properties={float="true"}
 kwmc rule owner="Screenhero" properties={float="true"}
 kwmc rule owner="Script Editor" name="Library" properties={float="true"}
 kwmc rule owner="Script Editor" name="sdef" properties={float="true"}
@@ -85,26 +81,20 @@ kwmc rule owner="System Preferences" properties={float="true"}
 kwmc rule owner="Transmission" properties={float="true"}
 kwmc rule owner="VirtualBox" properties={float="true"}
 kwmc rule owner="VMware Fusion" properties={float="true"}
-kwmc rule owner="WebStorm" name="Platform and Plugin Updates" properties={float="true"}
-kwmc rule owner="WebStorm" name="Preferences" properties={float="true"}
-kwmc rule owner="WebStorm" name="Project Structure" properties={float="true"}
-kwmc rule owner="WebStorm" name="Welcome to WebStorm" properties={float="true"}
 kwmc rule owner="Zandronum" properties={float="true"}
 
 # The following command creates a rule that
 # captures an application to the given screen,
 # if the screen exists.
+kwmc rule owner="AppCode" properties={display="1"}
 kwmc rule owner="Audirvana Plus" properties={display="0"}
 kwmc rule owner="CLion" properties={display="1"}
 kwmc rule owner="DataGrip" properties={display="1"}
 kwmc rule owner="IntelliJ IDEA" properties={display="1"}
 kwmc rule owner="Messages" properties={display="0"}
-kwmc rule owner="PyCharm" properties={display="1"}
-kwmc rule owner="RubyMine" properties={display="1"}
 kwmc rule owner="Simulator" properties={display="0"}
 kwmc rule owner="Simulator (Watch)" properties={display="0"}
 kwmc rule owner="Slack" properties={display="0"}
-kwmc rule owner="WebStorm" properties={display="1"}
 kwmc rule owner="Xcode" properties={display="1"}
 
 # Enable border for focused window
