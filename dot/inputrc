@@ -9,9 +9,9 @@ set mark-symlinked-directories on
 set skip-completed-text on
 
 set show-all-if-ambiguous on
-set show-all-if-unmodified off
-set menu-complete-display-prefix off
-set completion-query-items -1
+set show-all-if-unmodified on
+set menu-complete-display-prefix on
+set completion-query-items 150
 
 # Comments list Emacs key notation for bindings because this termcap-y stuff
 # can be hard to read.
