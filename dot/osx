@@ -6,7 +6,7 @@
 # General UI/UX                                                               #
 ###############################################################################
 
-# Menu bar: show remaining battery percentage (on pre-10.8); hide time
+# Menu bar: show remaining battery percentage
 defaults write com.apple.menuextra.battery ShowPercent -string "YES"
 
 # Display ASCII control characters using caret notation in standard text views
@@ -21,6 +21,10 @@ defaults write NSGlobalDomain NSDisableAutomaticTermination -bool true
 
 # Set a blazingly fast keyboard repeat rate
 defaults write NSGlobalDomain KeyRepeat -int 0
+
+# Disable smart quotes/dashes because typing code into Slack
+defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
 
 ###############################################################################
 # Screen                                                                      #
@@ -63,7 +67,7 @@ defaults write com.apple.dock showhidden -bool true
 # Kill affected applications                                                  #
 ###############################################################################
 
-for app in Finder Dock SystemUIServer; do
-	killall "$app" > /dev/null 2>&1
+for process in Finder Dock SystemUIServer; do
+  killall "${process}" &> /dev/null
 done
 echo "Done. Note that some of these changes require a logout/restart to take effect."
