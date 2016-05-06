@@ -54,8 +54,6 @@ alias ggr="git grep --break --heading --line-number"
 
 gcb() {
   local current_branch="$(git branch 2>/dev/null | sed -e '/^[^*]/d' | colrm 1 2)"
-  echo "${current_branch}"
-  return
   git fetch --prune
   git branch --merged | \
     colrm 1 2 | \
