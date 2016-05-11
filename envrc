@@ -3,7 +3,10 @@
 #
 
 export PATH="${PATH}:${DCP}/shims:${DCP}/bin"
-export GREP_OPTIONS="--color=auto"
+export DCP_OS="$(uname -s)"
+if [[ -n "${BASH}" ]]; then
+  alias grep="grep --color=auto"
+fi
 export LS_OPTIONS="--color=auto"
 export DPOGGI_TWOLINE="true"
 export CLICOLOR="1"
@@ -11,10 +14,9 @@ export EDITOR="vim"
 
 
 #
-# DCP_OS var, check for Homebrew
+# Check for Homebrew
 #
 
-export DCP_OS="$(uname -s)"
 # Guard for Darwin because I know nothing about Linuxbrew, and this PATH order
 # would be inappropriate for most distros.
 if [[ "${DCP_OS}" = "Darwin" && -x "/usr/local/bin/brew" ]]; then
