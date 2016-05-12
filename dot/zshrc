@@ -24,7 +24,7 @@ fi
 #
 
 # Load most of dcp
-[[ -e "${DCP}/initrc" ]] && source "${DCP}/initrc"
+[[ -e "${DCP}/lib/init.sh" ]] && source "${DCP}/lib/init.sh"
 
 # Load oh-my-zsh itself
 [[ -e "${ZSH}/oh-my-zsh.sh" ]] && source "${ZSH}/oh-my-zsh.sh"
@@ -43,4 +43,4 @@ if hash hub 2>/dev/null; then
 fi
 
 # Finish up the details
-[[ -e "${DCP}/postrc" ]] && source "${DCP}/postrc"
+[[ -e "${DCP}/lib/post_init.sh" ]] && source "${DCP}/lib/post_init.sh"

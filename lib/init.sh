@@ -1,5 +1,5 @@
 # Load aliases
-[[ -e "${DCP}/aliasrc" ]] && source "${DCP}/aliasrc"
+[[ -e "${DCP}/lib/aliases.sh" ]] && source "${DCP}/lib/aliases.sh"
 
 # Load OS-specific aliases, if appropriate
 [[ -e "${DCP}/lib/aliases_${DCP_OS}.sh" ]] && source "${DCP}/lib/aliases_${DCP_OS}.sh"

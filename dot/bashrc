@@ -4,7 +4,7 @@ export DCP="${HOME}/.dcp"
 [[ -e "${DCP}/envrc" ]] && source "${DCP}/envrc"
 
 # Load most of dcp
-[[ -e "${DCP}/initrc" ]] && source "${DCP}/initrc"
+[[ -e "${DCP}/lib/init.sh" ]] && source "${DCP}/lib/init.sh"
 
 # Set PS1, etc.
 set_prompt
@@ -15,4 +15,4 @@ if [[ -s "/usr/share/doc/pkgfile/command-not-found.bash" ]]; then
 fi
 
 # Finish up the details
-[[ -e "${DCP}/postrc" ]] && source "${DCP}/postrc"
+[[ -e "${DCP}/lib/post_init.sh" ]] && source "${DCP}/lib/post_init.sh"

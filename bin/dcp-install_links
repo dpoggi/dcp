@@ -25,9 +25,9 @@ That said, it can also really mess things up. It's good to examine their
 contents and evaluate if they need to exist.
 
 For example, RVM will persistently try to create ~/.zlogin to ensure that
-it gets loaded, but this already happens in ~/.dcp/postrc, and the code they
-put in ~/.zlogin will cause zsh to both start and exit with return code 1 for
-login shells if you ever uninstall RVM. Not good!
+it gets loaded, but this already happens in ~/.dcp/lib/post_init.sh, and the
+code they put in ~/.zlogin will cause zsh to both start and exit with return
+code 1 for login shells if you ever uninstall RVM. Not good!
 
 This wall of warning text will only be shown once, unless you get rid of these
 files then create them again at some point.
