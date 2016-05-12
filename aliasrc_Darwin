@@ -3,11 +3,17 @@
 #
 
 # Open Xcode for current folder (prefers workspace to project)
-alias xc="open -a /Applications/Xcode.app ."
+xc() {
+  open -a "/Applications/Xcode.app" .
+}
 # Dammit Xcode (delete derived data twice a day for entire career as needed)
-alias fuxcode='rm -rf "${HOME}/Library/Developer/Xcode/DerivedData"'
+fuxcode() {
+  rm -rf "${HOME}/Library/Developer/Xcode/DerivedData"
+}
 # Verify Xcode installation
-alias haxcode="spctl --assess --verbose /Applications/Xcode.app"
+haxcode() {
+  spctl --assess --verbose "/Applications/Xcode.app"
+}
 
 
 #
@@ -73,7 +79,9 @@ reset_dns_cache() {
 }
 
 # Clear Quick Look's file locks (so you can empty the trash)
-alias reset_quick_look="qlmanage -r"
+reset_quick_look() {
+  qlmanage -r
+}
 
 
 #
