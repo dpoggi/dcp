@@ -2,7 +2,7 @@
 [[ -e "${DCP}/aliasrc" ]] && source "${DCP}/aliasrc"
 
 # Load OS-specific aliases, if appropriate
-[[ -e "${DCP}/aliasrc_${DCP_OS}" ]] && source "${DCP}/aliasrc_${DCP_OS}"
+[[ -e "${DCP}/lib/aliases_${DCP_OS}.sh" ]] && source "${DCP}/lib/aliases_${DCP_OS}.sh"
 
 # Load local modifications
 [[ -e "${DCP}/localrc" ]] && source "${DCP}/localrc"
