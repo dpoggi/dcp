@@ -44,3 +44,6 @@ fi
 
 # Finish up the details
 [[ -e "${DCP}/lib/post_init.sh" ]] && source "${DCP}/lib/post_init.sh"
+
+# Enable fallback behavior when glob matching fails
+unsetopt nomatch
