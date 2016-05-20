@@ -5,7 +5,7 @@
 \pset null '[NULL]'
 
 -- Set the prompt for normal actions
-\set PROMPT1 '%[%033[1m%]%M %n@%/%R%[%033[0m%]%# '
+\set PROMPT1 '%[%033[1m%]%M %n@%/\n%R%[%033[0m%]%# '
 -- Set the prompt for extra input
 \set PROMPT2 '[more] %R > '
 
