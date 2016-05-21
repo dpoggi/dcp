@@ -45,6 +45,10 @@ kwmc config add-role AXDialog iTerm
 # The following commands create rules that
 # blacklists an application from Kwms tiling
 kwmc rule owner="App Store" properties={float="true"}
+kwmc rule owner="Android Studio" name="Platform and Plugin Updates" properties={float="true"}
+kwmc rule owner="Android Studio" name="Preferences" properties={float="true"}
+kwmc rule owner="Android Studio" name="Project Structure" properties={float="true"}
+kwmc rule owner="Android Studio" name="Welcome to Android Studio" properties={float="true"}
 kwmc rule owner="AppCode" name="Platform and Plugin Updates" properties={float="true"}
 kwmc rule owner="AppCode" name="Preferences" properties={float="true"}
 kwmc rule owner="AppCode" name="Project Structure" properties={float="true"}
