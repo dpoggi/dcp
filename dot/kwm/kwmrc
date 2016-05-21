@@ -63,7 +63,9 @@ kwmc rule owner="DataGrip" name="Preferences" properties={float="true"}
 kwmc rule owner="DataGrip" name="Project Structure" properties={float="true"}
 kwmc rule owner="DataGrip" name="Welcome to DataGrip" properties={float="true"}
 kwmc rule owner="Dropbox" properties={float="true"}
+kwmc rule owner="emulator64-arm" properties={float="true"}
 kwmc rule owner="Firefox" name="Launch Application" properties={float="true"}
+kwmc rule owner="Installer" properties={float="true"}
 kwmc rule owner="IntelliJ IDEA" name="Platform and Plugin Updates" properties={float="true"}
 kwmc rule owner="IntelliJ IDEA" name="Preferences" properties={float="true"}
 kwmc rule owner="IntelliJ IDEA" name="Project Structure" properties={float="true"}
@@ -71,6 +73,8 @@ kwmc rule owner="IntelliJ IDEA" name="Welcome to IntelliJ IDEA" properties={floa
 kwmc rule owner="League of Legends" properties={float="true"}
 kwmc rule owner="Messages" properties={float="true"}
 kwmc rule owner="Photoshop" properties={float="true"}
+kwmc rule owner="qemu-system-i386" properties={float="true"}
+kwmc rule owner="qemu-system-x86_64" properties={float="true"}
 kwmc rule owner="Screenhero" properties={float="true"}
 kwmc rule owner="Script Editor" name="Library" properties={float="true"}
 kwmc rule owner="Script Editor" name="sdef" properties={float="true"}
