@@ -56,6 +56,10 @@ class Installable
     if @formulae && @formulae.count > 0
       STDERR.puts "\nEnsure the following Homebrew formulae are installed: [#{@formulae.join(", ")}]"
     end
+
+    if @additional_info
+      STDERR.puts "\n\nAdditional info: #{@additional_info}"
+    end
   end
 end
 
@@ -69,6 +73,7 @@ class GpgAgent < Installable
 
     @cmd = "launchctl load -S Aqua -w \"#{@plist_tmpl.path}\""
     @formulae = %w(gnupg2 gpg-agent pinentry-mac)
+    @additional_info = "to use GPG to sign all local Git commits, do: `git config --global commit.gpgsign true'"
   end
 
   def write
