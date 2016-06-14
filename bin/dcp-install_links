@@ -71,6 +71,7 @@ if hash git 2>/dev/null; then
   maybe_git_config "core.editor" "vim"
   maybe_git_config "push.default" "matching"
   maybe_git_config "grep.lineNumber" "true"
+  maybe_git_config "submodule.fetchJobs" "2"
   git config --global "core.excludesfile" "${HOME}/.cvsignore"
   [[ "${DCP_OS}" = "Darwin" ]] && maybe_git_config "core.trustctime" "false"
 fi
