@@ -67,7 +67,7 @@ reset_launch_services() {
 reset_dns_cache() {
   printf >&2 "Flushing the DNS cache (enter your user password if prompted)...\n"
 
-  if hash discoveryutil 2>/dev/null; then
+  if hash discoveryutil 2> /dev/null; then
     # OS X 10.9 - 10.10.3
     sudo discoveryutil mdnsflushcache
     sudo discoveryutil udnsflushcache

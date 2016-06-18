@@ -53,7 +53,7 @@ alias grv="git remote -v"
 alias ggr="git grep --break --heading --line-number"
 
 gcb() {
-  local current_branch="$(git branch 2>/dev/null | sed -e '/^[^*]/d' | colrm 1 2)"
+  local current_branch="$(git branch 2> /dev/null | sed -e '/^[^*]/d' | colrm 1 2)"
   git fetch --prune
   git branch --merged | \
     colrm 1 2 | \
@@ -167,7 +167,14 @@ gpip() {
 
 # docker-machine environment
 dm_env() {
-  eval "$(docker-machine env "$1")"
+  if [[ "$1" != "none" ]]; then
+    eval "$(docker-machine env "$1")"
+  else
+    unset DOCKER_TLS_VERIFY
+    unset DOCKER_HOST
+    unset DOCKER_CERT_PATH
+    unset DOCKER_MACHINE_NAME
+  fi
 }
 
 # Kill running Emacsen
@@ -180,10 +187,10 @@ __kill_emacs() {
 # Clipboard functions
 #
 
-if hash pbcopy 2>/dev/null && hash pbpaste 2>/dev/null; then
+if hash pbcopy 2> /dev/null && hash pbpaste 2> /dev/null; then
   DCP_CBCOPY="pbcopy"
   DCP_CBPASTE="pbpaste"
-elif hash xsel 2>/dev/null; then
+elif hash xsel 2> /dev/null; then
   DCP_CBCOPY="xsel --clipboard --input"
   DCP_CBPASTE="xsel --clipboard --output"
 fi
@@ -215,7 +222,7 @@ cbpaste() {
 # Easter egg!
 #
 
-if hash cowsay 2>/dev/null; then
+if hash cowsay 2> /dev/null; then
   cornholio() {
     cowsay -f beavis.zen "hehehehehehehehe"
   }
