@@ -1,95 +1,89 @@
-#
-# Prefix and metakey configuration
-#
+//
+// Prefix and metakey configuration
+//
 
-# Set prefix hotkey
-kwmc config prefix-key ctrl-s
+// Set prefix hotkey
+kwmc bindsym ctrl-s mode activate prefix
 
-# Prefix is not applied globally
-kwmc config prefix-global off
-
-# Time in seconds before prefix must be reactivated
-kwmc config prefix-timeout 0.5
-
-# Metakeys
-#
-# For same-space, same-screen window moves
+// Metakeys
+//
+// For same-space, same-screen window moves
 define super alt+cmd
-# Every super key needs a sidekick, right? RIGHT?! (for space moves)
+// Every super key needs a sidekick, right? RIGHT?! (for space moves)
 define sidekick alt+shift
-# For screen moves and other stuff n' things
+// For screen moves and other stuff n' things
 define hyper ctrl+alt+cmd
 
 
-#
-# Keybinds
-#
+//
+// Keybinds
+//
 
-# After some digging through the kwm source, sys commands are run by system(3),
-# thus anything after the word 'sys' itself is passed along to /bin/sh. kwm
-# does (as of v2.2.0 at latest) perform this execution on a dedicated thread.
-#
-# Launch iTerm (launch if not running, else create new window)
-kwmc bind hyper-t sys osascript -e 'if application "iTerm" is running' -e 'tell application "iTerm" to create window with default profile' -e 'else' -e 'tell application "iTerm" to activate' -e 'end if'
-# Launch MacVim
-kwmc bind hyper-v sys /usr/local/bin/mvim
-# Launch Emacs
-kwmc bind hyper-e sys osascript -e 'tell application "Emacs" to activate'
-# Launch Sublime
-kwmc bind hyper-s sys osascript -e 'tell application "Sublime Text" to activate'
-# Launch Atom
-kwmc bind hyper-a sys osascript -e 'tell application "Atom" to activate'
+// After some digging through the kwm source, exec commands are run by system(3),
+// thus anything after the word 'sys' itself is passed along to /bin/sh. kwm
+// does (as of v2.2.0 at latest) perform this execution on a dedicated thread.
+//
+// Launch iTerm (launch if not running, else create new window)
+kwmc bindsym hyper-t exec osascript -e 'if application "iTerm" is running' -e 'tell application "iTerm" to create window with default profile' -e 'else' -e 'tell application "iTerm" to activate' -e 'end if'
+// Launch MacVim
+kwmc bindsym hyper-v exec /usr/local/bin/mvim
+// Launch Emacs
+kwmc bindsym hyper-e exec osascript -e 'tell application "Emacs" to activate'
+// Launch Sublime
+kwmc bindsym hyper-s exec osascript -e 'tell application "Sublime Text" to activate'
+// Launch Atom
+kwmc bindsym hyper-a exec osascript -e 'tell application "Atom" to activate'
 
-# Rotate window-tree of current space 90 degrees clockwise
-kwmc bind hyper-r tree rotate 90
+// Rotate window-tree of current space 90 degrees clockwise
+kwmc bindsym hyper-r tree rotate 90
 
-# Toggle fullscreen on focused container
-kwmc bind super-f window -z fullscreen
+// Toggle fullscreen on focused container
+kwmc bindsym super-f window -z fullscreen
 
-# Set space tiling mode to BSP
-kwmc bind hyper-b space -t bsp
-# Set space tiling mode to monocle
-kwmc bind hyper-m space -t monocle
-# Set space tiling mode to floating
-kwmc bind hyper-f space -t float
+// Set space tiling mode to BSP
+kwmc bindsym hyper-b space -t bsp
+// Set space tiling mode to monocle
+kwmc bindsym hyper-m space -t monocle
+// Set space tiling mode to floating
+kwmc bindsym hyper-f space -t float
 
-# Toggle floating for focused container
-kwmc bind super-t window -t focused
+// Toggle floating for focused container
+kwmc bindsym super-t window -t focused
 
-# Not using the new commands from v2.2.0 yet because I haven't thought of an
-# intuitive way to lay out their keybinds.
-#
-# Shrink focused container
-kwmc bind prefix-w window -c expand 0.05
-# Expand focused container
-kwmc bind prefix-s window -c reduce 0.05
+// Not using the new commands from v2.2.0 yet because I haven't thought of an
+// intuitive way to lay out their keybinds.
+//
+// Shrink focused container
+kwmc bindsym prefix-w window -c expand 0.05
+// Expand focused container
+kwmc bindsym prefix-s window -c reduce 0.05
 
-# Toggle split-mode
-kwmc bind prefix-m window -c split-mode toggle
+// Toggle split-mode
+kwmc bindsym prefix-m window -c split-mode toggle
 
-# Move focus counter-clockwise
-kwmc bind prefix-k window -f next
-# Move focus clockwise
-kwmc bind prefix-j window -f prev
+// Move focus counter-clockwise
+kwmc bindsym prefix-k window -f next
+// Move focus clockwise
+kwmc bindsym prefix-j window -f prev
 
-# Move screen focus counter-clockwise
-kwmc bind prefix-h display -f prev
-# Move screen focus clockwise
-kwmc bind prefix-l display -f next
-# Because I'm a klutz
-kwmc bind prefix-; display -f next
+// Move screen focus counter-clockwise
+kwmc bindsym prefix-h display -f prev
+// Move screen focus clockwise
+kwmc bindsym prefix-l display -f next
+// Because I'm a klutz
+kwmc bindsym prefix-; display -f next
 
-# Swap focused container counter-clockwise
-kwmc bind super-left window -s prev
-# Swap focused container clockwise
-kwmc bind super-right window -s next
+// Swap focused container counter-clockwise
+kwmc bindsym super-left window -s prev
+// Swap focused container clockwise
+kwmc bindsym super-right window -s next
 
-# Swap focused container one space left
-kwmc bind sidekick-left window -m space left
-# Swap focused container one space right
-kwmc bind sidekick-right window -m space right
+// Swap focused container one space left
+kwmc bindsym sidekick-left window -m space left
+// Swap focused container one space right
+kwmc bindsym sidekick-right window -m space right
 
-# Swap focused container one display counter-clockwise
-kwmc bind hyper-left window -m display prev
-# Swap focused container one display clockwise
-kwmc bind hyper-right window -m display next
+// Swap focused container one display counter-clockwise
+kwmc bindsym hyper-left window -m display prev
+// Swap focused container one display clockwise
+kwmc bindsym hyper-right window -m display next
