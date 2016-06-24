@@ -74,17 +74,34 @@ gpub() {
   git checkout "$1"
 }
 
-# For oh-my-zsh jira plugin
-gbjira() {
-  if [[ -z "${BASH}" && "$(whence -w jira)" = "jira: function" ]]; then
-    local branch="$("${DCP}/bin/__ps1_git_branch" | sed -e 's/[\(\)]//g')"
-    if [[ -n "${branch}" ]]; then
-      jira "${branch}"
-    else
-      printf >&2 "Unable to get the current branch.\n"
-      return 1
-    fi
+
+#
+# Find files of extension $1 with lines longer than $2 columns
+#
+
+find_long_lines() {
+  if [[ "$#" != "2" ]]; then
+    printf >&2 "Usage: find_long_lines <ext> <#>\n"
+    return 1
   fi
+
+  local c_red="\033[0;31m"
+  local c_green="\033[0;32m"
+  local c_white="\033[0;37m"
+  local c_reset="\033[0m"
+  local file result line
+
+  while read file; do
+    result="$(grep -n ".\\{$2\\}" "${file}" | cut -d ':' -f 1)"
+    if [[ -n "${result}" ]]; then
+      printf >&2 "${c_green}%s${c_white}:${c_reset} " \
+                 "$(printf "%s" "${file}" | tail -c +3)"
+      while read line; do
+        printf >&2 "${c_red}%s${c_white},${c_reset} " "${line}"
+      done < <(printf "%s" "${result}")
+      printf >&2 "${c_red}%s${c_reset}\n" "${line}"
+    fi
+  done < <(find . -mindepth 1 -type f -name "*.$1" -print)
 }
 
 
