@@ -199,6 +199,16 @@ __kill_emacs() {
   emacsclient --eval "(kill-emacs)"
 }
 
+# Restart shell with version managers disabled
+
+no_managers() {
+  local opt
+  if [[ "$-" = *l* ]] || shopt -q login_shell 2> /dev/null; then
+    opt="--login"
+  fi
+  DCP_DISABLE_MANAGERS="true" exec "${SHELL}" "${opt}"
+}
+
 
 #
 # Clipboard functions
