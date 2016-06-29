@@ -161,8 +161,16 @@ __bin_path() {
 }
 
 # Gets job number from PID after &ing a process
-__jobno() {
-  jobs -l | grep -F "$1" | awk '{ print $1 }' | sed -e 's/[^0-9]//g'
+__job_num() {
+  local num="$(jobs -l \
+                 | grep -F "$1" \
+                 | tail -n 1 \
+                 | cut -d ' ' -f 1 \
+                 | sed -e 's/[^[:digit:]]//g')"
+  if [[ -z "${num}" ]]; then
+    return 1
+  fi
+  printf "%s" "${num}"
 }
 
 # Filter components from PATH-like var
