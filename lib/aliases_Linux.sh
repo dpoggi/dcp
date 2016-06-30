@@ -9,9 +9,10 @@ __net_open_things() {
   fi
 
   printf "%s\n%s\n" "$1" \
-    "$(sudo -H netstat --all --listening --program --numeric --wide | \
-       awk "$2" | sort -g)" | column -t -o "    " | \
-       sed -r -e 's/^([0-9]+)(\s+)(\w+):(\w+) (.*)$/\1\2\3: \4\5/'
+    "$(sudo -H netstat --all --listening --program --numeric --wide \
+         | awk "$2" | sort -g)" \
+           | column -t -o "    " \
+           | sed -r -e 's/^([0-9]+)(\s+)(\w+):(\w+) (.*)$/\1\2\3: \4\5/'
 }
 
 # List open TCP/UDP ports.

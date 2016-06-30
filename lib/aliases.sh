@@ -55,11 +55,11 @@ alias ggr="git grep --break --heading --line-number"
 gcb() {
   local current_branch="$(git branch 2> /dev/null | sed -e '/^[^*]/d' | colrm 1 2)"
   git fetch --prune
-  git branch --merged | \
-    colrm 1 2 | \
-    grep -v "^${current_branch}$" | \
-    grep -v "^master$" | \
-    xargs git branch -d
+  git branch --merged \
+    | colrm 1 2 \
+    | grep -v "^${current_branch}$" \
+    | grep -v "^master$" \
+    | xargs git branch -d
 }
 
 gitignore() {
@@ -132,13 +132,15 @@ __ps1_uid() {
 }
 
 # Set prompt in either shell
-set_prompt() {
-  if [[ -n "${BASH}" ]]; then
-    export PS1="$(__ps1_preamble)$(__ps1_git)$(__ps1_uid)"
-  elif [[ -n "${ZSH}" ]]; then
+if [[ -n "${ZSH_NAME}" ]]; then
+  set_prompt() {
     source "${ZSH}/themes/${ZSH_THEME}.zsh-theme"
-  fi
-}
+  }
+else
+  set_prompt() {
+    export PS1="$(__ps1_preamble)$(__ps1_git)$(__ps1_uid)"
+  }
+fi
 
 # One-line or two-line prompt
 oneline() {
@@ -156,9 +158,15 @@ twoline() {
 #
 
 # Use shell functions to override binaries whilst respecting $PATH
-__bin_path() {
-  [[ -n "${BASH}" ]] && type -P "$1" || whence -p "$1"
-}
+if [[ -n "${ZSH_NAME}" ]]; then
+  __bin_path() {
+    whence -p "$1"
+  }
+else
+  __bin_path() {
+    type -P "$1"
+  }
+fi
 
 # Gets job number from PID after &ing a process
 __job_num() {
@@ -209,56 +217,20 @@ __kill_emacs() {
 
 # Restart shell with version managers disabled
 
-no_managers() {
-  local opt
-  if [[ "$-" = *l* ]] || shopt -q login_shell 2> /dev/null; then
-    opt="--login"
-  fi
-  DCP_DISABLE_MANAGERS="true" exec "${SHELL}" "${opt}"
-}
-
-
-#
-# Clipboard functions
-#
-
-if hash pbcopy 2> /dev/null && hash pbpaste 2> /dev/null; then
-  DCP_CBCOPY="pbcopy"
-  DCP_CBPASTE="pbpaste"
-elif hash xsel 2> /dev/null; then
-  DCP_CBCOPY="xsel --clipboard --input"
-  DCP_CBPASTE="xsel --clipboard --output"
-fi
-
-cbcopy() {
-  [[ -n "${DCP_CBCOPY}" ]] || return 1
-  if [[ -e "$1" ]]; then
-    local file="$1"
-    shift
-    cat "${file}" | ${DCP_CBCOPY} "$@"
-  else
-    ${DCP_CBCOPY} "$@"
-  fi
-}
-
-cbpaste() {
-  [[ -n "${DCP_CBPASTE}" ]] || return 1
-  if [[ -n "$1" ]]; then
-    local file="$1"
-    shift
-    ${DCP_CBPASTE} "$@" >>"${file}"
-  else
-    ${DCP_CBPASTE} "$@"
-  fi
-}
-
-
-#
-# Easter egg!
-#
-
-if hash cowsay 2> /dev/null; then
-  cornholio() {
-    cowsay -f beavis.zen "hehehehehehehehe"
+if [[ -n "${ZSH_NAME}" ]]; then
+  no_managers() {
+    local opt
+    if [[ "$-" = *l* ]]; then
+      opt="--login"
+    fi
+    DCP_DISABLE_MANAGERS="true" exec zsh "${opt}"
+  }
+else
+  no_managers() {
+    local opt
+    if shopt -q login_shell 2> /dev/null; then
+      opt="--login"
+    fi
+    DCP_DISABLE_MANAGERS="true" exec bash "${opt}"
   }
 fi

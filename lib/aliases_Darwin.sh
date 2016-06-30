@@ -4,7 +4,7 @@
 
 # Open Xcode for current folder (prefers workspace to project)
 xc() {
-  open -a "/Applications/Xcode.app" .
+  open -a "/Applications/Xcode.app" "${1:-.}"
 }
 # Dammit Xcode (delete derived data twice a day for entire career as needed)
 fuxcode() {
@@ -93,13 +93,27 @@ reset_quick_look() {
 use_jdk() {
   [[ "$#" -gt "0" ]] || return 1
 
-  # Finds the newest Java _ (first argument) JDK available
+  # Finds the newest JDK available based on first two args.
   local pattern
-  [[ "$1" -ge "9" ]] && pattern="jdk${1}*" || pattern="jdk1\.${1}*"
+  if [[ -n "$2" ]]; then
+    pattern="jdk1\.${1}\.0_${2}\.jdk"
+  else
+    pattern="jdk1\.${1}\.0_*\.jdk"
+  fi
 
-  local jdk_dir="$(command find "/Library/Java/JavaVirtualMachines" \
-    -maxdepth 1 -name "${pattern}" -print | tail -n 1)"
-  [[ -d "${jdk_dir}" ]] || { printf >&2 "Java $1 not found.\n"; return 1; }
+  local jdk_dir="$(find "/Library/Java/JavaVirtualMachines" \
+                        -maxdepth 1 \
+                        -name "${pattern}" \
+                        -print \
+                     | tail -n 1)"
+  if [[ ! -d "${jdk_dir}" ]]; then
+    local update
+    if [[ -n "$2" ]]; then
+      update="u$2"
+    fi
+    printf >&2 "JDK $1${update} not found.\n"
+    return 1
+  fi
 
   printf >&2 "Using $(basename "${jdk_dir}") (enter your user password if prompted)...\n"
   sudo ln -snfv "${jdk_dir}/Contents/Home" "/Library/Java/Home"
@@ -114,9 +128,9 @@ use_jdk() {
 # environment variables in the Control Panel on Windows. Seen by apps like
 # IntelliJ that pick up on certain vars: JAVA_HOME, etc.
 launchd_export() {
-  local var="$1"
-  local val="$(eval "printf \"\${${var}}\"")"
-  launchctl setenv "${var}" "${val}"
+  local var_name="$1"
+  local var_value="$(eval "printf \"%s\" \"\${${var_name}}\"")"
+  launchctl setenv "${var_name}" "${var_value}"
 }
 
 # launchctl wrapper for making things feel a little more... right.
@@ -173,7 +187,7 @@ fi
 # Misc
 #
 
-# Holy crap an Emacs alias.
+# Emacs GUI
 if [[ -e "/Applications/Emacs.app" ]]; then
   alias guemacs="open -a /Applications/Emacs.app"
 fi

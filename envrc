@@ -4,7 +4,7 @@
 
 export PATH="${PATH}:${DCP}/shims:${DCP}/bin"
 export DCP_OS="$(uname -s)"
-if [[ -n "${BASH}" ]]; then
+if [[ -z "${ZSH_NAME}" ]]; then
   alias grep="grep --color=auto"
 fi
 export LS_OPTIONS="--color=auto"
