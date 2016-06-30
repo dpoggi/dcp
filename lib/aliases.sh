@@ -85,21 +85,16 @@ find_long_lines() {
     return 1
   fi
 
-  local c_red="\033[0;31m"
-  local c_green="\033[0;32m"
-  local c_white="\033[0;37m"
-  local c_reset="\033[0m"
   local file result line
-
   while read file; do
     result="$(grep -n ".\\{$2\\}" "${file}" | cut -d ':' -f 1)"
     if [[ -n "${result}" ]]; then
-      printf >&2 "${c_green}%s${c_white}:${c_reset} " \
+      printf >&2 "${DCP_GREEN}%s${DCP_WHITE}:${DCP_RESET} " \
                  "$(printf "%s" "${file}" | tail -c +3)"
       while read line; do
-        printf >&2 "${c_red}%s${c_white},${c_reset} " "${line}"
+        printf >&2 "${DCP_RED}%s${DCP_WHITE},${DCP_RESET} " "${line}"
       done < <(printf "%s" "${result}")
-      printf >&2 "${c_red}%s${c_reset}\n" "${line}"
+      printf >&2 "${DCP_RED}%s${DCP_RESET}\n" "${line}"
     fi
   done < <(find . -mindepth 1 -type f -name "*.$1" -print)
 }
@@ -109,26 +104,18 @@ find_long_lines() {
 # PS1
 #
 
-# Colors!
-c_red="\[\033[0;31m\]"
-c_green="\[\033[0;32m\]"
-c_white="\[\033[0;37m\]"
-c_cyan="\[\033[0;36m\]"
-c_purple="\[\033[0;35m\]"
-c_yellow="\[\033[0;33m\]"
-c_reset="\[\033[0m\]"
-
 # Component functions
 __ps1_preamble() {
-  [[ "${UID}" = "0" ]] && printf "${c_red}" || printf "${c_green}"
-  printf "\\\\u${c_white}@${c_cyan}\\h${c_white}:${c_purple}\\w"
+  [[ "${UID}" = "0" ]] && printf "${DCP_PS1_RED}" || printf "${DCP_PS1_GREEN}"
+  printf "\\\\u${DCP_PS1_WHITE}@${DCP_PS1_CYAN}\\h"
+  printf "${DCP_PS1_WHITE}:${DCP_PS1_PURPLE}\\w"
 }
 __ps1_git() {
-  printf "${c_yellow}\$(${DCP}/bin/__ps1_git_branch)"
+  printf "${DCP_PS1_YELLOW}\$(${DCP}/bin/__ps1_git_branch)"
 }
 __ps1_uid() {
   [[ "${DPOGGI_TWOLINE}" = "true" ]] && printf "\n" || printf " "
-  printf "${c_red}\\\$${c_reset} "
+  printf "${DCP_PS1_RED}\\\$${DCP_PS1_RESET} "
 }
 
 # Set prompt in either shell
@@ -215,22 +202,31 @@ __kill_emacs() {
   emacsclient --eval "(kill-emacs)"
 }
 
-# Restart shell with version managers disabled
+# Restart shell with version managers enabled/disabled
 
 if [[ -n "${ZSH_NAME}" ]]; then
-  no_managers() {
-    local opt
-    if [[ "$-" = *l* ]]; then
-      opt="--login"
-    fi
-    DCP_DISABLE_MANAGERS="true" exec zsh "${opt}"
-  }
+  if [[ "$-" = *l* ]]; then
+    DCP_SHELL_INVOCATION=(zsh --login)
+  else
+    DCP_SHELL_INVOCATION=(zsh)
+  fi
 else
-  no_managers() {
-    local opt
-    if shopt -q login_shell 2> /dev/null; then
-      opt="--login"
-    fi
-    DCP_DISABLE_MANAGERS="true" exec bash "${opt}"
-  }
+  if shopt -q login_shell 2> /dev/null; then
+    readonly DCP_SHELL_INVOCATION=(bash --login)
+  else
+    readonly DCP_SHELL_INVOCATION=(bash)
+  fi
 fi
+
+yes_managers() {
+  unset DCP_DISABLE_MANAGERS
+  unset DCP_DISABLE_NVM
+  unset DCP_DISABLE_PYENV
+  unset DCP_DISABLE_RVM
+  unset DCP_DISABLE_RBENV
+  exec ${DCP_SHELL_INVOCATION[*]}
+}
+
+no_managers() {
+  DCP_DISABLE_MANAGERS="true" exec ${DCP_SHELL_INVOCATION[*]}
+}
