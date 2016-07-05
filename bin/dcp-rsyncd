@@ -1,25 +1,102 @@
-#!/bin/bash
+#!/usr/bin/env bash
+#
+# dcp-rsyncd - start rsyncd in a predictable manner.
+#
 
-config_path="${HOME}/.dcp/conf/rsyncd.conf"
-if [[ "$1" = "--help" ]]; then
-  printf >&2 "Usage: $(basename "$0") [--help] [--write-config]\n"
-elif [[ "$1" = "--write-config" ]]; then
-  for group in $(groups); do break; done
-  cat <<EOF | tee ${config_path} >/dev/null
+set -e
+
+readonly CONFIG_DIR="${HOME}/.dcp/conf"
+readonly CONFIG_PATH="${CONFIG_DIR}/rsyncd.conf"
+readonly LOG_PATH="${CONFIG_DIR}/rsyncd.log"
+
+print_usage() {
+  cat <<EOT
+Usage: $(basename "$0") [options]
+
+OPTIONS:
+  -h, --help                                 Display this message
+  -w, --write-config                         Write a default configuration file
+EOT
+}
+
+write_config() {
+  if [[ -s "${CONFIG_PATH}" ]]; then
+    printf >&2 "Error: %s already exists.\n" "${CONFIG_PATH}"
+    return 1
+  fi
+
+  if [[ ! -d "${CONFIG_DIR}" ]]; then
+    mkdir -p "${CONFIG_DIR}"
+  fi
+
+  printf "Writing default configuration to %s\n" "${CONFIG_PATH}"
+  cat > "${CONFIG_PATH}" <<EOF
 uid = nobody
 gid = nobody
 use chroot = yes
 max connections = 2
-syslog facility = local5
 
 [${USER}]
   path = ${HOME}
   uid = ${USER}
-  gid = ${group}
+  gid = $(id -gn)
   list = yes
   readonly = yes
 EOF
-else
-  printf >&2 "Starting rsync daemon, Ctrl-C to quit...\n"
-  sudo rsync --daemon --no-detach --config="${config_path}"
-fi
+}
+
+interrupt() {
+  if [[ -z "${rsync_pid}" ]]; then
+    return
+  fi
+  sudo kill -s INT "${rsync_pid}"
+}
+
+start_rsyncd() {
+  if [[ ! -s "${CONFIG_PATH}" ]]; then
+    printf >&2 "Warning: %s does not exist.\n\n" "${CONFIG_PATH}"
+    write_config
+    printf >&2 "\n"
+  fi
+
+  trap interrupt INT
+  rm -f "${LOG_PATH}"
+
+  sudo rsync --daemon \
+             --no-detach \
+             --verbose \
+             --config="${CONFIG_PATH}" \
+             --log-file="${LOG_PATH}" \
+             &
+  rsync_pid="$!"
+
+  while [[ ! -e "${LOG_PATH}" ]]; do
+    sleep 1
+  done
+  tail -f "${LOG_PATH}"
+}
+
+main() {
+  while [[ "$#" -gt "0" ]]; do
+    case "$1" in
+      -h | --help)
+        print_usage
+        return
+        ;;
+      -w | --write-config)
+        write_config
+        return "$?"
+        ;;
+      *)
+        printf >&2 "Error: unknown option %s\n\n" "$1"
+        print_usage
+        return 1
+        ;;
+    esac
+    shift
+  done
+
+  start_rsyncd
+}
+
+main "$@"
