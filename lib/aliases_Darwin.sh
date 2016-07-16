@@ -6,6 +6,10 @@
 xc() {
   open -a "/Applications/Xcode.app" "${1:-.}"
 }
+# Same for Xcode beta versions (has __nothing__ to do with X11 :o)
+xcb() {
+  open -a "/Applications/Xcode-beta.app" "${1:-.}"
+}
 # Dammit Xcode (delete derived data twice a day for entire career as needed)
 fuxcode() {
   rm -rf "${HOME}/Library/Developer/Xcode/DerivedData"
