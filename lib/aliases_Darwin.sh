@@ -100,15 +100,17 @@ use_jdk() {
   # Finds the newest JDK available based on first two args.
   local pattern
   if [[ -n "$2" ]]; then
-    pattern="jdk1\.${1}\.0_${2}\.jdk"
+    pattern="jdk1.${1}.0_${2}.jdk"
   else
-    pattern="jdk1\.${1}\.0_*\.jdk"
+    pattern="jdk1.${1}.0_*.jdk"
   fi
 
   local jdk_dir="$(find "/Library/Java/JavaVirtualMachines" \
+                        -mindepth 1 \
                         -maxdepth 1 \
                         -name "${pattern}" \
                         -print \
+                     | sort -n -t_ -k2,2 \
                      | tail -n 1)"
   if [[ ! -d "${jdk_dir}" ]]; then
     local update
