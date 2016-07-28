@@ -197,11 +197,6 @@ dm_env() {
   fi
 }
 
-# Kill running Emacsen
-__kill_emacs() {
-  emacsclient --eval "(kill-emacs)"
-}
-
 # Restart shell with version managers enabled/disabled
 
 if [[ -n "${ZSH_NAME}" ]]; then

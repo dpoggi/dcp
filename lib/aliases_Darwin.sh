@@ -187,23 +187,3 @@ if [[ -e "${HOME}/Library/LaunchAgents/homebrew.mxcl.gpg.agent.plist" ]]; then
     __lctl "$1" -S Aqua "${HOME}/Library/LaunchAgents/homebrew.mxcl.gpg.agent.plist"
   }
 fi
-
-
-#
-# Misc
-#
-
-# Emacs GUI
-if [[ -e "/Applications/Emacs.app" ]]; then
-  alias guemacs="open -a /Applications/Emacs.app"
-fi
-
-# Kill running Emacs
-kill_emacs() {
-  __kill_emacs
-
-  local plist="${HOME}/Library/LaunchAgents/homebrew.mxcl.emacs-mac.plist"
-  if [[ -e "${plist}" ]]; then
-    launchctl unload -F "${plist}"
-  fi
-}

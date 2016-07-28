@@ -95,19 +95,7 @@ class ExportVars < Installable
   end
 end
 
-class EmacsMac < Installable
-  def initialize(activate = false)
-    super
-    @plist_tmpl = Template.new("homebrew.mxcl.emacs-mac.plist.erb")
-    @cmd = "launchctl load -w \"#{@plist_tmpl.path}\""
-  end
-
-  def write
-    @plist_tmpl.write
-  end
-end
-
-installables = %w(GpgAgent ExportVars EmacsMac)
+installables = %w(GpgAgent ExportVars)
 if ARGV.length < 1
   STDERR.puts "Usage: dcp-launchd_install [--enable] <installable>\n\n"
   STDERR.puts "Installables: {#{installables.join("|")}}"
