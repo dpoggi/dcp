@@ -93,6 +93,7 @@ kwmc rule owner="Zandronum" properties={float="true"}
 // The following command creates a rule that
 // captures an application to the given screen,
 // if the screen exists.
+kwmc rule owner="Android Studio" properties={display="1"}
 kwmc rule owner="AppCode" properties={display="1"}
 kwmc rule owner="Audirvana Plus" properties={display="0"}
 kwmc rule owner="CLion" properties={display="1"}
