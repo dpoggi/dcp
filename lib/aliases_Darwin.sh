@@ -143,7 +143,7 @@ launchd_export() {
 __lctl() {
   local -a sudo_cmd
   if [[ "$1" = "sudo" ]]; then
-    sudo_cmd+=(sudo -H)
+    sudo_cmd=(sudo -H)
     shift
   fi
 
@@ -172,18 +172,26 @@ __lctl() {
 
 # launchctl wrapper for apsd (Apple Push Service: Messages.app, etc.)
 apsctl() {
-  __lctl sudo "$1" "/System/Library/LaunchDaemons/com.apple.apsd.plist"
+  __lctl sudo \
+         "$1" \
+         "/System/Library/LaunchDaemons/com.apple.apsd.plist"
 }
 
 # launchctl wrapper for CoreAudio (because sometimes there be dragons)
 coreaudioctl() {
-  __lctl sudo "$1" "/System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist"
+  __lctl sudo \
+         "$1" \
+         "/System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist"
 }
 
 # launchctl wrapper for gpg-agent, if the plist is installed
-if [[ -e "${HOME}/Library/LaunchAgents/homebrew.mxcl.gpg.agent.plist" ]]; then
+if [[ -s "${HOME}/Library/LaunchAgents/com.danpoggi.gpg-agent.plist" ]]; then
   gpgagentctl() {
-    [[ "$1" = "stop" || "$1" = "restart" ]] && killall gpg-agent
-    __lctl "$1" -S Aqua "${HOME}/Library/LaunchAgents/homebrew.mxcl.gpg.agent.plist"
+    if [[ "$1" = "stop" || "$1" = "restart" ]]; then
+      killall gpg-agent
+    fi
+    __lctl "$1" \
+           -S Aqua \
+           "${HOME}/Library/LaunchAgents/com.danpoggi.gpg-agent.plist"
   }
 fi

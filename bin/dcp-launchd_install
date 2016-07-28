@@ -66,7 +66,7 @@ end
 class GpgAgent < Installable
   def initialize(activate = false)
     super
-    @plist_tmpl = Template.new("homebrew.mxcl.gpg.agent.plist.erb")
+    @plist_tmpl = Template.new("com.danpoggi.gpg-agent.plist.erb")
     config_dir = File.join(ENV["HOME"], ".gnupg")
     FileUtils.mkdir_p(config_dir)
     @config_tmpl = Template.new("gpg-agent.conf.erb", config_dir)
