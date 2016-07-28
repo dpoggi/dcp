@@ -195,3 +195,19 @@ if [[ -s "${HOME}/Library/LaunchAgents/com.danpoggi.gpg-agent.plist" ]]; then
            "${HOME}/Library/LaunchAgents/com.danpoggi.gpg-agent.plist"
   }
 fi
+
+# brew services wrapper for Emacs, if it's installed via Homebrew
+if [[ -h "/usr/local/bin/emacsclient" && -d "/usr/local/opt/emacs" ]]; then
+  if [[ -s "${HOME}/.spacemacs" || -d "${HOME}/.spacemacs.d" ]]; then
+    EMACS_KILL_CMD="(spacemacs/kill-emacs)"
+  else
+    EMACS_KILL_CMD="(kill-emacs)"
+  fi
+
+  emacsctl() {
+    if [[ "$1" = "stop" || "$1" = "restart" ]]; then
+      emacsclient --eval "${EMACS_KILL_CMD}" 2> /dev/null
+    fi
+    brew services "$1" emacs
+  }
+fi
