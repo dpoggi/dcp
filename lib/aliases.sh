@@ -6,6 +6,9 @@ alias c="clear"
 alias ll="ls -la"
 alias la="ls -a"
 alias h="history | tail -32"
+if hash emacsclient 2> /dev/null; then
+  alias ecl="emacsclient"
+fi
 
 ext_ip() {
   local version
