@@ -5,6 +5,9 @@
 !/bin/__*
 !/bin/yolo
 
+# Ignore Jars in lib for use by scripts.
+/lib/*.jar
+
 # shims directory for wrapping scripts from bin/
 /shims/*
 !/shims/.keep
