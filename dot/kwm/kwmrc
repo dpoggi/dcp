@@ -97,6 +97,7 @@ kwmc rule owner="Android Studio" properties={display="1"}
 kwmc rule owner="AppCode" properties={display="1"}
 kwmc rule owner="Audirvana Plus" properties={display="0"}
 kwmc rule owner="CLion" properties={display="1"}
+kwmc rule owner="Eclipse" properties={display="1"}
 kwmc rule owner="IntelliJ IDEA" properties={display="1"}
 kwmc rule owner="Messages" properties={display="0"}
 kwmc rule owner="Simulator" properties={display="0"}
