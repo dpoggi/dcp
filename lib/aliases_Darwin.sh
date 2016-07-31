@@ -196,18 +196,48 @@ if [[ -s "${HOME}/Library/LaunchAgents/com.danpoggi.gpg-agent.plist" ]]; then
   }
 fi
 
-# brew services wrapper for Emacs, if it's installed via Homebrew
-if [[ -h "/usr/local/bin/emacsclient" && -d "/usr/local/opt/emacs" ]]; then
-  if [[ -s "${HOME}/.spacemacs" || -d "${HOME}/.spacemacs.d" ]]; then
-    EMACS_KILL_CMD="(spacemacs/kill-emacs)"
-  else
-    EMACS_KILL_CMD="(kill-emacs)"
-  fi
+# ctl script for Emacs, if it's installed via Homebrew
+if [[ -d "/usr/local/opt/emacs" ]]; then
+  __emacs_stop() {
+    local kill_cmd
+    if [[ -s "${HOME}/.spacemacs" || -d "${HOME}/.spacemacs.d" ]]; then
+      kill_cmd="(spacemacs/kill-emacs)"
+    else
+      kill_cmd="(kill-emacs)"
+    fi
+    emacsclient --eval "${kill_cmd}" 2> /dev/null
+  }
+
+  __emacs_kill() {
+    killall Emacs
+  }
+
+  __emacs_start() {
+    if ps -A | grep -q 'Emacs\.app'; then
+      return 1
+    fi
+    /usr/local/opt/emacs/bin/emacs --daemon &> /dev/null
+  }
 
   emacsctl() {
-    if [[ "$1" = "stop" || "$1" = "restart" ]]; then
-      emacsclient --eval "${EMACS_KILL_CMD}" 2> /dev/null
-    fi
-    brew services "$1" emacs
+    case "$1" in
+      start)
+        __emacs_start
+        ;;
+      stop)
+        __emacs_stop
+        ;;
+      kill)
+        __emacs_kill
+        ;;
+      restart)
+        __emacs_stop
+        __emacs_start
+        ;;
+      kickstart)
+        __emacs_kill
+        __emacs_start
+        ;;
+    esac
   }
 fi
