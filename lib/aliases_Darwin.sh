@@ -216,7 +216,7 @@ if [[ -d "/usr/local/opt/emacs" ]]; then
     if ps -A | grep -q 'Emacs\.app'; then
       return 1
     fi
-    /usr/local/opt/emacs/bin/emacs --daemon &> /dev/null
+    (cd "${HOME}" && /usr/local/opt/emacs/bin/emacs --daemon &> /dev/null)
   }
 
   emacsctl() {
