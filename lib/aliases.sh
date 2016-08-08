@@ -6,8 +6,16 @@ alias c="clear"
 alias ll="ls -la"
 alias la="ls -a"
 alias h="history | tail -32"
+
 if hash emacsclient 2> /dev/null; then
-  alias ecl="emacsclient"
+  gecl() {
+    emacsclient -c &
+    disown %$(__job_num "$!")
+  }
+
+  cecl() {
+    emacsclient -nw
+  }
 fi
 
 ext_ip() {
