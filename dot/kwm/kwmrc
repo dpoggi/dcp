@@ -73,6 +73,7 @@ kwmc rule owner="IntelliJ IDEA" name="Preferences" properties={float="true"}
 kwmc rule owner="IntelliJ IDEA" name="Project Structure" properties={float="true"}
 kwmc rule owner="IntelliJ IDEA" name="Welcome to IntelliJ IDEA" properties={float="true"}
 kwmc rule owner="League of Legends" properties={float="true"}
+kwmc rule owner="licecap" properties={float="true"}
 kwmc rule owner="Messages" properties={float="true"}
 kwmc rule owner="Photoshop" properties={float="true"}
 kwmc rule owner="qemu-system-i386" properties={float="true"}
