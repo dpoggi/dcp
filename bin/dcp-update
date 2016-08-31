@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 log_msg() {
   printf >&2 "\033[0;37m[%s]:\033[0m %s\n" "$(date +"%H:%M:%S")" "$1"
@@ -63,8 +63,12 @@ update_repo() {
   git merge --quiet --ff-only --no-edit origin/master \
             --strategy=recursive \
             --strategy-option=ours \
-            --strategy-option=ignore-all-space ||
-    fatal "Unable to update master using a fast-forward."
+            --strategy-option=ignore-all-space
+  if [[ "$?" != "0" ]]; then
+    log_msg "Unable to update master using a fast-forward, forcing a new checkout..."
+    git checkout --quiet --force -B master origin/master ||
+      fatal "Unable to force a new checkout of origin/master."
+  fi
 
   if [[ "${try_tag}" = "true" ]]; then
     checkout_tag "${repo}" "${name}"
