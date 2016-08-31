@@ -1,59 +1,64 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
-log_msg() {
+readonly DCP="${HOME}/.dcp"
+readonly DOTVIM_DIR="${HOME}/.vim"
+readonly ZSH="${HOME}/.oh-my-zsh"
+readonly ZSH_HLT_DIR="${ZSH}/custom/plugins/zsh-syntax-highlighting"
+
+if [[ "$(id -un)" = "danpoggi" && -z "${DCP_CLONE_HTTPS}" ]]; then
+  readonly GIT_BASE="git@github.com:dpoggi"
+else
+  readonly GIT_BASE="https://github.com/dpoggi"
+fi
+readonly ZSH_HLT_GIT="https://github.com/zsh-users/zsh-syntax-highlighting.git"
+
+log_info() {
   printf >&2 "\033[0;37m[%s]:\033[0m %s\n" "$(date +"%H:%M:%S")" "$1"
 }
 
-fatal() {
+log_fatal() {
   printf >&2 "\033[1;37;41m[FATAL]:\033[0m %s\n" "$1"
-  exit 1
+  return 1
 }
 
 clone_repo() {
-  local name="$(basename "$1")"
-  name="${name%.*}"
+  local repo_url="$1"
+  local repo_name="$(basename "${repo_url}" ".git")"
+  local clone_dir="$2"
 
-  if [[ ! -e "$2" ]]; then
-    log_msg "Cloning ${name} into $2..."
-    git clone --quiet --recursive "$1" "$2" &>/dev/null
-    log_msg "Finished."
-    did_something="yep"
+  if [[ ! -e "${clone_dir}" ]]; then
+    log_info "Cloning ${repo_name} into ${clone_dir}..."
+    git clone --quiet \
+              --recursive \
+              "${repo_url}" \
+              "${clone_dir}" \
+              &> /dev/null
+    log_info "Finished."
   else
-    log_msg "$2 already exists, skipping..."
+    log_info "${clone_dir} already exists, skipping..."
   fi
   printf >&2 "\n"
 }
 
-DCP="${HOME}/.dcp"
-dotvim_dir="${HOME}/.vim"
-ZSH="${HOME}/.oh-my-zsh"
-zsh_highlight_dir="${ZSH}/custom/plugins/zsh-syntax-highlighting"
+main() {
+  if ! hash git 2> /dev/null; then
+    log_fatal "Git is required."
+  fi
 
-[[ "${USER}" = "danpoggi" ]] &&
-  git_base="git@github.com:dpoggi" ||
-  git_base="https://github.com/dpoggi"
-dcp_git="${git_base}/dcp.git"
-dotvim_git="${git_base}/dotvim.git"
-zsh_git="${git_base}/oh-my-zsh.git"
-zsh_highlight_git="https://github.com/zsh-users/zsh-syntax-highlighting.git"
+  clone_repo "${GIT_BASE}/dcp.git" "${DCP}"
+  clone_repo "${GIT_BASE}/dotvim.git" "${DOTVIM_DIR}"
 
-hash git 2>/dev/null || fatal "Unable to find Git."
+  clone_repo "${GIT_BASE}/oh-my-zsh.git" "${ZSH}"
+  clone_repo "${ZSH_HLT_GIT}" "${ZSH_HLT_DIR}"
 
-did_something="nope"
-
-clone_repo "${dcp_git}" "${DCP}"
-clone_repo "${dotvim_git}" "${dotvim_dir}"
-
-clone_repo "${zsh_git}" "${ZSH}"
-clone_repo "${zsh_highlight_git}" "${zsh_highlight_dir}"
-
-log_msg "Running update script..."
-export PATH="${PATH}:${DCP}/bin"
-printf >&2 "\n"
-"${DCP}/bin/dcp-update"
-
-if [[ "${did_something}" = "yep" ]]; then
+  log_info "Running update script..."
+  export PATH="${PATH}:${DCP}/bin"
   printf >&2 "\n"
-  log_msg "Tip: restart your terminal, or do \`exec $(basename "${SHELL}")' now."
-fi
+  "${DCP}/bin/dcp-update"
+
+  printf >&2 "\n"
+  log_info "Tip: restart your terminal, or do \`exec $(basename "${SHELL}")' now."
+}
+
+main "$@"
