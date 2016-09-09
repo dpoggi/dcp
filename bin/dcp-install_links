@@ -72,6 +72,23 @@ if hash git 2>/dev/null; then
   maybe_git_config "push.default" "matching"
   maybe_git_config "grep.lineNumber" "true"
   maybe_git_config "submodule.fetchJobs" "2"
+  maybe_git_config "core.attributesfile" "${HOME}/.gitattributes"
   git config --global "core.excludesfile" "${HOME}/.cvsignore"
-  [[ "${DCP_OS}" = "Darwin" ]] && maybe_git_config "core.trustctime" "false"
+
+  if [[ ! -e "${HOME}/.gitattributes" ]]; then
+    touch "${HOME}/.gitattributes"
+  fi
+
+  if [[ "${DCP_OS}" = "Darwin" ]]; then
+    maybe_git_config "core.trustctime" "false"
+    maybe_git_config "diff.plist.textconv" "plutil -convert xml1 -o -"
+    maybe_git_config "diff.provision.textconv" "openssl smime -inform der -verify -in"
+
+    if ! grep -q 'mobileprovision' "${HOME}/.gitattributes"; then
+      printf "*.mobileprovision diff=provision\n" >> "${HOME}/.gitattributes"
+    fi
+    if ! grep -q 'plist' "${HOME}/.gitattributes"; then
+      printf "*.plist diff=plist\n" >> "${HOME}/.gitattributes"
+    fi
+  fi
 fi
