@@ -84,11 +84,11 @@ if hash git 2>/dev/null; then
     maybe_git_config "diff.plist.textconv" "plutil -convert xml1 -o -"
     maybe_git_config "diff.provision.textconv" "openssl smime -inform der -verify -in"
 
-    if ! grep -q 'mobileprovision' "${HOME}/.gitattributes"; then
-      printf "*.mobileprovision diff=provision\n" >> "${HOME}/.gitattributes"
-    fi
-    if ! grep -q 'plist' "${HOME}/.gitattributes"; then
+    if ! grep -q '^\*\.plist' "${HOME}/.gitattributes"; then
       printf "*.plist diff=plist\n" >> "${HOME}/.gitattributes"
+    fi
+    if ! grep -q '^\*\.mobileprovision' "${HOME}/.gitattributes"; then
+      printf "*.mobileprovision diff=provision\n" >> "${HOME}/.gitattributes"
     fi
   fi
 fi
