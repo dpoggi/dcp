@@ -8,13 +8,54 @@ warning() {
   printf >&2 "\033[0;33m[WARNING]:\033[0m %s\n" "$1"
 }
 
-link_dotfile() {
+__link_dotfile() {
   local link="${HOME}/.$(basename "$1")"
   if [[ ! -h "${link}" ]] && [[ -s "${link}" || -d "${link}" ]]; then
     warning "~/$(basename "${link}") is a directory or file of non-zero size, skipping."
   else
     ln -snfv "$1" "${link}"
   fi
+}
+
+link_dotfile_macos() {
+  __link_dotfile "$@"
+}
+
+link_dotfile() {
+  case "$(basename "$1")" in
+    kwm|osx)
+      :
+      ;;
+    *)
+      __link_dotfile "$@"
+  esac
+}
+
+check_and_cleanup() {
+  if [[ "${DCP_OS}" = "Darwin" ]]; then
+    touch "${HOME}/.hushlogin"
+  fi
+  if [[ "${DCP_OS}" != "Darwin" && -h "${HOME}/.osx" ]]; then
+    rm -f "${HOME}/.osx"
+  fi
+  if [[ -h "${HOME}/.gitignore_global" ]]; then
+    rm -f "${HOME}/.gitignore_global"
+  fi
+}
+
+check_non_dcp() {
+  local result="false"
+  local dotfile
+  for dotfile in "${NON_DCP_DOTFILES[@]}"; do
+    if [[ -e "${HOME}/${dotfile}" ]]; then
+      if [[ "${result}" = "false" ]]; then
+        printf >&2 "\n"
+      fi
+      result="true"
+      warning "~/${dotfile} exists but is not provided by ~/.dcp."
+    fi
+  done
+  printf "%s" "${result}"
 }
 
 maybe_git_config() {
@@ -41,61 +82,36 @@ EOT
 }
 
 main() {
+  check_and_cleanup
+
   local dotfile
-  local has_non_dcp_dotfiles="false"
-
-  if [[ "${DCP_OS}" = "Darwin" ]]; then
-    touch "${HOME}/.hushlogin"
-  fi
-  if [[ "${DCP_OS}" != "Darwin" && -h "${HOME}/.osx" ]]; then
-    rm -f "${HOME}/.osx"
-  fi
-  if [[ -h "${HOME}/.gitignore_global" ]]; then
-    rm -f "${HOME}/.gitignore_global"
-  fi
-
   if [[ "${DCP_OS}" = "Darwin" ]]; then
     for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*vimrc; do
-      link_dotfile "${dotfile}"
+      link_dotfile_macos "${dotfile}"
     done
   else
     for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*vimrc; do
-      case "$(basename "${dotfile}")" in
-        kwm|osx)
-          :
-          ;;
-        *)
-          link_dotfile "${dotfile}"
-      esac
+      link_dotfile "${dotfile}"
     done
   fi
 
-  for dotfile in "${NON_DCP_DOTFILES[@]}"; do
-    if [[ -e "${HOME}/${dotfile}" ]]; then
-      if [[ "${has_non_dcp_dotfiles}" != "true" ]]; then
-        printf "\n"
-      fi
-      has_non_dcp_dotfiles="true"
-      warning "~/${dotfile} exists but is not provided by ~/.dcp."
-    fi
-  done
-
-  if [[ "${has_non_dcp_dotfiles}" = "true" && ! -e "${WARNING_SHOWN_PATH}" ]]; then
+  local has_non_dcp="$(check_non_dcp)"
+  if [[ "${has_non_dcp}" = "false" ]]; then
+    rm -f "${WARNING_SHOWN_PATH}"
+  elif [[ "${has_non_dcp}" = "true" && ! -e "${WARNING_SHOWN_PATH}" ]]; then
     print_warning
     touch "${WARNING_SHOWN_PATH}"
   fi
-  if [[ "${has_non_dcp_dotfiles}" = "false" ]]; then
-    rm -f "${WARNING_SHOWN_PATH}"
-  fi
 
   if hash git 2> /dev/null; then
+    git config --global "core.excludesfile" "${HOME}/.cvsignore"
+
     maybe_git_config "color.ui" "true"
     maybe_git_config "core.editor" "vim"
     maybe_git_config "push.default" "matching"
     maybe_git_config "grep.lineNumber" "true"
     maybe_git_config "submodule.fetchJobs" "2"
     maybe_git_config "core.attributesfile" "${HOME}/.gitattributes"
-    git config --global "core.excludesfile" "${HOME}/.cvsignore"
 
     if [[ ! -e "${HOME}/.gitattributes" ]]; then
       touch "${HOME}/.gitattributes"
