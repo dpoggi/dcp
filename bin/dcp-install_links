@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+readonly DCP_OS="$(uname -s)"
+readonly NON_DCP_DOTFILES=( .profile .bash_login .zlogin )
+readonly WARNING_SHOWN_PATH="${HOME}/.dcp/conf/install_links_warning_shown"
 
 warning() {
   printf >&2 "\033[0;33m[WARNING]:\033[0m %s\n" "$1"
@@ -14,13 +18,15 @@ link_dotfile() {
 }
 
 maybe_git_config() {
-  git config --global "$1" >/dev/null || git config --global "$1" "$2"
+  if ! git config --global "$1" > /dev/null; then
+    git config --global "$1" "$2"
+  fi
 }
 
 print_warning() {
   cat >&2 <<EOT
 
-Having any of [${non_dcp_dotfiles[*]}] should (in theory) be harmless.
+Having any of [${NON_DCP_DOTFILES[*]}] should (in theory) be harmless.
 That said, it can also really mess things up. It's good to examine their
 contents and evaluate if they need to exist.
 
@@ -34,61 +40,80 @@ files then create them again at some point.
 EOT
 }
 
-DCP_OS="$(uname -s)"
-non_dcp_dotfiles=(.profile .bash_login .zlogin)
-has_non_dcp_dotfiles="false"
-warning_shown_path="${HOME}/.dcp/conf/install_links_warning_shown"
+main() {
+  local dotfile
+  local has_non_dcp_dotfiles="false"
 
-for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*vimrc; do
-  if [[ "${DCP_OS}" != "Darwin" && "$(basename "${dotfile}")" = "osx" ]]; then
-    [[ -h "${HOME}/.osx" ]] && rm -f "${HOME}/.osx"
-  elif [[ "${DCP_OS}" != "Darwin" && "$(basename "${dotfile}")" = "kwm" ]]; then
-    :
-  else
-    link_dotfile "${dotfile}"
+  if [[ "${DCP_OS}" = "Darwin" ]]; then
+    touch "${HOME}/.hushlogin"
   fi
-done
-
-[[ -h "${HOME}/.gitignore_global" ]] && rm -f "${HOME}/.gitignore_global"
-[[ "${DCP_OS}" = "Darwin" ]] && touch "${HOME}/.hushlogin"
-
-for dotfile in "${non_dcp_dotfiles[@]}"; do
-  if [[ -e "${HOME}/${dotfile}" ]]; then
-    [[ "${has_non_dcp_dotfiles}" = "true" ]] || printf "\n"
-    has_non_dcp_dotfiles="true"
-    warning "~/${dotfile} exists but is not provided by ~/.dcp."
+  if [[ "${DCP_OS}" != "Darwin" && -h "${HOME}/.osx" ]]; then
+    rm -f "${HOME}/.osx"
   fi
-done
-
-if [[ "${has_non_dcp_dotfiles}" = "true" && ! -e "${warning_shown_path}" ]]; then
-  print_warning
-  touch "${warning_shown_path}"
-fi
-[[ "${has_non_dcp_dotfiles}" = "false" ]] && rm -f "${warning_shown_path}"
-
-if hash git 2>/dev/null; then
-  maybe_git_config "color.ui" "true"
-  maybe_git_config "core.editor" "vim"
-  maybe_git_config "push.default" "matching"
-  maybe_git_config "grep.lineNumber" "true"
-  maybe_git_config "submodule.fetchJobs" "2"
-  maybe_git_config "core.attributesfile" "${HOME}/.gitattributes"
-  git config --global "core.excludesfile" "${HOME}/.cvsignore"
-
-  if [[ ! -e "${HOME}/.gitattributes" ]]; then
-    touch "${HOME}/.gitattributes"
+  if [[ -h "${HOME}/.gitignore_global" ]]; then
+    rm -f "${HOME}/.gitignore_global"
   fi
 
   if [[ "${DCP_OS}" = "Darwin" ]]; then
-    maybe_git_config "core.trustctime" "false"
-    maybe_git_config "diff.plist.textconv" "plutil -convert xml1 -o -"
-    maybe_git_config "diff.provision.textconv" "openssl smime -inform der -verify -in"
+    for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*vimrc; do
+      link_dotfile "${dotfile}"
+    done
+  else
+    for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*vimrc; do
+      case "$(basename "${dotfile}")" in
+        kwm|osx)
+          :
+          ;;
+        *)
+          link_dotfile "${dotfile}"
+      esac
+    done
+  fi
 
-    if ! grep -q '^\*\.plist' "${HOME}/.gitattributes"; then
-      printf "*.plist diff=plist\n" >> "${HOME}/.gitattributes"
+  for dotfile in "${NON_DCP_DOTFILES[@]}"; do
+    if [[ -e "${HOME}/${dotfile}" ]]; then
+      if [[ "${has_non_dcp_dotfiles}" != "true" ]]; then
+        printf "\n"
+      fi
+      has_non_dcp_dotfiles="true"
+      warning "~/${dotfile} exists but is not provided by ~/.dcp."
     fi
-    if ! grep -q '^\*\.mobileprovision' "${HOME}/.gitattributes"; then
-      printf "*.mobileprovision diff=provision\n" >> "${HOME}/.gitattributes"
+  done
+
+  if [[ "${has_non_dcp_dotfiles}" = "true" && ! -e "${WARNING_SHOWN_PATH}" ]]; then
+    print_warning
+    touch "${WARNING_SHOWN_PATH}"
+  fi
+  if [[ "${has_non_dcp_dotfiles}" = "false" ]]; then
+    rm -f "${WARNING_SHOWN_PATH}"
+  fi
+
+  if hash git 2> /dev/null; then
+    maybe_git_config "color.ui" "true"
+    maybe_git_config "core.editor" "vim"
+    maybe_git_config "push.default" "matching"
+    maybe_git_config "grep.lineNumber" "true"
+    maybe_git_config "submodule.fetchJobs" "2"
+    maybe_git_config "core.attributesfile" "${HOME}/.gitattributes"
+    git config --global "core.excludesfile" "${HOME}/.cvsignore"
+
+    if [[ ! -e "${HOME}/.gitattributes" ]]; then
+      touch "${HOME}/.gitattributes"
+    fi
+
+    if [[ "${DCP_OS}" = "Darwin" ]]; then
+      maybe_git_config "core.trustctime" "false"
+      maybe_git_config "diff.plist.textconv" "plutil -convert xml1 -o -"
+      maybe_git_config "diff.provision.textconv" "openssl smime -inform der -verify -in"
+
+      if ! grep -q '^\*\.plist' "${HOME}/.gitattributes"; then
+        printf "*.plist diff=plist\n" >> "${HOME}/.gitattributes"
+      fi
+      if ! grep -q '^\*\.mobileprovision' "${HOME}/.gitattributes"; then
+        printf "*.mobileprovision diff=provision\n" >> "${HOME}/.gitattributes"
+      fi
     fi
   fi
-fi
+}
+
+main "$@"
