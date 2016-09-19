@@ -202,8 +202,10 @@ __path_combine_searches() {
 
 # Filter components from PATH-like var
 __path_filter() {
-  # No-op if there's nothing to scrub - starting Perl ain't cheap.
+  # No-op (print our first arg) if there's nothing to scrub -
+  # starting Perl ain't cheap.
   if ! __path_check "$1" "$2"; then
+    printf "%s" "$1"
     return
   fi
 
