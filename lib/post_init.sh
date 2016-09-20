@@ -17,7 +17,7 @@ if [[ -z "${DCP_DISABLE_NVM}" ]]; then
     # Because for some reason this doesn't end up in PATH with Homebrew...
     source "/usr/local/opt/nvm/nvm.sh"
   fi
-else
+elif [[ -z "${DCP_DISABLE_NVM_NOFILTER}" ]]; then
   export PATH="$(__path_filter "${PATH}" "nvm")"
 fi
 
