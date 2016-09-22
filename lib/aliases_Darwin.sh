@@ -198,14 +198,16 @@ fi
 
 # ctl script for Emacs, if it's installed via Homebrew
 if [[ -d "/usr/local/opt/emacs" ]]; then
+  if [[ -s "${HOME}/.spacemacs" || -d "${HOME}/.spacemacs.d" ]]; then
+    DCP_EMACS_KILL_CMD="(spacemacs/kill-emacs)"
+  else
+    DCP_EMACS_KILL_CMD="(kill-emacs)"
+  fi
+
   __emacs_stop() {
-    local kill_cmd
-    if [[ -s "${HOME}/.spacemacs" || -d "${HOME}/.spacemacs.d" ]]; then
-      kill_cmd="(spacemacs/kill-emacs)"
-    else
-      kill_cmd="(kill-emacs)"
-    fi
-    emacsclient --eval "${kill_cmd}" 2> /dev/null
+    /usr/local/opt/emacs/bin/emacsclient \
+      --eval "${DCP_EMACS_KILL_CMD}" \
+      2> /dev/null
   }
 
   __emacs_kill() {
@@ -238,6 +240,8 @@ if [[ -d "/usr/local/opt/emacs" ]]; then
         __emacs_kill
         __emacs_start
         ;;
+      *)
+        return 1
     esac
   }
 fi
