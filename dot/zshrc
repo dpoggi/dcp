@@ -3,7 +3,12 @@
 #
 
 # Standard plugins
-plugins=( emoji git-extras history jsontools zsh-syntax-highlighting )
+plugins=( history jsontools zsh-syntax-highlighting )
+
+# Emoji probably don't matter in non-256color environments
+if [[ "${TERM}" = *256color* ]]; then
+  plugins+=( emoji )
+fi
 
 # Mac-specific plugins
 if [[ "${DCP_OS}" = "Darwin" ]]; then
@@ -35,9 +40,9 @@ if [[ -s "/usr/share/doc/pkgfile/command-not-found.zsh" ]]; then
 fi
 
 # Completion aliasing for hub command
-if hash hub 2>/dev/null; then
+if hash hub 2> /dev/null; then
   alias git="hub"
-  if type compdef >/dev/null; then
+  if type compdef > /dev/null; then
      compdef hub=git
   fi
 fi
