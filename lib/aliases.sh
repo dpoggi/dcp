@@ -237,11 +237,7 @@ else
 fi
 
 yes_managers() {
-  typeset +x DCP_DISABLE_MANAGERS
-  typeset +x DCP_DISABLE_NVM
-  typeset +x DCP_DISABLE_PYENV
-  typeset +x DCP_DISABLE_RVM
-  typeset +x DCP_DISABLE_RBENV
+  export DCP_PREVENT_DISABLE="true"
   exec ${DCP_SHELL_INVOCATION[*]}
 }
 

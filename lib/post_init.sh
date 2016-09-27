@@ -1,3 +1,19 @@
+if [[ -n "${DCP_PREVENT_DISABLE}" ]]; then
+  typeset +x DCP_DISABLE_MANAGERS
+  unset DCP_DISABLE_MANAGERS
+  typeset +x DCP_DISABLE_NVM
+  unset DCP_DISABLE_NVM
+  typeset +x DCP_DISABLE_PYENV
+  unset DCP_DISABLE_PYENV
+  typeset +x DCP_DISABLE_RVM
+  unset DCP_DISABLE_RVM
+  typeset +x DCP_DISABLE_RBENV
+  unset DCP_DISABLE_RBENV
+
+  typeset +x DCP_PREVENT_DISABLE
+  unset DCP_PREVENT_DISABLE
+fi
+
 if [[ -n "${DCP_DISABLE_MANAGERS}" ]]; then
   DCP_DISABLE_NVM="true"
   DCP_DISABLE_PYENV="true"
