@@ -220,40 +220,28 @@ gpip() {
   PIP_REQUIRE_VIRTUALENV="" pip "$@"
 }
 
-# docker-machine environment
-dm_env() {
-  if [[ "$1" != "none" ]]; then
-    eval "$(docker-machine env "$1")"
-  else
-    unset DOCKER_TLS_VERIFY
-    unset DOCKER_HOST
-    unset DOCKER_CERT_PATH
-    unset DOCKER_MACHINE_NAME
-  fi
-}
-
 # Restart shell with version managers enabled/disabled
 
 if [[ -n "${ZSH_NAME}" ]]; then
   if [[ "$-" = *l* ]]; then
-    DCP_SHELL_INVOCATION=(zsh --login)
+    DCP_SHELL_INVOCATION=( zsh --login )
   else
-    DCP_SHELL_INVOCATION=(zsh)
+    DCP_SHELL_INVOCATION=( zsh )
   fi
 else
   if shopt -q login_shell 2> /dev/null; then
-    readonly DCP_SHELL_INVOCATION=(bash --login)
+    readonly DCP_SHELL_INVOCATION=( bash --login )
   else
-    readonly DCP_SHELL_INVOCATION=(bash)
+    readonly DCP_SHELL_INVOCATION=( bash )
   fi
 fi
 
 yes_managers() {
-  unset DCP_DISABLE_MANAGERS
-  unset DCP_DISABLE_NVM
-  unset DCP_DISABLE_PYENV
-  unset DCP_DISABLE_RVM
-  unset DCP_DISABLE_RBENV
+  typeset +x DCP_DISABLE_MANAGERS
+  typeset +x DCP_DISABLE_NVM
+  typeset +x DCP_DISABLE_PYENV
+  typeset +x DCP_DISABLE_RVM
+  typeset +x DCP_DISABLE_RBENV
   exec ${DCP_SHELL_INVOCATION[*]}
 }
 
