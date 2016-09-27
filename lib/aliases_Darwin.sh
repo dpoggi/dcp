@@ -25,35 +25,61 @@ haxcode() {
 #            install something in between. Boop!
 #
 
-boop() {
-  local -a formulae
-  local purge="-s"
-  local cask=""
-  local cask_purge="--outdated"
+__boop_check_pyenv() {
+  if ! printf "%s" "${PATH}" | grep -Fq 'pyenv'; then
+    return
+  fi
+  if ! type no_managers 2>&1 | grep -Fq 'function'; then
+    return
+  fi
 
+  printf >&2 "pyenv found in \$PATH. This will break installing/upgrading Vim from Homebrew.\n"
+  printf >&2 "Run no_managers function now to restart this shell without it (y/n)? "
+  read -r
+
+  if [[ "${REPLY}" = y* || "${REPLY}" = Y* ]]; then
+    printf >&2 "\nRestarting the shell. Please run this command again.\n"
+    no_managers
+  fi
+}
+
+boop() {
+  if [[ "$1" = "cask" ]]; then
+    local cask="true"
+    shift
+  fi
+
+  local -a formulae
   while [[ "$#" -gt "0" ]]; do
-    case "$1" in
-      --purge)
-        purge="--prune=all"
-        cask_purge=""
-        ;;
-      cask)
-        cask="cask"
-        ;;
-      *)
-        formulae+=("$1")
-        ;;
-    esac
+    formulae+=( "$1" )
     shift
   done
 
-  brew update && \
-  brew upgrade && \
-  [[ -n "${formulae[@]}" ]] &&
-    brew ${cask} install "${formulae[@]}" || true && \
-  [[ -n "${cask}" ]] &&
-    brew cask cleanup "${cask_purge}" || \
-  brew cleanup --force "${purge}" || true
+  __boop_check_pyenv
+
+  brew update
+  if [[ "$?" != "0" ]]; then
+    return "$?"
+  fi
+
+  brew upgrade
+  if [[ "$?" != "0" ]]; then
+    return "$?"
+  fi
+
+  if [[ -n "${formulae[*]}" ]]; then
+    if [[ "${cask}" = "true" ]]; then
+      brew cask install "${formulae[@]}"
+    else
+      brew install "${formulae[@]}"
+    fi
+  fi
+
+  if [[ "${cask}" = "true" ]]; then
+    brew cask cleanup
+  else
+    brew cleanup --prune=all
+  fi
 }
 
 
@@ -62,8 +88,14 @@ boop() {
 #
 
 # Reset "Open With..." menus after connecting a drive with applications on it
+
 reset_launch_services() {
-  /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -kill -r -domain local -domain system -domain user
+  local framework="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework"
+
+  "${framework}"/Support/lsregister -kill -r \
+                                    -domain local \
+                                    -domain system \
+                                    -domain user
   killall Finder
 }
 
@@ -72,13 +104,13 @@ reset_dns_cache() {
   printf >&2 "Flushing the DNS cache (enter your user password if prompted)...\n"
 
   if hash discoveryutil 2> /dev/null; then
-    # OS X 10.9 - 10.10.3
-    sudo discoveryutil mdnsflushcache
-    sudo discoveryutil udnsflushcache
+    # OS X 10.9 - 10.10.3 (RIP discoveryd)
+    sudo -H discoveryutil mdnsflushcache
+    sudo -H discoveryutil udnsflushcache
   else
-    # Sane versions of OS X
-    sudo dscacheutil -flushcache
-    sudo killall -HUP mDNSResponder
+    # Sane versions of macOS (mDNSResponder =~ government cheese)
+    sudo -H dscacheutil -flushcache
+    sudo -H killall -HUP mDNSResponder
   fi
 }
 
@@ -90,7 +122,7 @@ reset_quick_look() {
 
 #
 # Oracle Jabba or: How I Learned to Stop Worrying...
-# and Begrudgingly Accept the State of Multiple Java Installs on OS X
+# and Begrudgingly Accept the State of Multiple Java Installs on macOS
 # Yes, I've seen jenv. No, I don't think I like it.
 #
 
@@ -122,7 +154,7 @@ use_jdk() {
   fi
 
   printf >&2 "Using $(basename "${jdk_dir}") (enter your user password if prompted)...\n"
-  sudo ln -snfv "${jdk_dir}/Contents/Home" "/Library/Java/Home"
+  sudo -H ln -snfv "${jdk_dir}/Contents/Home" "/Library/Java/Home"
 }
 
 
@@ -143,7 +175,7 @@ launchd_export() {
 __lctl() {
   local -a sudo_cmd
   if [[ "$1" = "sudo" ]]; then
-    sudo_cmd=(sudo -H)
+    sudo_cmd=( sudo -H )
     shift
   fi
 
