@@ -59,6 +59,11 @@ alias gb="git branch"
 alias gf="git fetch"
 alias gr="git rebase"
 alias gm="git merge"
+
+gdt() {
+  git describe --tags --abbrev=0
+}
+
 gn() {
   if [[ -e ".git" ]]; then
     return 1
@@ -67,6 +72,7 @@ gn() {
     && git add . \
     && git commit -m 'Initial commit.'
 }
+
 alias grv="git remote -v"
 alias ggr="git grep --break --heading --line-number"
 
