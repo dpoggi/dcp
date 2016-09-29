@@ -50,11 +50,6 @@ fi
 
 [[ -s "${DCP}/localenv" ]] && source "${DCP}/localenv"
 
-# Extend PATH with $JAVA_HOME/bin if one was set in localenv. Doesn't need to be
-# prepended thanks to the wrappers in /usr/bin, but there are a couple programs
-# (at least for Java 8) without wrappers in 10.11.
-[[ -n "${JAVA_HOME}" ]] && export PATH="${PATH}:${JAVA_HOME}/bin"
-
 
 #
 # Simplify PATH down to its earliest distinct elements. That is, remove
