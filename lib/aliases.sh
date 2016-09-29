@@ -230,23 +230,24 @@ gpip() {
 
 if [[ -n "${ZSH_NAME}" ]]; then
   if [[ "$-" = *l* ]]; then
-    DCP_SHELL_INVOCATION=( zsh --login )
+    readonly DCP_SHELL_INVOCATION="exec -l zsh -l"
   else
-    DCP_SHELL_INVOCATION=( zsh )
+    readonly DCP_SHELL_INVOCATION="exec zsh"
   fi
 else
   if shopt -q login_shell 2> /dev/null; then
-    readonly DCP_SHELL_INVOCATION=( bash --login )
+    readonly DCP_SHELL_INVOCATION="exec -l bash -l"
   else
-    readonly DCP_SHELL_INVOCATION=( bash )
+    readonly DCP_SHELL_INVOCATION="exec bash"
   fi
 fi
 
 yes_managers() {
   export DCP_PREVENT_DISABLE="true"
-  exec ${DCP_SHELL_INVOCATION[*]}
+  eval "${DCP_SHELL_INVOCATION}"
 }
 
 no_managers() {
-  DCP_DISABLE_MANAGERS="true" exec ${DCP_SHELL_INVOCATION[*]}
+  export DCP_DISABLE_MANAGERS="true"
+  eval "${DCP_SHELL_INVOCATION}"
 }
