@@ -31,8 +31,6 @@ kwmc bindsym hyper-v exec /usr/local/bin/mvim
 kwmc bindsym hyper-e exec osascript -e 'tell application "Emacs" to activate'
 // Launch Sublime
 kwmc bindsym hyper-s exec osascript -e 'tell application "Sublime Text" to activate'
-// Launch Atom
-kwmc bindsym hyper-a exec osascript -e 'tell application "Atom" to activate'
 
 // Rotate window-tree of current space 90 degrees clockwise
 kwmc bindsym hyper-r tree rotate 90
