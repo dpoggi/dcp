@@ -67,6 +67,7 @@ kwmc rule owner="CLion" name="Welcome to CLion" properties={float="true"}
 kwmc rule owner="Dash" properties={float="true"}
 kwmc rule owner="Dropbox" properties={float="true"}
 kwmc rule owner="emulator64-arm" properties={float="true"}
+kwmc rule owner="FaceTime" properties={float="true"}
 kwmc rule owner="Firefox" name="Launch Application" properties={float="true"}
 kwmc rule owner="Installer" properties={float="true"}
 kwmc rule owner="IntelliJ IDEA" name="Platform and Plugin Updates" properties={float="true"}
