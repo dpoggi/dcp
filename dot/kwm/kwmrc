@@ -60,6 +60,7 @@ kwmc rule owner="Archive Utility" properties={float="true"}
 kwmc rule owner="Archiver" properties={float="true"}
 kwmc rule owner="Calculator" properties={float="true"}
 kwmc rule owner="Calendar" properties={float="true"}
+kwmc rule owner="Changes" properties={float="true"}
 kwmc rule owner="CLion" name="Platform and Plugin Updates" properties={float="true"}
 kwmc rule owner="CLion" name="Preferences" properties={float="true"}
 kwmc rule owner="CLion" name="Project Structure" properties={float="true"}
