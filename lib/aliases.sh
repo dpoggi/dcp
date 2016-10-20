@@ -251,3 +251,8 @@ no_managers() {
   export DCP_DISABLE_MANAGERS="true"
   eval "${DCP_SHELL_INVOCATION}"
 }
+
+# JABBA
+gen_mvn_wrapper() {
+  mvn -N io.takari:maven:wrapper
+}
