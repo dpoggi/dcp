@@ -34,6 +34,7 @@ resize + shift - up        :   kwmc window -c reduce 0.05 north
 resize - right             :   kwmc window -c expand 0.05 east
 resize + shift - right     :   kwmc window -c reduce 0.05 east
 
+# Leave resize mode
 # 0x35 = esc
 resize - 0x35              :   khd -e "mode activate default"
 resize - return            :   khd -e "mode activate default"
@@ -79,3 +80,5 @@ ctrl + alt + cmd - b       :   kwmc space -t bsp
 ctrl + alt + cmd - f       :   kwmc space -t float
 ctrl + alt + cmd - m       :   kwmc space -t monocle
 ctrl + alt + cmd - r       :   kwmc tree rotate 90
+# Lock the screen <3
+ctrl + alt + cmd - l       :   pmset displaysleepnow
