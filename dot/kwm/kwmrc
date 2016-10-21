@@ -7,9 +7,6 @@ kwmc config tiling bsp
 // Tiling mode for space 1 on screen 0
 kwmc config space 0 1 mode monocle
 
-// Let Kwm listen for hotkeys
-kwmc config hotkeys on
-
 // Automatically float windows that fail to resize
 kwmc config float-non-resizable on
 
@@ -52,19 +49,11 @@ kwmc rule owner="Android Studio" name="Preferences" properties={float="true"}
 kwmc rule owner="Android Studio" name="Project Structure" properties={float="true"}
 kwmc rule owner="Android Studio" name="Welcome to Android Studio" properties={float="true"}
 kwmc rule name="Android Emulator" properties={float="true"}
-kwmc rule owner="AppCode" name="Platform and Plugin Updates" properties={float="true"}
-kwmc rule owner="AppCode" name="Preferences" properties={float="true"}
-kwmc rule owner="AppCode" name="Project Structure" properties={float="true"}
-kwmc rule owner="AppCode" name="Welcome to AppCode" properties={float="true"}
 kwmc rule owner="Archive Utility" properties={float="true"}
 kwmc rule owner="Archiver" properties={float="true"}
 kwmc rule owner="Calculator" properties={float="true"}
 kwmc rule owner="Calendar" properties={float="true"}
 kwmc rule owner="Changes" properties={float="true"}
-kwmc rule owner="CLion" name="Platform and Plugin Updates" properties={float="true"}
-kwmc rule owner="CLion" name="Preferences" properties={float="true"}
-kwmc rule owner="CLion" name="Project Structure" properties={float="true"}
-kwmc rule owner="CLion" name="Welcome to CLion" properties={float="true"}
 kwmc rule owner="Dash" properties={float="true"}
 kwmc rule owner="Dropbox" properties={float="true"}
 kwmc rule owner="emulator64-arm" properties={float="true"}
@@ -98,9 +87,7 @@ kwmc rule owner="Zandronum" properties={float="true"}
 // captures an application to the given screen,
 // if the screen exists.
 kwmc rule owner="Android Studio" properties={display="1"}
-kwmc rule owner="AppCode" properties={display="1"}
 kwmc rule owner="Audirvana Plus" properties={display="0"}
-kwmc rule owner="CLion" properties={display="1"}
 kwmc rule owner="Eclipse" properties={display="1"}
 kwmc rule owner="IntelliJ IDEA" properties={display="1"}
 kwmc rule owner="Messages" properties={display="0"}
@@ -126,9 +113,6 @@ kwmc mode prefix prefix on
 kwmc mode prefix timeout 0.5
 kwmc mode prefix restore default
 kwmc mode prefix color 0xFF458588
-
-// Include keybinds
-include binds
 
 // Include local modifications
 include local
