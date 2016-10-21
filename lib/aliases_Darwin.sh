@@ -228,7 +228,37 @@ if [[ -s "${HOME}/Library/LaunchAgents/com.danpoggi.gpg-agent.plist" ]]; then
   }
 fi
 
-# ctl script for Emacs, if it's installed via Homebrew
+# ctl scripts for kwm, if it and khd are installed via Homebrew
+if [[ -d "/usr/local/opt/kwm" && -d "/usr/local/opt/khd" ]]; then
+  __kwm_khd_stop() {
+    brew services stop koekeishiya/khd/khd
+    brew services stop koekeishiya/kwm/kwm
+  }
+
+  __kwm_khd_start() {
+    brew services start koekeishiya/kwm/kwm
+    brew services start koekeishiya/khd/khd
+  }
+
+  kwmctl() {
+    case "$1" in
+      start)
+        __kwm_khd_start
+        ;;
+      stop)
+        __kwm_khd_stop
+        ;;
+      restart)
+        __kwm_khd_stop
+        __kwm_khd_start
+        ;;
+      *)
+        return 1
+    esac
+  }
+fi
+
+# ctl scripts for Emacs, if it's installed via Homebrew
 if [[ -d "/usr/local/opt/emacs" ]]; then
   if [[ -s "${HOME}/.spacemacs" || -d "${HOME}/.spacemacs.d" ]]; then
     DCP_EMACS_KILL_CMD="(spacemacs/kill-emacs)"
