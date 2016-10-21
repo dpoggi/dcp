@@ -14,30 +14,30 @@ khd mode resize color 0xddbdd322
 # ~~~ Resize Mode ~~~
 #
 
-alt + cmd - r              :   khd -e "mode activate resize"
+alt + cmd - r                :   khd -e "mode activate resize"
 
 # Need to be able to jump around for this to be useful
-resize - h                 :   kwmc display -f prev
-resize - j                 :   kwmc window -f prev
-resize - k                 :   kwmc window -f next
-resize - l                 :   kwmc display -f next
+resize - h                   :   kwmc display -f prev
+resize - j                   :   kwmc window -f prev
+resize - k                   :   kwmc window -f next
+resize - l                   :   kwmc display -f next
 # 0x29 = ;
-resize - 0x29              :   kwmc display -f next
+resize - 0x29                :   kwmc display -f next
 
 # Actual resize commands
-resize - left              :   kwmc window -c expand 0.05 west
-resize + shift - left      :   kwmc window -c reduce 0.05 west
-resize - down              :   kwmc window -c expand 0.05 south
-resize + shift - down      :   kwmc window -c reduce 0.05 south
-resize - up                :   kwmc window -c expand 0.05 north
-resize + shift - up        :   kwmc window -c reduce 0.05 north
-resize - right             :   kwmc window -c expand 0.05 east
-resize + shift - right     :   kwmc window -c reduce 0.05 east
+resize - left                :   kwmc window -c expand 0.05 west
+resize + shift - left        :   kwmc window -c reduce 0.05 west
+resize - down                :   kwmc window -c expand 0.05 south
+resize + shift - down        :   kwmc window -c reduce 0.05 south
+resize - up                  :   kwmc window -c expand 0.05 north
+resize + shift - up          :   kwmc window -c reduce 0.05 north
+resize - right               :   kwmc window -c expand 0.05 east
+resize + shift - right       :   kwmc window -c reduce 0.05 east
 
 # Leave resize mode
 # 0x35 = esc
-resize - 0x35              :   khd -e "mode activate default"
-resize - return            :   khd -e "mode activate default"
+resize - 0x35                :   khd -e "mode activate default"
+resize - return              :   khd -e "mode activate default"
 
 
 #
@@ -45,40 +45,67 @@ resize - return            :   khd -e "mode activate default"
 #
 
 # App launchers
-ctrl + alt + cmd - return  :   /usr/bin/osascript -e 'if application "iTerm" is running' -e 'tell application "iTerm" to create window with default profile' -e 'else' -e 'tell application "iTerm" to activate' -e 'end if'
-ctrl + alt + cmd - e       :   /usr/bin/osascript -e 'tell application "Emacs" to activate'
+ctrl + alt + cmd - return    :   /usr/bin/osascript -e 'if application "iTerm" is running' -e 'tell application "iTerm" to create window with default profile' -e 'else' -e 'tell application "iTerm" to activate' -e 'end if'
+ctrl + alt + cmd - e         :   /usr/bin/osascript -e 'tell application "Emacs" to activate'
 
-# Move window focus
-alt + cmd - h              :   kwmc display -f prev
-alt + cmd - j              :   kwmc window -f prev
-alt + cmd - k              :   kwmc window -f next
-alt + cmd - l              :   kwmc display -f next
+# Move focus by container
+alt + cmd - h                :   kwmc window -f west
+alt + cmd - j                :   kwmc window -f south
+alt + cmd - k                :   kwmc window -f north
+alt + cmd - l                :   kwmc window -f east
 # 0x29 = ;
-alt + cmd - 0x29           :   kwmc display -f next
+alt + cmd - 0x29             :   kwmc window -f east
+
+# Move focus by space - what a hack lol
+alt + shift - h              :   kwmc space -fExperimental left; \
+                                 killall Dock
+alt + shift - l              :   kwmc space -fExperimental right; \
+                                 killall Dock
+# # 0x29 = ;
+alt + shift - 0x29           :   kwmc space -fExperimental right; \
+                                 killall Dock
+
+# Move focus by display
+ctrl + alt + cmd - h         :   kwmc display -f prev
+ctrl + alt + cmd - l         :   kwmc display -f next
+# 0x29 = ;
+ctrl + alt + cmd - 0x29      :   kwmc display -f next
 
 # Move window by container
-alt + cmd - left           :   kwmc window -s prev
-alt + cmd - right          :   kwmc window -s next
+alt + cmd - left             :   kwmc window -s west
+alt + cmd - down             :   kwmc window -s south
+alt + cmd - up               :   kwmc window -s north
+alt + cmd - right            :   kwmc window -s east
 
 # Move window by space
-alt + cmd + shift - left   :   kwmc window -m space left
-alt + cmd + shift - right  :   kwmc window -m space right
+alt + shift - left           :   kwmc window -m space left
+alt + shift - right          :   kwmc window -m space right
+
+# Move window by space, move to that space - also what a hack lol
+alt + cmd + shift - left     :   kwmc window -m space left; \
+                                 kwmc space -fExperimental left; \
+                                 killall Dock
+alt + cmd + shift - right    :   kwmc window -m space right; \
+                                 kwmc space -fExperimental right; \
+                                 killall Dock
 
 # Move window by display
-ctrl + alt + cmd - left    :   kwmc window -m display prev
-ctrl + alt + cmd - right   :   kwmc window -m display next
+ctrl + alt + cmd - left      :   kwmc window -m display prev
+ctrl + alt + cmd - right     :   kwmc window -m display next
 
+# Fix the current space, for when things get screwy - instead of restarting kwm
+alt + cmd - space            :   kwmc space -r focused
 # Make the current window fullscreen
-alt + cmd - f              :   kwmc window -z fullscreen
-# Toggle horizontal/vertical/the other one I forget split
-alt + cmd - m              :   kwmc window -c split-mode toggle
+alt + cmd - f                :   kwmc window -z fullscreen
+# Toggle optimal/horizontal/vertical split mode
+alt + cmd - m                :   kwmc window -c split-mode toggle
 # Float the current window
-alt + cmd - o              :   kwmc window -t focused
+alt + cmd - o                :   kwmc window -t focused
 
 # "Big global-ish sorts of things"
-ctrl + alt + cmd - b       :   kwmc space -t bsp
-ctrl + alt + cmd - f       :   kwmc space -t float
-ctrl + alt + cmd - m       :   kwmc space -t monocle
-ctrl + alt + cmd - r       :   kwmc tree rotate 90
+ctrl + alt + cmd - b         :   kwmc space -t bsp
+ctrl + alt + cmd - f         :   kwmc space -t float
+ctrl + alt + cmd - m         :   kwmc space -t monocle
+ctrl + alt + cmd - r         :   kwmc tree rotate 90
 # Lock the screen <3
-ctrl + alt + cmd - l       :   pmset displaysleepnow
+ctrl + alt + cmd - space     :   pmset displaysleepnow
