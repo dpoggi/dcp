@@ -25,7 +25,7 @@ link_dotfile_macos() {
 
 link_dotfile() {
   case "$(basename "$1")" in
-    kwm|osx)
+    khdrc|kwm|osx)
       :
       ;;
     *)
