@@ -107,5 +107,8 @@ ctrl + alt + cmd - b         :   kwmc space -t bsp
 ctrl + alt + cmd - f         :   kwmc space -t float
 ctrl + alt + cmd - m         :   kwmc space -t monocle
 ctrl + alt + cmd - r         :   kwmc tree rotate 90
+# Start screensaver
+alt + shift - space          :   sleep 1; \
+                                 /usr/bin/open -a /System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app
 # Lock the screen <3
-ctrl + alt + cmd - space     :   pmset displaysleepnow
+ctrl + alt + cmd - space     :   /usr/bin/pmset displaysleepnow
