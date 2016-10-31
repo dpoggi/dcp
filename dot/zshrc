@@ -12,7 +12,7 @@ fi
 
 # Mac-specific plugins
 if [[ "${DCP_OS}" = "Darwin" ]]; then
-  plugins+=( brew brew-cask osx )
+  plugins+=( brew-cask osx )
 fi
 
 # User-specified plugins
