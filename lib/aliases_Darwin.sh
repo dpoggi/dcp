@@ -307,3 +307,12 @@ if [[ -d "/usr/local/opt/emacs" ]]; then
     esac
   }
 fi
+
+
+#
+# Misc
+#
+
+if [[ -d "/usr/local/opt/htop-osx" ]]; then
+  alias htop="sudo /usr/local/opt/htop-osx/bin/htop"
+fi
