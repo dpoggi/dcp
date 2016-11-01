@@ -74,16 +74,13 @@ transcode() {
   __source_to_wav "$1" "${base}.wav"
 
   __wav_to_caf "${base}.wav" "${base}.caf"
+  rm -f "${base}.wav"
 
   __caf_to_aac "${base}.caf" "${base}.aac" "$2"
+  rm -f "${base}.caf"
 
   __recombine "${base}_video.mkv" "${base}.aac" "${output}"
-
-  log_info "Cleaning up intermediate files..."
-  rm -f "${base}_video.mkv" \
-        "${base}.wav" \
-        "${base}.caf" \
-        "${base}.aac"
+  rm -f "${base}_video.mkv" "${base}.aac"
 
   log_info "Finished transcoding ${1}."
 }
