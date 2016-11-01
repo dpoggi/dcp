@@ -1,59 +1,121 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -e
 
-fail() {
-  printf >&2 "Fatal: %s\n" "$1"
-  exit 1
+log_info() {
+  printf "\033[0;34m[%s]:\033[0m %s\n" \
+         "$(date "+%Y-%m-%dT%H:%M:%SZ")" \
+         "$*"
 }
-log_msg() {
-  printf >&2 "%s\t%s\n" "$(date -u "+%Y-%m-%dT%H:%M:%SZ")" "$1"
+
+log_error() {
+  printf "\033[1;37;41m[%s]:\033[0m %s\n" \
+         "$(date "+%Y-%m-%dT%H:%M:%SZ")" \
+         "$*"
+}
+
+print_usage() {
+  printf "Usage: %s [--ios] input1.mkv [input2.mkv]...\n" "$(basename "$0")"
+}
+
+check_deps() {
+  if [[ "$(uname -s)" != "Darwin" ]]; then
+    log_error "this script requires afconvert(1) from macOS."
+    return 1
+  fi
+  if ! hash ffmpeg 2> /dev/null; then
+    log_error "ffmpeg not found."
+    return 1
+  fi
+  if ! hash afconvert 2> /dev/null; then
+    log_error "afconvert not found."
+    return 1
+  fi
+}
+
+__extract_video() {
+  log_info "Extracting video as-is..."
+  ffmpeg -v warning -i "$1" -an -c:v copy "$2"
+}
+
+__source_to_wav() {
+  log_info "Converting audio from source -> WAV..."
+  ffmpeg -v warning -i "$1" -vn -c:a pcm_s16le -ac 2 "$2"
+}
+
+__wav_to_caf() {
+  log_info "Converting audio from WAV -> CAF..."
+  afconvert "$1" "$2" -d 0 -f caff --soundcheck-generate
+}
+
+__caf_to_aac() {
+  log_info "Converting audio from CAF -> AAC ($(expr $3 / 1000)kbps)..."
+  afconvert "$1" "$2" \
+            -d aac -f m4af \
+            -u pgcm 2 -b "$3" -q 127 \
+            -s 2 --soundcheck-read
+}
+
+__recombine() {
+  log_info "Recombining..."
+  ffmpeg -v warning -i "$1" -i "$2" -c:v copy -c:a copy "$3"
 }
 
 transcode() {
   local base="${1%.*}"
-  local video="${base}_video.mkv"
-  local wav="${base}.wav"
-  local caf="${base}.caf"
-  local aac="${base}.m4a"
   local output="${base}.mp4"
-  [[ -e "${output}" ]] && output="${base}_out.mp4"
+  if [[ -e "${output}" ]]; then
+    output="${base}_out.mp4"
+  fi
 
-  log_msg "Transcoding ${1}..."
-  log_msg "Extracting video as-is..."
-  ffmpeg -v warning -i "$1" -an -c:v copy "${video}"
-  log_msg "Converting audio from source -> WAV..."
-  ffmpeg -v warning -i "$1" -vn -c:a pcm_s16le -ac 2 "${wav}"
+  log_info "Transcoding ${1}..."
 
-  log_msg "Converting audio from WAV -> CAF..."
-  afconvert "${wav}" "${caf}" -d 0 -f caff --soundcheck-generate
-  log_msg "Converting audio from CAF -> AAC ($(expr ${bitrate} / 1000)kbps)..."
-  afconvert "${caf}" "${aac}" -d aac -f m4af -u pgcm 2 -b "${bitrate}" -q 127 -s 2 --soundcheck-read
+  __extract_video "$1" "${base}_video.mkv"
 
-  log_msg "Muxing..."
-  ffmpeg -v warning -i "${video}" -i "${aac}" -c:v copy -c:a copy "${output}"
+  __source_to_wav "$1" "${base}.wav"
 
-  log_msg "Cleaning up intermediate files..."
-  rm -f "${video}" "${wav}" "${caf}" "${aac}"
-  log_msg "Finished transcoding ${1}."
+  __wav_to_caf "${base}.wav" "${base}.caf"
+
+  __caf_to_aac "${base}.caf" "${base}.aac" "$2"
+
+  __recombine "${base}_video.mkv" "${base}.aac" "${output}"
+
+  log_info "Cleaning up intermediate files..."
+  rm -f "${base}_video.mkv" \
+        "${base}.wav" \
+        "${base}.caf" \
+        "${base}.aac"
+
+  log_info "Finished transcoding ${1}."
 }
 
-[[ "$#" -gt "0" ]] || fail "no input file."
-hash 2>&- ffmpeg || fail "ffmpeg could not be found."
-hash 2>&- afconvert || fail "afconvert could not be found."
+main() {
+  check_deps
 
-bitrate="256000"
-declare -a inputs
-while [[ "$#" -gt "0" ]]; do
-  if [[ "$1" = "--ios" ]]; then
-    bitrate="160000"
-  elif [[ "$1" = "--help" ]]; then
-    echo >&2 "Usage: dcp-transcode [--ios] input1.mkv input2.mkv..."
-    exit
-  else
-    inputs+=( "$1" )
+  local -a inputs
+  local bitrate="256000"
+  while [[ "$#" -gt "0" ]]; do
+    case "$1" in
+      --ios)
+        bitrate="160000"
+        ;;
+      --help)
+        print_usage
+        return
+        ;;
+      *)
+        inputs+=( "$1" )
+    esac
+    shift
+  done
+
+  if [[ -z "${inputs[*]}" ]]; then
+    log_error "No input files."
+    return 1
   fi
-  shift
-done
 
-for (( i = 0; i < ${#inputs[@]}; i++ )); do
-  transcode "${inputs[$i]}"
-done
+  for input in "${inputs[@]}"; do
+    transcode "${input}" "${bitrate}"
+  done
+}
+
+main "$@"
