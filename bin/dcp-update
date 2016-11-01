@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
 
-log_msg() {
-  printf >&2 "\033[0;37m[%s]:\033[0m %s\n" "$(date +"%H:%M:%S")" "$1"
+log_info() {
+  printf "\033[0;34m[%s]:\033[0m %s\n" \
+         "$(date "+%Y-%m-%dT%H:%M:%SZ")" \
+         "$*"
+}
+
+log_error() {
+  printf "\033[1;37;41m[%s]:\033[0m %s\n" \
+         "$(date "+%Y-%m-%dT%H:%M:%SZ")" \
+         "$*"
 }
 
 fatal() {
-  printf >&2 "\033[1;37;41m[FATAL]:\033[0m %s\n" "$1"
+  log_error "$*"
   exit 1
 }
 
@@ -13,7 +21,7 @@ checkout_tag() {
   pushd "$1" >/dev/null
   local tag="$(git describe --abbrev=0 --tags 2>/dev/null)"
   if [[ -n "${tag}" ]]; then
-    log_msg "Checking out tag for latest version of $2..."
+    log_info "Checking out tag for latest version of $2..."
     git checkout --quiet --force "${tag}"
   fi
   popd >/dev/null
@@ -30,16 +38,16 @@ update_repo() {
   pushd "${repo}" >/dev/null
   local name="$(basename "$(git remote get-url origin 2>/dev/null)")"
   name="${name%.*}"
-  log_msg "Updating ${name}..."
+  log_info "Updating ${name}..."
 
-  log_msg "Fetching origin..."
+  log_info "Fetching origin..."
   local initial_branch="$(git symbolic-ref --short HEAD 2>/dev/null)"
   git fetch --quiet --force origin \
             "refs/heads/master:refs/remotes/origin/master" ||
     fatal "Unable to fetch origin."
 
   if [[ -n "$(git status --porcelain --ignore-submodules --untracked-files=all 2>/dev/null)" ]]; then
-    log_msg "Attempting to stash uncommitted changes:"
+    log_info "Attempting to stash uncommitted changes:"
     git status --short --ignore-submodules --untracked-files=all
     git merge --abort &>/dev/null
     git -c "user.name=dcp update" \
@@ -51,7 +59,7 @@ update_repo() {
   fi
 
   if [[ "${initial_branch}" != "master" ]]; then
-    log_msg "Checking out master..."
+    log_info "Checking out master..."
     if git merge-base --is-ancestor master origin/master &>/dev/null; then
       git checkout --quiet --force master
     else
@@ -59,13 +67,13 @@ update_repo() {
     fi
   fi
 
-  log_msg "Updating master..."
+  log_info "Updating master..."
   git merge --quiet --ff-only --no-edit origin/master \
             --strategy=recursive \
             --strategy-option=ours \
             --strategy-option=ignore-all-space
   if [[ "$?" != "0" ]]; then
-    log_msg "Unable to update master using a fast-forward, forcing a new checkout..."
+    log_info "Unable to update master using a fast-forward, forcing a new checkout..."
     git checkout --quiet --force -B master origin/master ||
       fatal "Unable to force a new checkout of origin/master."
   fi
@@ -75,7 +83,7 @@ update_repo() {
   fi
 
   if [[ -s ".gitmodules" ]]; then
-    log_msg "Updating submodules..."
+    log_info "Updating submodules..."
     git submodule update --quiet --init --recursive
   fi
   if [[ "${name}" = "dotvim" ]]; then
@@ -84,7 +92,7 @@ update_repo() {
     [[ -x "${hook_script}" ]] && "${hook_script}"
   fi
 
-  log_msg "Finished updating ${name}."
+  log_info "Finished updating ${name}."
   printf >&2 "\n"
   popd >/dev/null
 }
@@ -102,13 +110,13 @@ do
   [[ "${plugin}" != */example ]] && update_repo --try-tag "${plugin}"
 done
 
-log_msg "Updating symlinks..."
+log_info "Updating symlinks..."
 "${HOME}/.dcp/bin/dcp-install_links"
-log_msg "Done."
+log_info "Done."
 
 if [[ -n "${stashed}" ]]; then
   printf >&2 "\n"
-  log_msg "You may want to restore stashed changes to:"
-  log_msg "${stashed}"
-  log_msg "Use \`git stash pop' to do so."
+  log_info "You may want to restore stashed changes to:"
+  log_info "${stashed}"
+  log_info "Use \`git stash pop' to do so."
 fi
