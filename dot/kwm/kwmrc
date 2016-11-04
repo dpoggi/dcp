@@ -54,6 +54,7 @@ kwmc rule owner="Archiver" properties={float="true"}
 kwmc rule owner="Calculator" properties={float="true"}
 kwmc rule owner="Calendar" properties={float="true"}
 kwmc rule owner="Changes" properties={float="true"}
+kwmc rule owner="Contacts" properties={float="true"}
 kwmc rule owner="Dash" properties={float="true"}
 kwmc rule owner="Dropbox" properties={float="true"}
 kwmc rule owner="emulator64-arm" properties={float="true"}
