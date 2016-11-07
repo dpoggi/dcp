@@ -1,6 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# ~/.osx — http://mths.be/osx
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  printf >&2 "This script should only be run on macOS.\n"
+  exit 1
+fi
+
+readonly DARWIN_MAJOR_VERSION="$(uname -r | sed -e 's/\..*//')"
 
 ###############################################################################
 # General UI/UX                                                               #
@@ -20,7 +25,13 @@ defaults write NSGlobalDomain NSQuitAlwaysKeepsWindows -bool false
 defaults write NSGlobalDomain NSDisableAutomaticTermination -bool true
 
 # Set a blazingly fast keyboard repeat rate
-defaults write NSGlobalDomain KeyRepeat -int 0
+if [[ "${DARWIN_MAJOR_VERSION}" -le "15" ]]; then
+  defaults write NSGlobalDomain KeyRepeat -int 0
+else
+  defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+  defaults write NSGlobalDomain KeyRepeat -int 1
+  defaults write NSGlobalDomain InitialKeyRepeat -int 12
+fi
 
 # Disable smart quotes/dashes because typing code into Slack
 defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
