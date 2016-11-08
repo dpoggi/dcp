@@ -108,12 +108,19 @@ main() {
   fi
 
   log_info "Generating palette..."
-  ffmpeg -v warning ${time_opts} -i "${input_file}" -vf "${filters},palettegen" -y "${palette}"
+  ffmpeg -v warning \
+         ${time_opts} \
+         -i "${input_file}" \
+         -vf "${filters},palettegen" \
+         -y "${palette}"
 
   log_info "Makin' the GIF..."
   ffmpeg -v warning \
          ${time_opts} \
-         -i "${input_file}" -i "${palette}" -lavfi "${filters} [x]; [x][1:v] ${palette_opts}" -y "${output_gif}"
+         -i "${input_file}" \
+         -i "${palette}" \
+         -lavfi "${filters} [x]; [x][1:v] ${palette_opts}" \
+         -y "${output_gif}"
 
   rm -f "${palette}"
   log_info "Done."
