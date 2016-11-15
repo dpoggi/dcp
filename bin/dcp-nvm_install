@@ -1,4 +1,0 @@
-#!/bin/bash
-
-exec __dcp-vm_install "https://github.com/creationix/nvm.git" \
-                      "${HOME}/.nvm"
