@@ -18,13 +18,20 @@ fatal() {
 }
 
 checkout_tag() {
-  pushd "$1" >/dev/null
-  local tag="$(git describe --abbrev=0 --tags 2>/dev/null)"
+  pushd "$1" > /dev/null
+
+  if [[ "$2" = "zsh-syntax-highlighting" ]]; then
+    local tag="0.5.0"
+  else
+    local tag="$(git describe --abbrev=0 --tags 2> /dev/null)"
+  fi
+
   if [[ -n "${tag}" ]]; then
     log_info "Checking out tag for latest version of $2..."
     git checkout --quiet --force "${tag}"
   fi
-  popd >/dev/null
+
+  popd > /dev/null
 }
 
 # Thank you based Homebrew, no way I would've thought of some of this...
@@ -36,7 +43,7 @@ update_repo() {
   done
 
   pushd "${repo}" >/dev/null
-  local name="$(basename "$(git remote get-url origin 2>/dev/null)")"
+  local name="$(basename "$(git remote get-url origin 2>/dev/null)" .git)"
   name="${name%.*}"
   log_info "Updating ${name}..."
 
@@ -104,11 +111,13 @@ update_repo "${HOME}/.vim"
 
 update_repo "${HOME}/.oh-my-zsh"
 plugins_dir="${HOME}/.oh-my-zsh/custom/plugins"
-for plugin in \
-  $(find "${plugins_dir}" -maxdepth 1 -type d -print 2>/dev/null | tail -n +2)
-do
-  [[ "${plugin}" != */example ]] && update_repo --try-tag "${plugin}"
-done
+while read -d $'\x00' -r plugin; do
+  if [[ "${plugin}" != */example ]]; then
+    update_repo --try-tag "${plugin}"
+  fi
+done < <(find "${plugins_dir}" -maxdepth 1 \
+                               -type d \
+                               -print0 2> /dev/null | tail -n +2)
 
 log_info "Updating symlinks..."
 "${HOME}/.dcp/bin/dcp-install_links"
