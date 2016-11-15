@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#
+# dcp-install_nvm - installs Node Version Manager at ~/.nvm
+#
+set -e
+
+if [[ -n "${DCP_SHELL_INVOCATION}" ]]; then
+  readonly SHELL_INVOCATION="${DCP_SHELL_INVOCATION}"
+else
+  readonly SHELL_INVOCATION="exec $(basename "${SHELL}")"
+fi
+
+__git_clone_release "https://github.com/creationix/nvm.git" "${HOME}/.nvm"
+printf "\n"
+printf "Finished installing NVM. To start using it, \`${SHELL_INVOCATION}'"

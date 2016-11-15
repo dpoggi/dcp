@@ -241,6 +241,7 @@ else
     readonly DCP_SHELL_INVOCATION="exec bash"
   fi
 fi
+export DCP_SHELL_INVOCATION
 
 yes_managers() {
   export DCP_PREVENT_DISABLE="true"
