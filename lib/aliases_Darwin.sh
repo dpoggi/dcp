@@ -173,58 +173,70 @@ launchd_export() {
 
 # launchctl wrapper for making things feel a little more... right.
 __lctl() {
-  local -a sudo_cmd
-  if [[ "$1" = "sudo" ]]; then
-    sudo_cmd=( sudo -H )
-    shift
+  if [[ "$#" -lt "3" || ! -s "$3" ]]; then
+    return 1
   fi
 
-  case "$1" in
+  local action="$1"
+  shift
+
+  local target_domain
+  if [[ "$1" = "user" || "$1" = "gui" ]]; then
+    target_domain="$1/$(id -u)"
+  else
+    target_domain="$1"
+  fi
+  shift
+
+  local plist="$(cd "$(dirname "$1")" && pwd -P)/$(basename "$1")"
+  shift
+
+  local service_target="${target_domain}/$(basename "${plist}" .plist)"
+
+  local -a sudo_cmd
+  if [[ "${plist}" = /Library* || "${plist}" = /System/Library* ]]; then
+    sudo_cmd=(sudo -H)
+  fi
+
+  case "${action}" in
     start)
-      shift
-      ${sudo_cmd[*]} launchctl load -F "$@"
+      ${sudo_cmd[*]} launchctl bootstrap "${target_domain}" "${plist}"
       ;;
     stop)
-      shift
-      ${sudo_cmd[*]} launchctl unload -F "$@"
+      ${sudo_cmd[*]} launchctl bootout "${service_target}"
       ;;
     restart)
-      shift
-      ${sudo_cmd[*]} launchctl unload -F "$@"
-      ${sudo_cmd[*]} launchctl load -F "$@"
+      ${sudo_cmd[*]} launchctl kickstart -k "${service_target}"
       ;;
-    "")
-      return 1
+    enable)
+      ${sudo_cmd[*]} launchctl enable "${service_target}"
+      ;;
+    disable)
+      ${sudo_cmd[*]} launchctl disable "${service_target}"
       ;;
     *)
-      ${sudo_cmd[*]} launchctl "$@"
+      return 1
       ;;
   esac
 }
 
 # launchctl wrapper for apsd (Apple Push Service: Messages.app, etc.)
 apsctl() {
-  __lctl sudo \
-         "$1" \
-         "/System/Library/LaunchDaemons/com.apple.apsd.plist"
+  __lctl "$1" system "/System/Library/LaunchDaemons/com.apple.apsd.plist"
 }
 
 # launchctl wrapper for CoreAudio (because sometimes there be dragons)
 coreaudioctl() {
-  __lctl sudo \
-         "$1" \
-         "/System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist"
+  __lctl "$1" system "/System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist"
 }
 
 # launchctl wrapper for gpg-agent, if the plist is installed
 if [[ -s "${HOME}/Library/LaunchAgents/com.danpoggi.gpg-agent.plist" ]]; then
   gpgagentctl() {
     if [[ "$1" = "stop" || "$1" = "restart" ]]; then
-      killall gpg-agent
+      killall gpg-agent 2> /dev/null
     fi
-    __lctl "$1" \
-           -S Aqua \
-           "${HOME}/Library/LaunchAgents/com.danpoggi.gpg-agent.plist"
+    __lctl "$1" gui "${HOME}/Library/LaunchAgents/com.danpoggi.gpg-agent.plist"
   }
 fi
 
@@ -267,7 +279,7 @@ if [[ -d "/usr/local/opt/emacs" ]]; then
   fi
 
   __emacs_stop() {
-    /usr/local/opt/emacs/bin/emacsclient \
+    /usr/local/bin/emacsclient \
       --eval "${DCP_EMACS_KILL_CMD}" \
       2> /dev/null
   }
@@ -277,10 +289,10 @@ if [[ -d "/usr/local/opt/emacs" ]]; then
   }
 
   __emacs_start() {
-    if ps -A | grep -q 'Emacs\.app'; then
+    if ps -A | grep -Fq 'Emacs.app'; then
       return 1
     fi
-    (cd "${HOME}" && /usr/local/opt/emacs/bin/emacs --daemon &> /dev/null)
+    (cd "${HOME}" && /usr/local/bin/emacs --daemon &> /dev/null)
   }
 
   emacsctl() {
