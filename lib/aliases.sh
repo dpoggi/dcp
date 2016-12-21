@@ -60,6 +60,10 @@ alias gf="git fetch"
 alias gr="git rebase"
 alias gm="git merge"
 
+__git_current_branch() {
+  git branch 2> /dev/null | awk '$0 ~ /^\*/ { printf "%s", $2 }'
+}
+
 gdt() {
   git describe --tags --abbrev=0
 }
@@ -73,11 +77,24 @@ gn() {
     && git commit -m 'Initial commit.'
 }
 
+gfco() {
+  local current_branch="$(__git_current_branch)"
+  if [[ -z "${current_branch}" ]]; then
+    return 1
+  fi
+
+  git checkout -B "${current_branch}" "origin/${current_branch}"
+}
+
 alias grv="git remote -v"
 alias ggr="git grep --break --heading --line-number"
 
 gcb() {
-  local current_branch="$(git branch 2> /dev/null | sed -e '/^[^*]/d' | colrm 1 2)"
+  local current_branch="$(__git_current_branch)"
+  if [[ -z "${current_branch}" ]]; then
+    return 1
+  fi
+
   git fetch --prune
   git branch --merged \
     | colrm 1 2 \
