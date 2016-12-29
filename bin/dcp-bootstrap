@@ -14,11 +14,19 @@ fi
 readonly ZSH_HLT_GIT="https://github.com/zsh-users/zsh-syntax-highlighting.git"
 
 log_info() {
-  printf >&2 "\033[0;37m[%s]:\033[0m %s\n" "$(date +"%H:%M:%S")" "$1"
+  printf "\033[0;34m[%s]:\033[0m %s\n" \
+         "$(date "+%Y-%m-%dT%H:%M:%SZ")" \
+         "$*"
 }
 
-log_fatal() {
-  printf >&2 "\033[1;37;41m[FATAL]:\033[0m %s\n" "$1"
+log_error() {
+  printf >&2 "\033[1;37;41m[%s]:\033[0m %s\n" \
+             "$(date "+%Y-%m-%dT%H:%M:%SZ")" \
+             "$*"
+}
+
+fatal() {
+  log_error "$*"
   return 1
 }
 
@@ -43,7 +51,7 @@ clone_repo() {
 
 main() {
   if ! hash git 2> /dev/null; then
-    log_fatal "Git is required."
+    fatal "Git is required."
   fi
 
   clone_repo "${GIT_BASE}/dcp.git" "${DCP}"
