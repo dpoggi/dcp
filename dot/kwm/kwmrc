@@ -58,6 +58,7 @@ kwmc rule owner="Contacts" properties={float="true"}
 kwmc rule owner="Dash" properties={float="true"}
 kwmc rule owner="Dropbox" properties={float="true"}
 kwmc rule owner="Eclipse" properties={float="true"}
+kwmc rule name="Eclipse" properties={float="true"}
 kwmc rule owner="emulator64-arm" properties={float="true"}
 kwmc rule owner="FaceTime" properties={float="true"}
 kwmc rule owner="Firefox" name="Launch Application" properties={float="true"}
