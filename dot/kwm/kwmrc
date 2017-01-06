@@ -57,6 +57,7 @@ kwmc rule owner="Changes" properties={float="true"}
 kwmc rule owner="Contacts" properties={float="true"}
 kwmc rule owner="Dash" properties={float="true"}
 kwmc rule owner="Dropbox" properties={float="true"}
+kwmc rule owner="Eclipse" properties={float="true"}
 kwmc rule owner="emulator64-arm" properties={float="true"}
 kwmc rule owner="FaceTime" properties={float="true"}
 kwmc rule owner="Firefox" name="Launch Application" properties={float="true"}
@@ -90,7 +91,6 @@ kwmc rule owner="Zandronum" properties={float="true"}
 // if the screen exists.
 kwmc rule owner="Android Studio" properties={display="1"}
 kwmc rule owner="Audirvana Plus" properties={display="0"}
-kwmc rule owner="Eclipse" properties={display="1"}
 kwmc rule owner="IntelliJ IDEA" properties={display="1"}
 kwmc rule owner="Messages" properties={display="0"}
 kwmc rule owner="Simulator" properties={display="0"}
