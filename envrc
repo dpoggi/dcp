@@ -40,7 +40,7 @@ readonly DCP_PS1_RESET="\[${DCP_RESET}\]"
 # Guard for Darwin because I know nothing about Linuxbrew, and this PATH order
 # would be inappropriate for most distros.
 if [[ "${DCP_OS}" = "Darwin" && -x "/usr/local/bin/brew" ]]; then
-  export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH}:/usr/local/sbin"
+  export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin:${PATH}"
 fi
 
 
@@ -52,13 +52,30 @@ fi
 
 
 #
-# Simplify PATH down to its earliest distinct elements. That is, remove
-# duplicates without altering behavior.
+# __path_filter: Filter elements from a PATH-like string by expression.
+#
+# __path_distinct: Use __path_filter to simplify a PATH-like string down to its
+# earliest distinct elements. That is, remove duplicates without altering
+# behavior. Also filter out accidental literal '$PATH's.
 #
 
-__path_distinct() {
-  printf "%s" "$1" | \
-    perl -e 'print join(":", grep { not $seen{$_}++ } split(/:/, scalar <>))'
-}
+if hash perl 2> /dev/null; then
+  __path_filter() {
+    printf "%s" "$1" \
+      | perl -e "print join(\":\", grep { $2 } split(/:/, scalar <>))"
+  }
+
+  __path_distinct() {
+    __path_filter "$1" '!$seen{$_}++ && $_ ne "\$PATH"'
+  }
+else
+  __path_filter() {
+    printf "%s" "$1"
+  }
+
+  __path_distinct() {
+    printf "%s" "$1"
+  }
+fi
 
 export PATH="$(__path_distinct "${PATH}")"
