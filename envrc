@@ -58,7 +58,7 @@ fi
 
 __path_distinct() {
   printf "%s" "$1" | \
-    perl -e 'print join(":", grep { !$seen{$_}++ } split(/:/, scalar <>))'
+    perl -e 'print join(":", grep { not $seen{$_}++ } split(/:/, scalar <>))'
 }
 
 export PATH="$(__path_distinct "${PATH}")"
