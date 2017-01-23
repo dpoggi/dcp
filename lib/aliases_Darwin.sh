@@ -243,13 +243,13 @@ fi
 # ctl scripts for kwm, if it and khd are installed via Homebrew
 if [[ -d "/usr/local/opt/kwm" && -d "/usr/local/opt/khd" ]]; then
   __kwm_khd_stop() {
-    brew services stop koekeishiya/khd/khd
-    brew services stop koekeishiya/kwm/kwm
+    brew services stop koekeishiya/formulae/khd
+    brew services stop koekeishiya/formulae/kwm
   }
 
   __kwm_khd_start() {
-    brew services start koekeishiya/kwm/kwm
-    brew services start koekeishiya/khd/khd
+    brew services start koekeishiya/formulae/kwm
+    brew services start koekeishiya/formulae/khd
   }
 
   kwmctl() {
