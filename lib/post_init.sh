@@ -97,6 +97,4 @@ fi
 [[ -s "${BASE16_SHELL}" && -z "${INSIDE_EMACS}" ]] && source "${BASE16_SHELL}"
 
 # Another round of PATH deduplification after version managers load
-if [[ -z "${DCP_DISABLE_MANAGERS}" ]]; then
-  export PATH="$(__path_distinct "${PATH}")"
-fi
+export PATH="$(__path_distinct "${PATH}")"
