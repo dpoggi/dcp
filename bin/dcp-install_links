@@ -8,30 +8,64 @@ warning() {
   printf >&2 "\033[0;33m[WARNING]:\033[0m %s\n" "$1"
 }
 
-__link_dotfile() {
-  local link="${HOME}/.$(basename "$1")"
-  if [[ ! -h "${link}" ]] && [[ -s "${link}" || -d "${link}" ]]; then
-    warning "~/$(basename "${link}") is a directory or file of non-zero size, skipping."
+if [[ "${DCP_OS}" = "SunOS" ]]; then
+  if [[ -x "/usr/gnu/bin/ln" ]]; then
+    __make_symlink() {
+      # Modern Solarises and illumoses come with /usr/gnu :)
+      # Intentionally not depending on a soft link at /usr/bin/gln
+      /usr/gnu/bin/ln -snfv "$1" "$2"
+    }
   else
-    # For OpenBSD
-    printf >&2 "%s -> %s\n" "${link}" "$1"
-    ln -sf "$1" "${link}"
+    __make_symlink() {
+      # Solaris' ln(1) doesn't have -v
+      printf >&2 "%s -> %s\n" "$2" "$1"
+
+      # ... or -n (or its equivalent -h)
+      if [[ -h "$2" && -d "$2" ]]; then
+        return
+      fi
+
+      ln -sf "$1" "$2"
+    }
+  fi
+elif [[ "${DCP_OS}" = "OpenBSD" ]]; then
+  __make_symlink() {
+    # OpenBSD's ln(1) doesn't have -v
+    printf >&2 "%s -> %s\n" "$2" "$1"
+    ln -snf "$1" "$2"
+  }
+else
+  __make_symlink() {
+    ln -snfv "$1" "$2"
+  }
+fi
+
+__link_dotfile() {
+  local dotfile="$(basename "$1")"
+  local link="${HOME}/.${dotfile}"
+
+  if [[ ! -h "${link}" ]] && [[ -d "${link}" || -s "${link}" ]]; then
+    warning "~/.${dotfile} is a directory or file of non-zero size, skipping."
+  else
+    __make_symlink "$1" "${link}"
   fi
 }
 
-link_dotfile_macos() {
-  __link_dotfile "$@"
-}
-
-link_dotfile() {
-  case "$(basename "$1")" in
-    khdrc|kwm|osx)
-      :
-      ;;
-    *)
-      __link_dotfile "$@"
-  esac
-}
+if [[ "${DCP_OS}" = "Darwin" ]]; then
+  link_dotfile() {
+    __link_dotfile "$@"
+  }
+else
+  link_dotfile() {
+    case "$(basename "$1")" in
+      khdrc|kwm|osx)
+        :
+        ;;
+      *)
+        __link_dotfile "$@"
+    esac
+  }
+fi
 
 check_and_cleanup() {
   if [[ "${DCP_OS}" = "Darwin" ]]; then
@@ -48,6 +82,7 @@ check_and_cleanup() {
 check_non_dcp() {
   local result="false"
   local dotfile
+
   for dotfile in "${NON_DCP_DOTFILES[@]}"; do
     if [[ -e "${HOME}/${dotfile}" ]]; then
       if [[ "${result}" = "false" ]]; then
@@ -57,6 +92,7 @@ check_non_dcp() {
       warning "~/${dotfile} exists but is not provided by ~/.dcp."
     fi
   done
+
   printf "%s" "${result}"
 }
 
@@ -87,17 +123,13 @@ main() {
   check_and_cleanup
 
   local dotfile
-  if [[ "${DCP_OS}" = "Darwin" ]]; then
-    for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*vimrc; do
-      link_dotfile_macos "${dotfile}"
-    done
-  else
-    for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*vimrc; do
-      link_dotfile "${dotfile}"
-    done
-  fi
+
+  for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*vimrc; do
+    link_dotfile "${dotfile}"
+  done
 
   local has_non_dcp="$(check_non_dcp)"
+
   if [[ "${has_non_dcp}" = "false" ]]; then
     rm -f "${WARNING_SHOWN_PATH}"
   elif [[ "${has_non_dcp}" = "true" && ! -e "${WARNING_SHOWN_PATH}" ]]; then
@@ -105,32 +137,39 @@ main() {
     touch "${WARNING_SHOWN_PATH}"
   fi
 
-  if hash git 2> /dev/null; then
-    git config --global "core.excludesfile" "${HOME}/.cvsignore"
+  if ! hash git 2> /dev/null; then
+    # Only Git Things (tm) from here on out
+    return
+  fi
 
-    maybe_git_config "color.ui" "true"
-    maybe_git_config "core.editor" "vim"
-    maybe_git_config "push.default" "matching"
-    maybe_git_config "grep.lineNumber" "true"
-    maybe_git_config "submodule.fetchJobs" "2"
-    maybe_git_config "core.attributesfile" "${HOME}/.gitattributes"
+  git config --global "core.excludesfile" "${HOME}/.cvsignore"
 
-    if [[ ! -e "${HOME}/.gitattributes" ]]; then
-      touch "${HOME}/.gitattributes"
-    fi
+  maybe_git_config "color.ui" "true"
+  maybe_git_config "core.editor" "vim"
+  maybe_git_config "push.default" "matching"
+  maybe_git_config "grep.lineNumber" "true"
+  maybe_git_config "submodule.fetchJobs" "2"
+  maybe_git_config "core.attributesfile" "${HOME}/.gitattributes"
 
-    if [[ "${DCP_OS}" = "Darwin" ]]; then
-      maybe_git_config "core.trustctime" "false"
-      maybe_git_config "diff.plist.textconv" "plutil -convert xml1 -o -"
-      maybe_git_config "diff.provision.textconv" "openssl smime -inform der -verify -in"
+  if [[ ! -e "${HOME}/.gitattributes" ]]; then
+    touch "${HOME}/.gitattributes"
+  fi
 
-      if ! grep -q '^\*\.plist' "${HOME}/.gitattributes"; then
-        printf "*.plist diff=plist\n" >> "${HOME}/.gitattributes"
-      fi
-      if ! grep -q '^\*\.mobileprovision' "${HOME}/.gitattributes"; then
-        printf "*.mobileprovision diff=provision\n" >> "${HOME}/.gitattributes"
-      fi
-    fi
+  if [[ "${DCP_OS}" != "Darwin" ]]; then
+    # The rest is just for macOS
+    return
+  fi
+
+  maybe_git_config "core.trustctime" "false"
+  maybe_git_config "diff.plist.textconv" "plutil -convert xml1 -o -"
+  maybe_git_config "diff.provision.textconv" "openssl smime -inform der -verify -in"
+
+  if ! grep -q '^\*\.plist' "${HOME}/.gitattributes"; then
+    printf "*.plist diff=plist\n" >> "${HOME}/.gitattributes"
+  fi
+
+  if ! grep -q '^\*\.mobileprovision' "${HOME}/.gitattributes"; then
+    printf "*.mobileprovision diff=provision\n" >> "${HOME}/.gitattributes"
   fi
 }
 
