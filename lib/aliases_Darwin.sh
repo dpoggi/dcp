@@ -127,14 +127,27 @@ reset_quick_look() {
 #
 
 use_jdk() {
-  [[ "$#" -gt "0" ]] || return 1
+  if [[ "$#" -lt "1" ]]; then
+    return 1
+  fi
+
+  local jdk_word
+
+  if [[ "$1" = "zulu" ]]; then
+    jdk_word="zulu"
+    shift
+  else
+    jdk_word="jdk"
+  fi
 
   # Finds the newest JDK available based on first two args.
+
   local pattern
+
   if [[ -n "$2" ]]; then
-    pattern="jdk1.${1}.0_${2}.jdk"
+    pattern="${jdk_word}1.${1}.0_${2}.jdk"
   else
-    pattern="jdk1.${1}.0_*.jdk"
+    pattern="${jdk_word}1.${1}.0_*.jdk"
   fi
 
   local jdk_dir="$(find "/Library/Java/JavaVirtualMachines" \
