@@ -34,7 +34,7 @@ if [[ -z "${DCP_DISABLE_NVM}" ]]; then
     source "/usr/local/opt/nvm/nvm.sh"
   fi
 elif [[ -z "${DCP_DISABLE_NVM_NOFILTER}" ]]; then
-  export PATH="$(__path_filter "${PATH}" "nvm")"
+  export PATH="$(__path_filter "${PATH}" '$_ !~ /nvm/')"
 fi
 
 
@@ -53,7 +53,7 @@ if [[ -z "${DCP_DISABLE_PYENV}" ]]; then
     eval "$(pyenv-virtualenv-init -)"
   fi
 else
-  export PATH="$(__path_filter "${PATH}" "pyenv")"
+  export PATH="$(__path_filter "${PATH}" '$_ !~ /pyenv/')"
 fi
 
 
@@ -66,7 +66,7 @@ if [[ -d "${HOME}/.rvm" ]]; then
     export PATH="${PATH}:${HOME}/.rvm/bin"
     [[ -s "${HOME}/.rvm/scripts/rvm" ]] && source "${HOME}/.rvm/scripts/rvm"
   else
-    export PATH="$(__path_filter "${PATH}" "rvm")"
+    export PATH="$(__path_filter "${PATH}" '$_ !~ /rvm/')"
   fi
 else
   if [[ -z "${DCP_DISABLE_RBENV}" ]]; then
@@ -76,7 +76,7 @@ else
     fi
     hash rbenv 2>/dev/null && eval "$(rbenv init -)"
   else
-    export PATH="$(__path_filter "${PATH}" "rbenv")"
+    export PATH="$(__path_filter "${PATH}" '$_ !~ /rbenv/')"
   fi
 fi
 

@@ -224,35 +224,6 @@ __job_num() {
   printf "%s" "${job_num}"
 }
 
-# Check PATH-like var for a thing
-__path_check() {
-  printf "%s" "$1" | grep -Fq "$2"
-}
-
-# Combine PATH searches for __path_filter
-__path_combine_searches() {
-  local old_ifs="${IFS}"
-  IFS="|"
-  local search="($*)"
-  IFS="${old_ifs}"
-  printf "%s" "${search}"
-}
-
-# Filter components from PATH-like var
-__path_filter() {
-  # No-op (print our first arg) if there's nothing to scrub -
-  # starting Perl ain't cheap.
-  if ! __path_check "$1" "$2"; then
-    printf "%s" "$1"
-    return
-  fi
-
-  printf "%s" "$(printf "%s" "$1" | perl -p \
-      -e "s#:[^:]*$2[^:]*:#:#g;" \
-      -e "s#:[^:]*$2[^:]*##g;" \
-      -e "s#[^:]*$2[^:]*:##g;")"
-}
-
 # virtualenv-independent pip
 gpip() {
   PIP_REQUIRE_VIRTUALENV="" pip "$@"

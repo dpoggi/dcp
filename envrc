@@ -62,7 +62,8 @@ fi
 if hash perl 2> /dev/null; then
   __path_filter() {
     printf "%s" "$1" \
-      | perl -e "print join(\":\", grep { $2 } split(/:/, scalar <>))"
+      | perl \
+          -e "print join(\":\", grep { $2 } split(/:/, scalar <>))"
   }
 
   __path_distinct() {
