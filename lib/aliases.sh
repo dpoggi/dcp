@@ -211,15 +211,17 @@ fi
 
 # Gets job number from PID after &ing a process
 __job_num() {
-  local num="$(jobs -l \
-                 | grep -F "$1" \
-                 | tail -n 1 \
-                 | cut -d ' ' -f 1 \
-                 | sed -e 's/[^[:digit:]]//g')"
-  if [[ -z "${num}" ]]; then
+  local job_num="$(jobs -l \
+                   | grep -F " $1 " \
+                   | tail -n 1 \
+                   | cut -d ' ' -f 1 \
+                   | sed -e 's/[^0-9]//g')"
+
+  if [[ -z "${job_num}" ]]; then
     return 1
   fi
-  printf "%s" "${num}"
+
+  printf "%s" "${job_num}"
 }
 
 # Check PATH-like var for a thing
