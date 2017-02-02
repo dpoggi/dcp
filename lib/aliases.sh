@@ -19,20 +19,33 @@ if hash emacsclient 2> /dev/null; then
 fi
 
 ext_ip() {
-  local version
-  local json="false"
+  local ip_version="4"
+  local content_type="text/plain"
 
   while [[ "$#" -gt "0" ]]; do
-    [[ "$1" = "--json" ]] && json="true" || version="$1"
+    case "$1" in
+      --json|-j)
+        content_type="application/json"
+        ;;
+      6)
+        ip_version="6"
+        ;;
+    esac
     shift
   done
-  [[ "${version}" = "4" || "${version}" = "6" ]] || version="4"
 
-  if [[ "${json}" = "true" ]]; then
-    curl --silent "--ipv${version}" --header "Accept: application/json" \
-         "https://ip.danpoggi.com"
-  else
-    curl --silent "--ipv${version}" "https://ip.danpoggi.com"
+  curl --silent \
+       "--ipv${ip_version}" \
+       --header "Accept: ${content_type}" \
+       "https://ip.danpoggi.com" \
+       2> /dev/null
+
+  if [[ "$?" != "0" ]]; then
+    printf >&2 "Error: unable to retrieve external IP.\n"
+
+    if [[ "${ip_version}" = "6" ]]; then
+      printf >&2 "\nThis network may not be configured for IPv6.\n"
+    fi
   fi
 }
 
