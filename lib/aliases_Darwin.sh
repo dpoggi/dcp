@@ -82,6 +82,16 @@ boop() {
   fi
 }
 
+# Fix obnoxious bug with macOS zsh completion for /usr/bin/du if coreutils is
+# installed via Homebrew.
+
+if [[ -n "${ZSH_NAME}" && -x "/usr/local/opt/coreutils/bin/gdu" ]]; then
+  alias du="gdu"
+  if type compdef > /dev/null; then
+     compdef gdu=du
+  fi
+fi
+
 
 #
 # System-level resets... these come in handy.
