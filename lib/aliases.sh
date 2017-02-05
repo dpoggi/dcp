@@ -273,7 +273,7 @@ if hash mvn 2> /dev/null; then
 
     # Fix up DOS batch wrapper: incorrect comment syntax and strange CRLFs
     perl -i -p \
-      -e 's/^#/@REM/g;' \
+      -e 's/^#/\@REM/g;' \
       -e 's/\R/\015\012/g;' \
       mvnw.cmd
   }
