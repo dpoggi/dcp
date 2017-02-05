@@ -257,6 +257,24 @@ no_managers() {
 }
 
 # JABBA
-gen_mvn_wrapper() {
-  mvn -N io.takari:maven:wrapper
-}
+
+if hash mvn 2> /dev/null; then
+  generate_mvn_wrapper() {
+    mvn -N io.takari:maven:wrapper
+
+    if [[ "$?" != "0" ]]; then
+      return "$?"
+    fi
+
+    # Use my totally wicked cool Maven distribution... hehehe
+    printf "%s\n" \
+      "distributionUrl=https://s3.amazonaws.com/dcp-java/apache-maven-deluxe-3.3.9-bin.zip" \
+      > .mvn/wrapper/maven-wrapper.properties
+
+    # Fix up DOS batch wrapper: incorrect comment syntax and strange CRLFs
+    perl -i -p \
+      -e 's/^#/@REM/g;' \
+      -e 's/\R/\015\012/g;' \
+      mvnw.cmd
+  }
+fi
