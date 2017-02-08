@@ -136,14 +136,10 @@ reset_quick_look() {
 # Yes, I've seen jenv. No, I don't think I like it.
 #
 
-use_jdk() {
-  if [[ "$#" -lt "1" ]]; then
-    return 1
-  fi
-
+__find_jdk() {
   local jdk_word
 
-  if [[ "$1" = "zulu" ]]; then
+  if printf "%s" "$1" | grep -Fqi 'zulu'; then
     jdk_word="zulu"
     shift
   else
@@ -160,23 +156,46 @@ use_jdk() {
     pattern="${jdk_word}1.${1}.0_*.jdk"
   fi
 
-  local jdk_dir="$(find "/Library/Java/JavaVirtualMachines" \
-                        -mindepth 1 \
-                        -maxdepth 1 \
-                        -name "${pattern}" \
-                        -print \
-                     | sort -n -t_ -k2,2 \
-                     | tail -n 1)"
+  find "/Library/Java/JavaVirtualMachines" \
+       -mindepth 1 \
+       -maxdepth 1 \
+       -name "${pattern}" \
+       -print \
+    | sort -n -t_ -k2,2 \
+    | tail -n 1
+}
+
+use_jdk() {
+  if [[ "$#" -lt "1" ]]; then
+    return 1
+  fi
+
+  local jdk_dir="$(__find_jdk "$@")"
+
   if [[ ! -d "${jdk_dir}" ]]; then
-    local update
-    if [[ -n "$2" ]]; then
-      update="u$2"
+    local friendly_jdk_word
+
+    if printf "%s" "$1" | grep -Fqi 'zulu'; then
+      friendly_jdk_word="Zulu"
+      shift
+    else
+      friendly_jdk_word="JDK"
     fi
-    printf >&2 "JDK $1${update} not found.\n"
+
+    if [[ -n "$2" ]]; then
+      local update="u$2"
+    fi
+
+    printf >&2 "%s %s%s not found.\n" \
+               "${friendly_jdk_word}" \
+               "$1" \
+               "${update}"
+
     return 1
   fi
 
   printf >&2 "Using $(basename "${jdk_dir}") (enter your user password if prompted)...\n"
+
   sudo -H ln -snfv "${jdk_dir}/Contents/Home" "/Library/Java/Home"
 }
 
