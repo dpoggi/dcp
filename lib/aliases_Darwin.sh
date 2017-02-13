@@ -165,8 +165,46 @@ __find_jdk() {
     | tail -n 1
 }
 
+__list_jdks() {
+  local jdk_path jdk_dir jdk jdk_word major minor
+
+  printf "\n"
+
+  while read -d $'\x00' -r jdk_path; do
+    jdk_dir="$(basename "${jdk_path}")"
+
+    jdk="$(printf "%s" "${jdk_dir}" | \
+             sed -e 's/\.jdk$//' \
+                 -e 's/1\./ /' \
+                 -e 's/\.0_/ /')"
+
+    jdk_word="$(printf "%s" "${jdk}" | cut -d ' ' -f 1)"
+    major="$(printf "%s" "${jdk}" | cut -d ' ' -f 2)"
+    minor="$(printf "%s" "${jdk}" | cut -d ' ' -f 3)"
+
+    if [[ "${jdk_word}" = "jdk" ]]; then
+      printf "${DCP_RED}Oracle JDK\t"
+    elif [[ "${jdk_word}" = "zulu" ]]; then
+      printf "${DCP_BLUE}Azul Zulu\t"
+    fi
+
+    printf "${DCP_YELLOW}%s" "${major}"
+
+    printf "${DCP_PURPLE}u"
+
+    printf "${DCP_GREEN}%s${DCP_RESET}\t" "${minor}"
+
+    printf "%s\n\n" "${jdk_dir}"
+  done < <(find "/Library/Java/JavaVirtualMachines" \
+                -mindepth 1 \
+                -maxdepth 1 \
+                -type d \
+                -print0)
+}
+
 use_jdk() {
   if [[ "$#" -lt "1" ]]; then
+    __list_jdks
     return 1
   fi
 
