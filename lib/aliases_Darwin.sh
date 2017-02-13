@@ -165,13 +165,33 @@ __find_jdk() {
     | tail -n 1
 }
 
+__selected_jdk_dir() {
+  if [[ ! -h "/Library/Java/Home" ]]; then
+    return 1
+  fi
+
+  local resolved_path="$(readlink "/Library/Java/Home")"
+
+  if [[ ! -d "${resolved_path}" ]]; then
+    return 1
+  fi
+
+  printf "%s" "$(basename "$(cd "${resolved_path}/../.." && pwd -P)")"
+}
+
 __list_jdks() {
-  local jdk_path jdk_dir jdk jdk_word major minor
+  local selected_jdk_dir="$(__selected_jdk_dir)"
 
   printf "\n"
 
+  local jdk_path jdk_dir jdk jdk_word major minor
+
   while read -d $'\x00' -r jdk_path; do
     jdk_dir="$(basename "${jdk_path}")"
+
+    if [[ "${jdk_dir}" = "${selected_jdk_dir}" ]]; then
+      printf "* "
+    fi
 
     jdk="$(printf "%s" "${jdk_dir}" | \
              sed -e 's/\.jdk$//' \
@@ -190,7 +210,7 @@ __list_jdks() {
 
     printf "${DCP_YELLOW}%s" "${major}"
 
-    printf "${DCP_PURPLE}u"
+    printf "${DCP_CYAN}u"
 
     printf "${DCP_GREEN}%s${DCP_RESET}\t" "${minor}"
 
