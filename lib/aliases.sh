@@ -262,13 +262,15 @@ if hash mvn 2> /dev/null; then
   generate_mvn_wrapper() {
     mvn -N io.takari:maven:wrapper
 
-    if [[ "$?" != "0" ]]; then
-      return "$?"
+    local status="$?"
+
+    if [[ "${status}" != "0" ]]; then
+      return "${status}"
     fi
 
     # Use my totally wicked cool Maven distribution... hehehe
-    printf "%s\n" \
-      "distributionUrl=https://s3.amazonaws.com/dcp-java/apache-maven-deluxe-3.3.9-bin.zip" \
+    printf "distributionUrl=%s\n" \
+      "https://s3.amazonaws.com/dcp-java/apache-maven-deluxe-3.3.9-bin.zip" \
       > .mvn/wrapper/maven-wrapper.properties
 
     # Fix up DOS batch wrapper: incorrect comment syntax and strange CRLFs
