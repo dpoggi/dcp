@@ -140,7 +140,7 @@ find_long_lines() {
   fi
 
   local file result line
-  while read file; do
+  while read -d $'\x00' -r file; do
     result="$(grep -n ".\\{$2\\}" "${file}" | cut -d ':' -f 1)"
     if [[ -n "${result}" ]]; then
       printf >&2 "${DCP_GREEN}%s${DCP_WHITE}:${DCP_RESET} " \
@@ -150,7 +150,7 @@ find_long_lines() {
       done < <(printf "%s" "${result}")
       printf >&2 "${DCP_RED}%s${DCP_RESET}\n" "${line}"
     fi
-  done < <(find . -mindepth 1 -type f -name "*.$1" -print)
+  done < <(find . -mindepth 1 -type f -name "*.$1" -print0)
 }
 
 
