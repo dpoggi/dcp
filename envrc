@@ -50,35 +50,41 @@ fi
 # Local environment
 #
 
-[[ -s "${DCP}/localenv" ]] && source "${DCP}/localenv"
+if [[ -s "${DCP}/localenv" ]]; then
+  source "${DCP}/localenv"
+fi
 
 
 #
-# __path_filter: Filter elements from a PATH-like string by expression.
+# Determine and memoize shell invocation (approximately close enough)
 #
-# __path_distinct: Use __path_filter to simplify a PATH-like string down to its
+
+if [[ -s "${DCP}/lib/invocation.sh" ]]; then
+  source "${DCP}/lib/invocation.sh"
+fi
+
+
+#
+# __path_select: Select elements from a PATH-like string by Perl expression
+#
+# __path_distinct: Use __path_select to simplify a PATH-like string down to its
 # earliest distinct elements. That is, remove duplicates without altering
-# behavior. Also filter out accidental literal '$PATH's.
+# behavior. Also filter out accidental literal '$PATH's, which is a thing.
 #
 
 if hash perl 2> /dev/null; then
-  __path_filter() {
+  __path_select() {
     printf "%s" "$1" \
-      | perl \
-          -e "print join(\":\", grep { $2 } split(/:/, scalar <>))"
-  }
-
-  __path_distinct() {
-    __path_filter "$1" '!$seen{$_}++ && $_ ne "\$PATH"'
+      | perl -e "print join(\":\", grep { $2 } split(/:/, scalar <>))"
   }
 else
-  __path_filter() {
-    printf "%s" "$1"
-  }
-
-  __path_distinct() {
+  __path_select() {
     printf "%s" "$1"
   }
 fi
+
+__path_distinct() {
+  __path_select "$1" '!$seen{$_}++ && $_ ne "\$PATH"'
+}
 
 export PATH="$(__path_distinct "${PATH}")"

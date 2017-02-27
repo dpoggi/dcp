@@ -4,10 +4,10 @@
 #
 set -e
 
-if [[ -n "${DCP_SHELL_INVOCATION}" ]]; then
-  readonly SHELL_INVOCATION="${DCP_SHELL_INVOCATION}"
+if [[ -s "${DCP}/lib/invocation.sh" ]]; then
+  source "${DCP}/lib/invocation.sh"
 else
-  readonly SHELL_INVOCATION="exec $(basename "${SHELL}")"
+  readonly DCP_SHELL_INVOCATION="exec $(basename "${SHELL}")"
 fi
 
 __git_clone_release "https://github.com/creationix/nvm.git" "${HOME}/.nvm"

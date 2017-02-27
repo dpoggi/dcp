@@ -1,14 +1,18 @@
 if [[ -n "${DCP_PREVENT_DISABLE}" ]]; then
   typeset +x DCP_DISABLE_MANAGERS
   unset DCP_DISABLE_MANAGERS
+
   typeset +x DCP_DISABLE_NVM
   unset DCP_DISABLE_NVM
+
   typeset +x DCP_DISABLE_PYENV
   unset DCP_DISABLE_PYENV
+
   typeset +x DCP_DISABLE_RVM
   unset DCP_DISABLE_RVM
   typeset +x DCP_DISABLE_RBENV
   unset DCP_DISABLE_RBENV
+
   typeset +x DCP_DISABLE_RUSTUP
   unset DCP_DISABLE_RUSTUP
 
@@ -17,11 +21,14 @@ if [[ -n "${DCP_PREVENT_DISABLE}" ]]; then
 fi
 
 if [[ -n "${DCP_DISABLE_MANAGERS}" ]]; then
-  DCP_DISABLE_NVM="true"
-  DCP_DISABLE_PYENV="true"
-  DCP_DISABLE_RVM="true"
-  DCP_DISABLE_RBENV="true"
-  DCP_DISABLE_RUSTUP="true"
+  export DCP_DISABLE_NVM="true"
+  export DCP_DISABLE_PYENV="true"
+  export DCP_DISABLE_RVM="true"
+  export DCP_DISABLE_RBENV="true"
+  export DCP_DISABLE_RUSTUP="true"
+
+  typeset +x DCP_DISABLE_MANAGERS
+  unset DCP_DISABLE_MANAGERS
 fi
 
 
@@ -34,7 +41,7 @@ if [[ -z "${DCP_DISABLE_RUSTUP}" ]]; then
     export PATH="${HOME}/.cargo/bin:${PATH}"
   fi
 else
-  export PATH="$(__path_filter "${PATH}" '$_ !~ /cargo/')"
+  export PATH="$(__path_select "${PATH}" '$_ !~ /cargo/')"
 fi
 
 
@@ -51,7 +58,7 @@ if [[ -z "${DCP_DISABLE_NVM}" ]]; then
     source "/usr/local/opt/nvm/nvm.sh"
   fi
 elif [[ -z "${DCP_DISABLE_NVM_NOFILTER}" ]]; then
-  export PATH="$(__path_filter "${PATH}" '$_ !~ /nvm/')"
+  export PATH="$(__path_select "${PATH}" '$_ !~ /nvm/')"
 fi
 
 
@@ -70,7 +77,7 @@ if [[ -z "${DCP_DISABLE_PYENV}" ]]; then
     eval "$(pyenv-virtualenv-init -)"
   fi
 else
-  export PATH="$(__path_filter "${PATH}" '$_ !~ /pyenv/')"
+  export PATH="$(__path_select "${PATH}" '$_ !~ /pyenv/')"
 fi
 
 
@@ -83,7 +90,7 @@ if [[ -d "${HOME}/.rvm" ]]; then
     export PATH="${PATH}:${HOME}/.rvm/bin"
     [[ -s "${HOME}/.rvm/scripts/rvm" ]] && source "${HOME}/.rvm/scripts/rvm"
   else
-    export PATH="$(__path_filter "${PATH}" '$_ !~ /rvm/')"
+    export PATH="$(__path_select "${PATH}" '$_ !~ /rvm/')"
   fi
 else
   if [[ -z "${DCP_DISABLE_RBENV}" ]]; then
@@ -93,7 +100,7 @@ else
     fi
     hash rbenv 2>/dev/null && eval "$(rbenv init -)"
   else
-    export PATH="$(__path_filter "${PATH}" '$_ !~ /rbenv/')"
+    export PATH="$(__path_select "${PATH}" '$_ !~ /rbenv/')"
   fi
 fi
 
@@ -113,5 +120,5 @@ fi
 # Base16 colors, if the script path has been set locally
 [[ -s "${BASE16_SHELL}" && -z "${INSIDE_EMACS}" ]] && source "${BASE16_SHELL}"
 
-# Another round of PATH deduplification after version managers load
+# Another round of PATH deduplication after version managers load
 export PATH="$(__path_distinct "${PATH}")"

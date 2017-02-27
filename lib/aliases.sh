@@ -231,21 +231,6 @@ gpip() {
 
 # Restart shell with version managers enabled/disabled
 
-if [[ -n "${ZSH_NAME}" ]]; then
-  if [[ "$-" = *l* ]]; then
-    readonly DCP_SHELL_INVOCATION="exec -l zsh -l"
-  else
-    readonly DCP_SHELL_INVOCATION="exec zsh"
-  fi
-else
-  if shopt -q login_shell 2> /dev/null; then
-    readonly DCP_SHELL_INVOCATION="exec -l bash -l"
-  else
-    readonly DCP_SHELL_INVOCATION="exec bash"
-  fi
-fi
-export DCP_SHELL_INVOCATION
-
 enable_managers() {
   export DCP_PREVENT_DISABLE="true"
   eval "${DCP_SHELL_INVOCATION}"
@@ -253,6 +238,36 @@ enable_managers() {
 
 disable_managers() {
   export DCP_DISABLE_MANAGERS="true"
+  eval "${DCP_SHELL_INVOCATION}"
+}
+
+enable_rbenv() {
+  declare +x DCP_DISABLE_RBENV
+  unset DCP_DISABLE_RBENV
+  eval "${DCP_SHELL_INVOCATION}"
+}
+
+enable_rvm() {
+  declare +x DCP_DISABLE_RVM
+  unset DCP_DISABLE_RVM
+  eval "${DCP_SHELL_INVOCATION}"
+}
+
+enable_pyenv() {
+  declare +x DCP_DISABLE_PYENV
+  unset DCP_DISABLE_PYENV
+  eval "${DCP_SHELL_INVOCATION}"
+}
+
+enable_nvm() {
+  declare +x DCP_DISABLE_NVM
+  unset DCP_DISABLE_NVM
+  eval "${DCP_SHELL_INVOCATION}"
+}
+
+enable_rustup() {
+  declare +x DCP_DISABLE_RUSTUP
+  unset DCP_DISABLE_RUSTUP
   eval "${DCP_SHELL_INVOCATION}"
 }
 
