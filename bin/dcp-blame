@@ -1,0 +1,98 @@
+#!/usr/bin/env ruby
+
+module DcpBlame
+  class InputFile
+    def initialize(path)
+      @path = path
+    end
+
+    def exist?
+      File.exist?(@path)
+    end
+
+    def tracked_by_git?
+      system("git ls-files --error-unmatch \"#{@path}\" > /dev/null 2>&1")
+
+      $?.exitstatus == 0
+    end
+
+    def blame_only_lines
+      `git blame -c "#{@path}" 2> /dev/null`.lines.map do |line|
+        line.chomp.sub(/\).*$/, ")")
+      end
+    end
+
+    def colorized_lines
+      lexer = `pygmentize -N "#{@path}"`.chomp
+
+      if lexer != "text"
+        pygmentized = `pygmentize -l "#{lexer}" "#{@path}"`
+      else
+        pygmentized = `pygmentize -g "#{@path}"`
+      end
+
+      pygmentized.lines.map(&:chomp)
+    end
+  end
+
+  class Preconditions
+    def initialize(input_file)
+      @input_file = input_file
+    end
+
+    def assert!
+      if !@input_file.exist?
+        STDERR.puts "Error: input file does not exist"
+        exit 1
+      end
+
+      if !pygments_installed?
+        STDERR.puts "Error: unable to find `pygmentize' in PATH, please install Pygments"
+        exit 1
+      end
+
+      if !cwd_is_git_repo?
+        STDERR.puts "Error: working directory is not a Git repository"
+        exit 1
+      end
+
+      if !@input_file.tracked_by_git?
+        STDERR.puts "Error: input file is not tracked by Git"
+        exit 1
+      end
+    end
+
+    private
+    def pygments_installed?
+      system("hash pygmentize 2> /dev/null")
+
+      $?.exitstatus == 0
+    end
+
+    def cwd_is_git_repo?
+      system("git rev-parse --git-dir > /dev/null 2>&1")
+
+      $?.exitstatus == 0
+    end
+  end
+
+  def self.main!(args)
+    exit 1 if args.length < 1
+
+    input_file = InputFile.new(args[0])
+
+    Preconditions.new(input_file).assert!
+
+    blame_only_lines = input_file.blame_only_lines
+    colorized_lines = input_file.colorized_lines
+
+    if colorized_lines.length < blame_only_lines.length
+      STDERR.puts "Error: unable to colorize enough source lines"
+      exit 1
+    end
+
+    puts blame_only_lines.zip(colorized_lines).map(&:join).join("\n")
+  end
+end
+
+DcpBlame.main!(ARGV) if $PROGRAM_NAME == __FILE__
