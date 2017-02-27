@@ -29,17 +29,17 @@ __boop_check_pyenv() {
   if ! printf "%s" "${PATH}" | grep -Fq 'pyenv'; then
     return
   fi
-  if ! type no_managers 2>&1 | grep -Fq 'function'; then
+  if ! type disable_managers 2>&1 | grep -Fq 'function'; then
     return
   fi
 
   printf >&2 "pyenv found in \$PATH. This will break installing/upgrading Vim from Homebrew.\n"
-  printf >&2 "Run no_managers function now to restart this shell without it (y/n)? "
+  printf >&2 "Run disable_managers function now to restart this shell without it (y/n)? "
   read -r
 
   if [[ "${REPLY}" = y* || "${REPLY}" = Y* ]]; then
     printf >&2 "\nRestarting the shell. Please run this command again.\n"
-    no_managers
+    disable_managers
   fi
 }
 

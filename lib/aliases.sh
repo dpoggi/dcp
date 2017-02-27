@@ -246,12 +246,12 @@ else
 fi
 export DCP_SHELL_INVOCATION
 
-yes_managers() {
+enable_managers() {
   export DCP_PREVENT_DISABLE="true"
   eval "${DCP_SHELL_INVOCATION}"
 }
 
-no_managers() {
+disable_managers() {
   export DCP_DISABLE_MANAGERS="true"
   eval "${DCP_SHELL_INVOCATION}"
 }
