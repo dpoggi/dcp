@@ -9,6 +9,8 @@ if [[ -n "${DCP_PREVENT_DISABLE}" ]]; then
   unset DCP_DISABLE_RVM
   typeset +x DCP_DISABLE_RBENV
   unset DCP_DISABLE_RBENV
+  typeset +x DCP_DISABLE_RUSTUP
+  unset DCP_DISABLE_RUSTUP
 
   typeset +x DCP_PREVENT_DISABLE
   unset DCP_PREVENT_DISABLE
@@ -19,7 +21,22 @@ if [[ -n "${DCP_DISABLE_MANAGERS}" ]]; then
   DCP_DISABLE_PYENV="true"
   DCP_DISABLE_RVM="true"
   DCP_DISABLE_RBENV="true"
+  DCP_DISABLE_RUSTUP="true"
 fi
+
+
+#
+# Add rustup (~/.cargo/bin) directory to PATH if available
+#
+
+if [[ -z "${DCP_DISABLE_RUSTUP}" ]]; then
+  if [[ -d "${HOME}/.cargo" ]]; then
+    export PATH="${HOME}/.cargo/bin:${PATH}"
+  fi
+else
+  export PATH="$(__path_filter "${PATH}" '$_ !~ /cargo/')"
+fi
+
 
 #
 # Load nvm if available
