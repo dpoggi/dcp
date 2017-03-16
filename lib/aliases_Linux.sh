@@ -1,5 +1,5 @@
 #
-# Network admin things.
+# Network admin things
 #
 
 __net_open_things() {
@@ -10,12 +10,13 @@ __net_open_things() {
 
   printf "%s\n%s\n" "$1" \
     "$(sudo -H netstat --all --listening --program --numeric --wide \
-         | awk "$2" | sort -g)" \
-           | column -t -o "    " \
-           | sed -r -e 's/^([0-9]+)(\s+)(\w+):(\w+) (.*)$/\1\2\3: \4\5/'
+           | awk "$2" | sort -g)" \
+         | column -t -o "    " \
+         | sed -r -e 's/^([0-9]+)(\s+)(\w+):(\w+) (.*)$/\1\2\3: \4\5/'
 }
 
-# List open TCP/UDP ports.
+# List open TCP/UDP ports
+
 net_open_ports() {
   sudo -H true
   printf "======== Open TCP/UDP Ports ========\n"
@@ -33,7 +34,8 @@ net_open_ports() {
   }'
 }
 
-# List open Unix sockets.
+# List open Unix sockets
+
 net_open_sockets() {
   sudo -H true
   printf "======== Open Unix Sockets ========\n"
@@ -46,6 +48,7 @@ net_open_sockets() {
 }
 
 # List all of it. List it all.
+
 net_open_all() {
   net_open_ports
   printf "\n"
