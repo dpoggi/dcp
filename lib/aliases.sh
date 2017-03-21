@@ -277,10 +277,10 @@ if hash mvn 2> /dev/null; then
   generate_mvn_wrapper() {
     mvn -N io.takari:maven:wrapper
 
-    local status="$?"
+    local exit_status="$?"
 
-    if [[ "${status}" != "0" ]]; then
-      return "${status}"
+    if [[ "${exit_status}" != "0" ]]; then
+      return "${exit_status}"
     fi
 
     # Use my totally wicked cool Maven distribution... hehehe
