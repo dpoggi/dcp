@@ -2,13 +2,13 @@
 
 log_info() {
   printf "\033[0;34m[%s]:\033[0m %s\n" \
-         "$(date "+%Y-%m-%dT%H:%M:%SZ")" \
+         "$(date "+%Y-%m-%d %H:%M:%S")" \
          "$*"
 }
 
 log_error() {
   printf >&2 "\033[1;37;41m[%s]:\033[0m %s\n" \
-             "$(date "+%Y-%m-%dT%H:%M:%SZ")" \
+             "$(date "+%Y-%m-%d %H:%M:%S")" \
              "$*"
 }
 
