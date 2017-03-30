@@ -6,8 +6,7 @@
 !/bin/yolo
 
 # Ignore Jars in libexec for use by scripts.
-/libexec/*
-!/libexec/.keep
+/libexec/*.jar
 
 # shims directory for wrapping scripts from bin/
 /shims/*
