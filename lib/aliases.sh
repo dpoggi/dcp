@@ -92,7 +92,19 @@ gn() {
 
 gfco() {
   local current_branch="$(__git_current_branch)"
+
   if [[ -z "${current_branch}" ]]; then
+    return 1
+  fi
+
+  local remote_branch="origin/${current_branch}"
+
+  printf >&2 "Are you sure you want to force-checkout ${current_branch} from ${remote_branch}? "
+
+  read -r
+
+  if [[ "${REPLY}" != "YES" ]]; then
+    printf >&2 "\nError: only YES, in all caps, will continue.\n"
     return 1
   fi
 
