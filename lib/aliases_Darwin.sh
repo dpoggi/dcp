@@ -29,6 +29,7 @@ __boop_check_pyenv() {
   if ! printf "%s" "${PATH}" | grep -Fq 'pyenv'; then
     return
   fi
+
   if ! type disable_managers 2>&1 | grep -Fq 'function'; then
     return
   fi
@@ -44,42 +45,41 @@ __boop_check_pyenv() {
 }
 
 boop() {
-  if [[ "$1" = "cask" ]]; then
-    local cask="true"
-    shift
-  fi
-
-  local -a formulae
-  while [[ "$#" -gt "0" ]]; do
-    formulae+=( "$1" )
-    shift
-  done
-
   __boop_check_pyenv
 
-  brew update
-  if [[ "$?" != "0" ]]; then
-    return "$?"
+  if ! brew update; then
+    return 1
   fi
 
   brew upgrade
-  if [[ "$?" != "0" ]]; then
-    return "$?"
+
+  if ! brew upgrade; then
+    return 1
   fi
 
-  if [[ -n "${formulae[*]}" ]]; then
-    if [[ "${cask}" = "true" ]]; then
-      brew cask install "${formulae[@]}"
-    else
-      brew install "${formulae[@]}"
+  if [[ "$#" -gt "0" ]]; then
+    if ! brew install "$@"; then
+      return 1
     fi
   fi
 
-  if [[ "${cask}" = "true" ]]; then
-    brew cask cleanup
-  else
-    brew cleanup --prune=all
+  brew cleanup --prune=all
+}
+
+boop_cask() {
+  if [[ "$#" = "0" ]]; then
+    return 1
   fi
+
+  if ! brew update; then
+    return 1
+  fi
+
+  if ! brew cask install "$@"; then
+    return 1
+  fi
+
+  brew cask cleanup
 }
 
 # Fix obnoxious bug with macOS zsh completion for /usr/bin/du if coreutils is
@@ -87,6 +87,7 @@ boop() {
 
 if [[ -n "${ZSH_NAME}" && -x "/usr/local/opt/coreutils/bin/gdu" ]]; then
   alias du="gdu"
+
   if type compdef > /dev/null; then
      compdef gdu=du
   fi
