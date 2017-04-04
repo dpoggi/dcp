@@ -1,17 +1,21 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-launchd_export() {
-  local var="$1"
-  local val="$(eval "printf \"\${${var}}\"")"
-  launchctl setenv "${var}" "${val}"
-}
+set -e
 
-config_path="${DCP}/conf/vars"
+readonly DCP="${HOME}/.dcp"
+readonly ENVRC_PATH="${DCP}/envrc"
+readonly CONFIG_PATH="${DCP}/conf/vars"
 
-[[ -e "${config_path}" ]] || exit 1
-[[ -e "${DCP}/envrc" ]] && source "${DCP}/envrc" || exit 1
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  exit 1
+fi
 
-read -ra vars <<< $(cat "${config_path}")
-for var in "${vars[@]}"; do
-  launchd_export "${var}"
-done
+if [[ ! -e "${ENVRC_PATH}" || ! -e "${CONFIG_PATH}" ]]; then
+  exit 1
+fi
+
+. "${ENVRC_PATH}"
+
+while read -r var_name; do
+  launchctl setenv "${var_name}" "${!var_name}" || true
+done < <(cat "${CONFIG_PATH}")
