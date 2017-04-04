@@ -110,10 +110,15 @@ fi
 #
 
 # GPG Agent
-if [[ -s "${HOME}/.gnupg/gpg-agent-info" && -S "${HOME}/.gnupg/S.gpg-agent.ssh" ]]; then
-  source "${HOME}/.gnupg/gpg-agent-info"
+
+if [[ -S "${HOME}/.gnupg/S.gpg-agent.ssh" ]]; then
+  export SSH_AUTH_SOCK="${HOME}/.gnupg/S.gpg-agent.ssh"
+fi
+
+if [[ -s "${HOME}/.gnupg/gpg-agent-info" ]]; then
+  . "${HOME}/.gnupg/gpg-agent-info"
+
   export GPG_AGENT_INFO
-  export SSH_AUTH_SOCK
   export SSH_AGENT_PID
 fi
 

@@ -204,12 +204,13 @@ coreaudioctl() {
 }
 
 # launchctl wrapper for gpg-agent, if the plist is installed
-if [[ -s "${HOME}/Library/LaunchAgents/com.danpoggi.gpg-agent.plist" ]]; then
+if [[ -s "${HOME}/Library/LaunchAgents/com.github.dpoggi.gpg-agent.plist" ]]; then
   gpgagentctl() {
     if [[ "$1" = "stop" || "$1" = "restart" ]]; then
       killall gpg-agent 2> /dev/null
     fi
-    __lctl "$1" gui "${HOME}/Library/LaunchAgents/com.danpoggi.gpg-agent.plist"
+
+    __lctl "$1" gui "${HOME}/Library/LaunchAgents/com.github.dpoggi.gpg-agent.plist"
   }
 fi
 
