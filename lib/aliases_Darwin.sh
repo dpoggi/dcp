@@ -26,16 +26,21 @@ haxcode() {
 #
 
 __boop_check_pyenv() {
-  if ! printf "%s" "${PATH}" | grep -Fq 'pyenv'; then
+  if ! printf "%s" "${PATH}" | grep -Eq 'rbenv|pyenv|nvm'; then
     return
   fi
 
-  if ! type disable_managers 2>&1 | grep -Fq 'function'; then
+  if ! type disable_managers 2>&1 | grep -Fq ' function '; then
     return
   fi
 
-  printf >&2 "pyenv found in \$PATH. This will break installing/upgrading Vim from Homebrew.\n"
-  printf >&2 "Run disable_managers function now to restart this shell without it (y/n)? "
+  cat >&2 <<-EOT
+rbenv, pyenv, and/or nvm found in \$PATH. This will break installing/upgrading
+Vim from Homebrew. Run disable_managers function now to restart this shell
+EOT
+
+  printf >&2 "without it/them (y/n)? "
+
   read -r
 
   if [[ "${REPLY}" = y* || "${REPLY}" = Y* ]]; then
@@ -44,8 +49,22 @@ __boop_check_pyenv() {
   fi
 }
 
+__boop_vim_langs() {
+  if [[ "${DCP_BOOP_VIM_LANGS}" != "true" ]]; then
+    return
+  fi
+
+  if [[ "$1" != "link" && "$1" != "unlink" ]]; then
+    return 1
+  fi
+
+  brew "$1" node perl python ruby
+}
+
 boop() {
   __boop_check_pyenv
+
+  __boop_vim_langs link
 
   if ! brew update; then
     return 1
@@ -62,6 +81,8 @@ boop() {
       return 1
     fi
   fi
+
+  __boop_vim_langs unlink
 
   brew cleanup --prune=all
 }
@@ -247,15 +268,13 @@ fi
 # ctl scripts for Emacs, if it's installed via Homebrew
 if [[ -d "/usr/local/opt/emacs" ]]; then
   if [[ -s "${HOME}/.spacemacs" || -d "${HOME}/.spacemacs.d" ]]; then
-    DCP_EMACS_KILL_CMD="(spacemacs/kill-emacs)"
+    readonly DCP_EMACS_KILL_CMD="(spacemacs/kill-emacs)"
   else
-    DCP_EMACS_KILL_CMD="(kill-emacs)"
+    readonly DCP_EMACS_KILL_CMD="(kill-emacs)"
   fi
 
   __emacs_stop() {
-    /usr/local/bin/emacsclient \
-      --eval "${DCP_EMACS_KILL_CMD}" \
-      2> /dev/null
+    /usr/local/bin/emacsclient --eval "${DCP_EMACS_KILL_CMD}" 2> /dev/null
   }
 
   __emacs_kill() {
@@ -266,6 +285,7 @@ if [[ -d "/usr/local/opt/emacs" ]]; then
     if ps -A | grep -Fq 'Emacs.app'; then
       return 1
     fi
+
     (cd "${HOME}" && /usr/local/bin/emacs --daemon &> /dev/null)
   }
 
