@@ -224,14 +224,18 @@ coreaudioctl() {
   __lctl "$1" system "/System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist"
 }
 
-# launchctl wrapper for gpg-agent, if the plist is installed
-if [[ -s "${HOME}/Library/LaunchAgents/com.github.dpoggi.gpg-agent.plist" ]]; then
+# launchctl wrapper for gpg-agent, if installed by Homebrew
+if [[ -h "/usr/local/opt/gnupg" ]]; then
   gpgagentctl() {
     if [[ "$1" = "stop" || "$1" = "restart" ]]; then
-      killall gpg-agent 2> /dev/null
+      /usr/local/bin/gpgconf --kill gpg-agent
+
+      if [[ -n "$(ps -x | awk '$4 ~ /^gpg-agent/')" ]]; then
+        killall gpg-agent
+      fi
     fi
 
-    __lctl "$1" gui "${HOME}/Library/LaunchAgents/com.github.dpoggi.gpg-agent.plist"
+    /usr/local/bin/gpgconf --launch gpg-agent
   }
 fi
 
