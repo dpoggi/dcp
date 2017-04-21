@@ -287,12 +287,58 @@ enable_rustup() {
 
 if hash mvn 2> /dev/null; then
   mvn_wrapper() {
+    local write_git_files="false"
+
+    while [[ "$#" -gt "0" ]]; do
+      case "$1" in
+        --help|-h)
+          printf >&2 "Usage: %s [--write-git-files|-g]\n" "$0"
+          return
+          ;;
+        --write-git-files|-g)
+          write_git_files="true"
+          ;;
+        *)
+          printf >&2 "Invalid argument: %s\n" "$1"
+          return 1
+      esac
+
+      shift
+    done
+
+    if [[ -d ".mvn/wrapper" || -x "mvnw" ]]; then
+      printf >&2 "Existing Maven wrapper detected. Remove first (y/n)? "
+
+      read -r
+
+      if [[ "${REPLY}" = y* || "${REPLY}" = Y* ]]; then
+        rm -rf mvnw mvnw.cmd .mvn
+      fi
+    fi
+
     mvn -N io.takari:maven:wrapper
 
     local exit_status="$?"
 
     if [[ "${exit_status}" != "0" ]]; then
       return "${exit_status}"
+    fi
+
+    chmod 755 mvnw
+    chmod 644 mvnw.cmd .mvn/wrapper/maven-wrapper.{jar,properties}
+
+    if [[ "${write_git_files}" = "true" ]]; then
+      if [[ ! -e ".gitattributes" ]]; then
+        cat "${DCP}/share/gitignore/java.gitattributes" > .gitattributes
+      else
+        printf >&2 ".gitattributes file already exists, skipping\n"
+      fi
+
+      if [[ ! -e ".gitignore" ]]; then
+        cat "${DCP}/share/gitignore/java.gitignore" > .gitignore
+      else
+        printf >&2 ".gitignore file already exists, skipping\n"
+      fi
     fi
   }
 fi
