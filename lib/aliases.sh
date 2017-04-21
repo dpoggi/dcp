@@ -327,6 +327,9 @@ if hash mvn 2> /dev/null; then
     chmod 755 mvnw
     chmod 644 mvnw.cmd .mvn/wrapper/maven-wrapper.{jar,properties}
 
+    # Fix yet another script bug in the Maven wrapper
+		perl -pi -e 's/^\s*echo \$MAVEN_PROJECTBASEDIR$//' mvnw
+
     if [[ "${write_git_files}" = "true" ]]; then
       if [[ ! -e ".gitattributes" ]]; then
         cat "${DCP}/share/gitignore/java.gitattributes" > .gitattributes
