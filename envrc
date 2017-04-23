@@ -54,6 +54,11 @@ if [[ -s "${DCP}/localenv" ]]; then
   source "${DCP}/localenv"
 fi
 
+# Add GOPATH bin directories to PATH, if present
+if [[ -n "${GOPATH}" ]]; then
+  export PATH="${PATH}:$(printf "%s" "${GOPATH}" | sed -e 's#:#/bin:#g' -e 's#$#/bin#')"
+fi
+
 
 #
 # Determine and memoize shell invocation (approximately close enough)
