@@ -1,3 +1,12 @@
+#
+# Add ~/.local/bin directory to PATH if available
+#
+
+if [[ -d "${HOME}/.local/bin" ]]; then
+  export PATH="${HOME}/.local/bin:${PATH}"
+fi
+
+
 if [[ -n "${DCP_PREVENT_DISABLE}" ]]; then
   typeset +x DCP_DISABLE_MANAGERS
   unset DCP_DISABLE_MANAGERS
