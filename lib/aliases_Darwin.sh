@@ -103,6 +103,30 @@ boop_cask() {
   brew cask cleanup
 }
 
+# Code signing helper for Homebrew binaries (notably GDB)
+
+if [[ -s "${DCP}/conf/brew-codesign-cert.sha1" ]]; then
+  brew_codesign() {
+    if ! file -b "$1" | grep -q '^Mach-O.*executable'; then
+      printf >&2 "Error: argument is not a Mach-O executable\n"
+      return 1
+    fi
+
+    local executable_path
+
+    if [[ ! -h "$1" ]]; then
+      executable_path="$1"
+    else
+      executable_path="$(cd "$(dirname "$1")" \
+                         && realpath -q "$(readlink -n "$1")")"
+    fi
+
+    /usr/bin/codesign --keychain "${HOME}/Library/Keychains/login.keychain" \
+                      -s "$(cat "${DCP}/conf/brew-codesign-cert.sha1")" \
+                      "${executable_path}"
+  }
+fi
+
 # Fix obnoxious bug with macOS zsh completion for /usr/bin/du if coreutils is
 # installed via Homebrew.
 
