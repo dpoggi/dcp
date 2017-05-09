@@ -37,10 +37,9 @@ __boop_check_pyenv() {
   cat >&2 <<-EOT
 rbenv, rvm, pyenv, and/or nvm found in PATH. This will break installing or
 upgrading Vim from Homebrew. Run disable_managers function now to restart this
-shell
 EOT
 
-  printf >&2 "without it/them (y/n)? "
+  printf >&2 "shell without it/them (y/n)? "
 
   read -r
 
