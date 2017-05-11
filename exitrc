@@ -1,5 +1,9 @@
 if [[ "${SHLVL}" = "1" && -z "${SSH_TTY}" ]]; then
-  [[ -x "/usr/bin/clear_console" ]] && /usr/bin/clear_console
+  if [[ -x /usr/bin/clear_console ]]; then
+    /usr/bin/clear_console
+  fi
 fi
 
-[[ -e "${DCP}/localexit" ]] && source "${DCP}/localexit"
+if [[ -e "${DCP}/localexit" ]]; then
+  source "${DCP}/localexit"
+fi
