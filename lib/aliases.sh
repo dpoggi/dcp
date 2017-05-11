@@ -85,6 +85,7 @@ gn() {
   if [[ -e ".git" ]]; then
     return 1
   fi
+
   git init \
     && git add . \
     && git commit -m 'Initial commit'
@@ -129,15 +130,19 @@ gcb() {
 }
 
 gitignore() {
-  curl -sJL "https://raw.githubusercontent.com/github/gitignore/master/${1}.gitignore"
+  if [[ "$#" -lt "1" ]]; then
+    return 1
+  fi
+
+  curl -sJL "https://www.gitignore.io/api/${1}"
 }
 
 gpub() {
-  git push origin "${1}:refs/heads/$1"
-  git fetch origin
-  git config "branch.${1}.remote" origin
-  git config "branch.${1}.merge" "refs/heads/$1"
-  git checkout "$1"
+  git push origin "${1}:refs/heads/$1" \
+    && git fetch origin \
+    && git config "branch.${1}.remote" origin \
+    && git config "branch.${1}.merge" "refs/heads/$1" \
+    && git checkout "$1"
 }
 
 
@@ -152,14 +157,18 @@ find_long_lines() {
   fi
 
   local file result line
+
   while read -d $'\x00' -r file; do
     result="$(grep -n ".\\{$2\\}" "${file}" | cut -d ':' -f 1)"
+
     if [[ -n "${result}" ]]; then
       printf >&2 "${DCP_GREEN}%s${DCP_WHITE}:${DCP_RESET} " \
                  "$(printf "%s" "${file}" | tail -c +3)"
+
       while read line; do
         printf >&2 "${DCP_RED}%s${DCP_WHITE},${DCP_RESET} " "${line}"
       done < <(printf "%s" "${result}")
+
       printf >&2 "${DCP_RED}%s${DCP_RESET}\n" "${line}"
     fi
   done < <(find . -mindepth 1 -type f -name "*.$1" -print0)
@@ -176,9 +185,11 @@ __ps1_preamble() {
   printf "\\\\u${DCP_PS1_WHITE}@${DCP_PS1_CYAN}\\h"
   printf "${DCP_PS1_WHITE}:${DCP_PS1_PURPLE}\\w"
 }
+
 __ps1_git() {
   printf "${DCP_PS1_YELLOW}\$(${DCP}/bin/__ps1_git_branch)"
 }
+
 __ps1_uid() {
   [[ "${DPOGGI_TWOLINE}" = "true" ]] && printf "\n" || printf " "
   printf "${DCP_PS1_RED}\\\$${DCP_PS1_RESET} "
@@ -200,6 +211,7 @@ oneline() {
   export DPOGGI_TWOLINE="false"
   set_prompt
 }
+
 twoline() {
   export DPOGGI_TWOLINE="true"
   set_prompt
@@ -224,10 +236,10 @@ fi
 # Gets job number from PID after &ing a process
 __job_num() {
   local job_num="$(jobs -l \
-                   | grep -F " $1 " \
-                   | tail -n 1 \
-                   | cut -d ' ' -f 1 \
-                   | sed -e 's/[^0-9]//g')"
+    | grep -F " $1 " \
+    | tail -n 1 \
+    | cut -d ' ' -f 1 \
+    | sed -e 's/[^0-9]//g')"
 
   if [[ -z "${job_num}" ]]; then
     return 1
