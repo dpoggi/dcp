@@ -297,6 +297,20 @@ enable_rustup() {
 
 # JABBA
 
+__git_files_write() {
+  if [[ ! -e ".gitattributes" ]]; then
+    cat "${DCP}/share/gitignore/$1.gitattributes" > .gitattributes
+  else
+    printf >&2 ".gitattributes file already exists, skipping\n"
+  fi
+
+  if [[ ! -e ".gitignore" ]]; then
+    cat "${DCP}/share/gitignore/$1.gitignore" > .gitignore
+  else
+    printf >&2 ".gitignore file already exists, skipping\n"
+  fi
+}
+
 if hash mvn 2> /dev/null; then
   mvn_wrapper() {
     local write_git_files="false"
@@ -343,17 +357,52 @@ if hash mvn 2> /dev/null; then
 		perl -pi -e 's/^\s*echo \$MAVEN_PROJECTBASEDIR$//' mvnw
 
     if [[ "${write_git_files}" = "true" ]]; then
-      if [[ ! -e ".gitattributes" ]]; then
-        cat "${DCP}/share/gitignore/java.gitattributes" > .gitattributes
-      else
-        printf >&2 ".gitattributes file already exists, skipping\n"
-      fi
+      __git_files_write java
+    fi
+  }
+fi
 
-      if [[ ! -e ".gitignore" ]]; then
-        cat "${DCP}/share/gitignore/java.gitignore" > .gitignore
-      else
-        printf >&2 ".gitignore file already exists, skipping\n"
+if hash gradle 2> /dev/null; then
+  gradle_wrapper() {
+    local write_git_files="false"
+
+    while [[ "$#" -gt "0" ]]; do
+      case "$1" in
+        --help|-h)
+          printf >&2 "Usage: %s [--write-git-files|-g]\n" "$0"
+          return
+          ;;
+        --write-git-files|-g)
+          write_git_files="true"
+          ;;
+        *)
+          printf >&2 "Invalid argument: %s\n" "$1"
+          return 1
+      esac
+
+      shift
+    done
+
+    if [[ -d "gradle/wrapper" || -x "gradlew" ]]; then
+      printf >&2 "Existing Gradle wrapper detected. Remove first (y/n)? "
+
+      read -r
+
+      if [[ "${REPLY}" = y* || "${REPLY}" = Y* ]]; then
+        rm -rf .gradle gradle gradlew gradlew.bat
       fi
+    fi
+
+    gradle --no-daemon wrapper
+
+    local exit_status="$?"
+
+    if [[ "${exit_status}" != "0" ]]; then
+      return "${exit_status}"
+    fi
+
+    if [[ "${write_git_files}" = "true" ]]; then
+      __git_files_write java
     fi
   }
 fi
