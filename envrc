@@ -61,11 +61,11 @@ fi
 
 
 #
-# Determine and memoize shell invocation (approximately close enough)
+# Detect shell + invocation (approximately close enough)
 #
 
-if [[ -s "${DCP}/lib/invocation.sh" ]]; then
-  source "${DCP}/lib/invocation.sh"
+if [[ -s "${DCP}/lib/detect_shell.sh" ]]; then
+  source "${DCP}/lib/detect_shell.sh"
 fi
 
 
