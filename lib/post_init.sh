@@ -14,6 +14,9 @@ if [[ -n "${DCP_PREVENT_DISABLE}" ]]; then
   typeset +x DCP_DISABLE_NVM
   unset DCP_DISABLE_NVM
 
+  typeset +x DCP_DISABLE_OPAM
+  unset DCP_DISABLE_OPAM
+
   typeset +x DCP_DISABLE_PYENV
   unset DCP_DISABLE_PYENV
 
@@ -31,6 +34,7 @@ fi
 
 if [[ -n "${DCP_DISABLE_MANAGERS}" ]]; then
   export DCP_DISABLE_NVM="true"
+  export DCP_DISABLE_OPAM="true"
   export DCP_DISABLE_PYENV="true"
   export DCP_DISABLE_RVM="true"
   export DCP_DISABLE_RBENV="true"
@@ -51,6 +55,21 @@ if [[ -z "${DCP_DISABLE_RUSTUP}" ]]; then
   fi
 else
   export PATH="$(__path_select "${PATH}" '$_ !~ /cargo/')"
+fi
+
+
+#
+# Configure OPAM environment if available
+#
+
+if [[ -z "${DCP_DISABLE_OPAM}" ]]; then
+  if [[ "${DCP_SHELL}" = "bash" && -s "${HOME}/.opam/opam-init/init.sh" ]]; then
+    source "${HOME}/.opam/opam-init/init.sh"
+  elif [[ "${DCP_SHELL}" = "zsh" && -s "${HOME}/.opam/opam-init/init.zsh" ]]; then
+    source "${HOME}/.opam/opam-init/init.zsh"
+  fi
+else
+  export PATH="$(__path_select "${PATH}" '$_ !~ /opam/')"
 fi
 
 

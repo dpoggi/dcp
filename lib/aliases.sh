@@ -289,6 +289,12 @@ enable_nvm() {
   eval "${DCP_SHELL_INVOCATION}"
 }
 
+enable_opam() {
+  declare +x DCP_DISABLE_OPAM
+  unset DCP_DISABLE_OPAM
+  eval "${DCP_SHELL_INVOCATION}"
+}
+
 enable_rustup() {
   declare +x DCP_DISABLE_RUSTUP
   unset DCP_DISABLE_RUSTUP
