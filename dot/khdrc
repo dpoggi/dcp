@@ -2,12 +2,9 @@
 # ~~~ Settings ~~~
 #
 
-# Enable kwm compatibility. Is this supposed to be handling border color?
-khd kwm on
-
 # Border colors... seems more like modes just need to be enumerated this way.
-khd mode default color 0xddd5c4a1
-khd mode resize color 0xddbdd322
+khd mode default on_enter kwmc config border focused color 0xddd5c4a1
+khd mode resize on_enter kwmc config border focused color 0xddbdd322
 
 
 #
