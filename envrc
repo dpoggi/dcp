@@ -2,7 +2,7 @@
 # Common environment
 #
 
-export PATH="${PATH}:${DCP}/shims:${DCP}/bin"
+export PATH="${PATH}:${DCP}/bin"
 export DCP_OS="$(uname -s)"
 if [[ -z "${ZSH_NAME}" ]]; then
   alias grep="grep --color=auto"
