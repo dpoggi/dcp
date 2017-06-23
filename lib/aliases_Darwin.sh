@@ -105,7 +105,7 @@ boop_cask() {
 
 # Code signing helper for Homebrew binaries (notably GDB)
 
-if [[ -s "${DCP}/conf/brew-codesign-cert.sha1" ]]; then
+if [[ -s "${DCP_CONFIG_DIR}/brew_codesign.sha1" ]]; then
   brew_codesign() {
     if ! file -b "$1" | grep -q '^Mach-O.*executable'; then
       printf >&2 "Error: argument is not a Mach-O executable\n"
@@ -117,12 +117,11 @@ if [[ -s "${DCP}/conf/brew-codesign-cert.sha1" ]]; then
     if [[ ! -h "$1" ]]; then
       executable_path="$1"
     else
-      executable_path="$(cd "$(dirname "$1")" \
-                         && realpath -q "$(readlink -n "$1")")"
+      executable_path="$(cd "$(dirname "$1")" && realpath -q "$(readlink -n "$1")")"
     fi
 
-    /usr/bin/codesign --keychain "${HOME}/Library/Keychains/login.keychain" \
-                      -s "$(cat "${DCP}/conf/brew-codesign-cert.sha1")" \
+    /usr/bin/codesign --force \
+                      --sign "$(cat "${DCP_CONFIG_DIR}/brew_codesign.sha1")" \
                       "${executable_path}"
   }
 fi

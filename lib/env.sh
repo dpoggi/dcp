@@ -58,6 +58,9 @@ if [[ -s "${DCP}/localenv" ]]; then
   source "${DCP}/localenv"
 fi
 
+readonly DCP_CONFIG_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/dcp"
+mkdir -p "${DCP_CONFIG_DIR}"
+
 # Add GOPATH bin directories to PATH, if present
 if [[ -n "${GOPATH}" ]]; then
   export PATH="${PATH}:$(printf "%s" "${GOPATH}" | sed -e 's#:#/bin:#g' -e 's#$#/bin#')"
