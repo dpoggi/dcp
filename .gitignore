@@ -5,13 +5,6 @@
 !/bin/__*
 !/bin/yolo
 
-# Ignore Jars in libexec for use by scripts.
-/libexec/*.jar
-
-# shims directory for wrapping scripts from bin/
-/shims/*
-!/shims/.keep
-
 # local environment variables
 localenv
 # local login shell things (may/may not run)
