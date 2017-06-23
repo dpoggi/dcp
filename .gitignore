@@ -20,6 +20,10 @@ localexit
 /conf/*
 !/conf/.keep
 
+# migrating conf to etc
+/etc/*
+!/etc/.keep
+
 # kwm config is wide open besides the two provided files
 /dot/kwm/*
 !/dot/kwm/kwmrc

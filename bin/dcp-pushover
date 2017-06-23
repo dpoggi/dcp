@@ -1,12 +1,31 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+readonly CONFIG_PATH="${HOME}/.dcp/etc/pushover.sh"
+readonly API_BASE_URL="https://api.pushover.net/1"
 
 fatal() {
   printf >&2 "\033[1;37;41m[FATAL]:\033[0m %s\n" "$1"
-  exit "${2:-1}"
+  exit 1
 }
 
-config="${HOME}/.dcp/conf/pushover"
-[[ -e "${config}" ]] && source "${config}" || fatal "Missing ${config} file."
-[[ "$#" -gt "0" ]] || fatal "Message required."
+if [[ "$#" = "0" ]]; then
+  fatal "Argument required."
+fi
 
-curl --silent --data "token=${PUSHOVER_TOKEN}&user=${PUSHOVER_USER}&message=$1" "https://api.pushover.net/1/messages.json"
+if [[ ! -e "${CONFIG_PATH}" ]]; then
+  fatal "Missing configuration file ${CONFIG_PATH}"
+fi
+
+. "${CONFIG_PATH}"
+
+if [[ -z "${PUSHOVER_TOKEN}" || -z "${PUSHOVER_USER}" ]]; then
+  fatal "Configuration file must define \$PUSHOVER_TOKEN and \$PUSHOVER_USER"
+fi
+
+curl --silent \
+     --form-string "token=${PUSHOVER_TOKEN}" \
+     --form-string "user=${PUSHOVER_USER}" \
+     --form-string "message=$1" \
+     "${API_BASE_URL}/messages.json"
