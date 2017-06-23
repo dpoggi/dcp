@@ -7,7 +7,7 @@ Dotfiles. Big, maximalist, and scary. Working on trimming this stuff down.
 The installation script can be used as follows:
 
 ```bash
-curl -sSL https://dcp.danpoggi.com | bash
+curl -fSL https://dcp.danpoggi.com | bash
 ```
 
 This URL is a temporary redirect to
