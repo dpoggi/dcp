@@ -120,7 +120,7 @@ done < <(find "${plugins_dir}" -maxdepth 1 \
                                -print0 2> /dev/null | tail -n +2)
 
 log_info "Updating symlinks..."
-"${HOME}/.dcp/bin/dcp-install_links"
+"${HOME}/.dcp/bin/dcp-install-links"
 log_info "Done."
 
 if [[ -n "${stashed}" ]]; then

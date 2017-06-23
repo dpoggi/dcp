@@ -21,7 +21,7 @@ Any dotfiles that are "in the way" when the script attempts to symlink them
 into `~/.dcp` will be ignored and called out — it's completely up to you
 whether to leave them in the way or clear them out in favor of those provided.
 To link remaining dotfiles after deleting or moving them out of the way, run
-`~/.dcp/bin/dcp-install_links`.
+`~/.dcp/bin/dcp-install-links`.
 
 ## Version Managers
 

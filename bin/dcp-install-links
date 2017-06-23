@@ -2,7 +2,7 @@
 
 readonly DCP_OS="$(uname -s)"
 readonly NON_DCP_DOTFILES=( .profile .bash_login .zlogin )
-readonly WARNING_SHOWN_PATH="${HOME}/.dcp/conf/install_links_warning_shown"
+readonly WARNING_SHOWN_PATH="${XDG_CONFIG_HOME:-${HOME}/.config}/dcp/symlink_warning_shown"
 
 warning() {
   printf >&2 "\033[0;33m[WARNING]:\033[0m %s\n" "$1"
@@ -134,6 +134,7 @@ main() {
     rm -f "${WARNING_SHOWN_PATH}"
   elif [[ "${has_non_dcp}" = "true" && ! -e "${WARNING_SHOWN_PATH}" ]]; then
     print_warning
+    mkdir -p "$(dirname "${WARNING_SHOWN_PATH}")"
     touch "${WARNING_SHOWN_PATH}"
   fi
 
