@@ -21,21 +21,13 @@ export CLICOLOR="1"
 #
 
 readonly DCP_RED="\033[0;31m"
-readonly DCP_PS1_RED="\[${DCP_RED}\]"
 readonly DCP_GREEN="\033[0;32m"
-readonly DCP_PS1_GREEN="\[${DCP_GREEN}\]"
 readonly DCP_WHITE="\033[0;37m"
-readonly DCP_PS1_WHITE="\[${DCP_WHITE}\]"
 readonly DCP_BLUE="\033[0;34m"
-readonly DCP_PS1_BLUE="\[${DCP_BLUE}\]"
 readonly DCP_CYAN="\033[0;36m"
-readonly DCP_PS1_CYAN="\[${DCP_CYAN}\]"
 readonly DCP_PURPLE="\033[0;35m"
-readonly DCP_PS1_PURPLE="\[${DCP_PURPLE}\]"
 readonly DCP_YELLOW="\033[0;33m"
-readonly DCP_PS1_YELLOW="\[${DCP_YELLOW}\]"
 readonly DCP_RESET="\033[0m"
-readonly DCP_PS1_RESET="\[${DCP_RESET}\]"
 
 
 #
@@ -50,6 +42,15 @@ fi
 
 
 #
+# Detect shell + invocation (approximately close enough)
+#
+
+if [[ -s "${DCP}/lib/detect_shell.sh" ]]; then
+  source "${DCP}/lib/detect_shell.sh"
+fi
+
+
+#
 # Local environment
 #
 
@@ -60,15 +61,6 @@ fi
 # Add GOPATH bin directories to PATH, if present
 if [[ -n "${GOPATH}" ]]; then
   export PATH="${PATH}:$(printf "%s" "${GOPATH}" | sed -e 's#:#/bin:#g' -e 's#$#/bin#')"
-fi
-
-
-#
-# Detect shell + invocation (approximately close enough)
-#
-
-if [[ -s "${DCP}/lib/detect_shell.sh" ]]; then
-  source "${DCP}/lib/detect_shell.sh"
 fi
 
 

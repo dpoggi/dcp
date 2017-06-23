@@ -5,13 +5,17 @@ if [[ -e "${DCP}/lib/env.sh" ]]; then
   . "${DCP}/lib/env.sh"
 fi
 
+# PS1
+if [[ -e "${DCP}/lib/ps1.sh" ]]; then
+  . "${DCP}/lib/ps1.sh"
+fi
+
+set_prompt
+
 # Load most of dcp
 if [[ -e "${DCP}/lib/init.sh" ]]; then
   . "${DCP}/lib/init.sh"
 fi
-
-# Set PS1, etc.
-set_prompt
 
 # Finish up the details
 if [[ -e "${DCP}/lib/post_init.sh" ]]; then

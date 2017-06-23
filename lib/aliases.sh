@@ -176,33 +176,13 @@ find_long_lines() {
 
 
 #
-# PS1
+# Utility functions
 #
 
-# Component functions
-__ps1_preamble() {
-  [[ "${UID}" = "0" ]] && printf "${DCP_PS1_RED}" || printf "${DCP_PS1_GREEN}"
-  printf "\\\\u${DCP_PS1_WHITE}@${DCP_PS1_CYAN}\\h"
-  printf "${DCP_PS1_WHITE}:${DCP_PS1_PURPLE}\\w"
-}
-
-__ps1_git() {
-  printf "${DCP_PS1_YELLOW}\$(${DCP}/libexec/ps1_git_branch.sh)"
-}
-
-__ps1_uid() {
-  [[ "${DPOGGI_TWOLINE}" = "true" ]] && printf "\n" || printf " "
-  printf "${DCP_PS1_RED}\\\$${DCP_PS1_RESET} "
-}
-
-# Set prompt in either shell
+# Set prompt in zsh
 if [[ -n "${ZSH_NAME}" ]]; then
   set_prompt() {
-    source "${ZSH}/themes/${ZSH_THEME}.zsh-theme"
-  }
-else
-  set_prompt() {
-    export PS1="$(__ps1_preamble)$(__ps1_git)$(__ps1_uid)"
+    . "${ZSH}/themes/${ZSH_THEME}.zsh-theme"
   }
 fi
 
@@ -216,11 +196,6 @@ twoline() {
   export DPOGGI_TWOLINE="true"
   set_prompt
 }
-
-
-#
-# Utility functions
-#
 
 # Use shell functions to override binaries whilst respecting $PATH
 if [[ -n "${ZSH_NAME}" ]]; then
