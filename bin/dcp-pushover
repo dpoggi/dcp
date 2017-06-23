@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-readonly CONFIG_PATH="${HOME}/.dcp/etc/pushover.sh"
+readonly CONFIG_PATH="${XDG_CONFIG_HOME:-${HOME}/.config}/dcp/pushover.sh"
 readonly API_BASE_URL="https://api.pushover.net/1"
 
 fatal() {
@@ -17,6 +17,9 @@ fi
 if [[ ! -e "${CONFIG_PATH}" ]]; then
   fatal "Missing configuration file ${CONFIG_PATH}"
 fi
+
+PUSHOVER_TOKEN=""
+PUSHOVER_USER=""
 
 . "${CONFIG_PATH}"
 
