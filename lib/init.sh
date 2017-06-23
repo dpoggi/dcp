@@ -1,8 +1,14 @@
 # Load aliases
-[[ -e "${DCP}/lib/aliases.sh" ]] && source "${DCP}/lib/aliases.sh"
+if [[ -e "${DCP}/lib/aliases.sh" ]]; then
+  . "${DCP}/lib/aliases.sh"
+fi
 
 # Load OS-specific aliases, if appropriate
-[[ -e "${DCP}/lib/aliases_${DCP_OS}.sh" ]] && source "${DCP}/lib/aliases_${DCP_OS}.sh"
+if [[ -e "${DCP}/lib/aliases_${DCP_OS}.sh" ]]; then
+  . "${DCP}/lib/aliases_${DCP_OS}.sh"
+fi
 
 # Load local modifications
-[[ -e "${DCP}/localrc" ]] && source "${DCP}/localrc"
+if [[ -s "${DCP}/localrc" ]]; then
+  . "${DCP}/localrc"
+fi

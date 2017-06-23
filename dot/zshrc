@@ -16,10 +16,11 @@ if [[ "${DCP_OS}" = "Darwin" ]]; then
 fi
 
 # User-specified plugins
-if [[ -e "${DCP}/conf/plugins" ]]; then
-  for plugin in $(cat "${DCP}/conf/plugins"); do
+if [[ -s "${DCP}/conf/plugins" ]]; then
+  while read -r plugin; do
     plugins+=( "${plugin}" )
-  done
+  done < <(cat "${DCP}/conf/plugins")
+
   unset plugin
 fi
 
@@ -29,26 +30,28 @@ fi
 #
 
 # Load most of dcp
-[[ -e "${DCP}/lib/init.sh" ]] && source "${DCP}/lib/init.sh"
-
-# Load oh-my-zsh itself
-[[ -e "${ZSH}/oh-my-zsh.sh" ]] && source "${ZSH}/oh-my-zsh.sh"
-
-# 'Command not found' hook for Arch Linux
-if [[ -s "/usr/share/doc/pkgfile/command-not-found.zsh" ]]; then
-  source "/usr/share/doc/pkgfile/command-not-found.zsh"
+if [[ -e "${DCP}/lib/init.sh" ]]; then
+  . "${DCP}/lib/init.sh"
 fi
 
-# Completion aliasing for hub command
+# Load oh-my-zsh
+if [[ -e "${ZSH}/oh-my-zsh.sh" ]]; then
+  . "${ZSH}/oh-my-zsh.sh"
+fi
+
+# Completion aliasing for GitHub CLI
 if hash hub 2> /dev/null; then
   alias git="hub"
+
   if type compdef > /dev/null; then
      compdef hub=git
   fi
 fi
 
 # Finish up the details
-[[ -e "${DCP}/lib/post_init.sh" ]] && source "${DCP}/lib/post_init.sh"
+if [[ -e "${DCP}/lib/post_init.sh" ]]; then
+  . "${DCP}/lib/post_init.sh"
+fi
 
 # Enable fallback behavior when glob matching fails
 unsetopt nomatch

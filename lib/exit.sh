@@ -4,6 +4,6 @@ if [[ "${SHLVL}" = "1" && -z "${SSH_TTY}" ]]; then
   fi
 fi
 
-if [[ -e "${DCP}/localexit" ]]; then
-  source "${DCP}/localexit"
+if [[ -s "${DCP}/localexit" ]]; then
+  . "${DCP}/localexit"
 fi
