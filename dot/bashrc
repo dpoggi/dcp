@@ -1,7 +1,7 @@
 export DCP="${HOME}/.dcp"
 
 # Set up environment
-[[ -e "${DCP}/envrc" ]] && source "${DCP}/envrc"
+[[ -e "${DCP}/lib/env.sh" ]] && source "${DCP}/lib/env.sh"
 
 # Load most of dcp
 [[ -e "${DCP}/lib/init.sh" ]] && source "${DCP}/lib/init.sh"

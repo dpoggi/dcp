@@ -1,1 +1,1 @@
-[[ -e "${DCP}/exitrc" ]] && source "${DCP}/exitrc"
+[[ -e "${DCP}/lib/exit.sh" ]] && source "${DCP}/lib/exit.sh"

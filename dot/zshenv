@@ -12,4 +12,4 @@ else
 fi
 
 # Set up environment
-[[ -e "${DCP}/envrc" ]] && source "${DCP}/envrc"
+[[ -e "${DCP}/lib/env.sh" ]] && source "${DCP}/lib/env.sh"

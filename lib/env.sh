@@ -3,14 +3,17 @@
 #
 
 export PATH="${PATH}:${DCP}/bin"
+
 export DCP_OS="$(uname -s)"
+
 if [[ -z "${ZSH_NAME}" ]]; then
   alias grep="grep --color=auto"
 fi
+
+export EDITOR="vim"
 export LS_OPTIONS="--color=auto"
 export DPOGGI_TWOLINE="true"
 export CLICOLOR="1"
-export EDITOR="vim"
 
 
 #
