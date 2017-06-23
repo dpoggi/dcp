@@ -24,7 +24,7 @@ __ps1_preamble() {
 }
 
 __ps1_git() {
-  printf "${DCP_PS1_YELLOW}\$(${DCP}/libexec/ps1_git_branch.sh)"
+  printf "${DCP_PS1_YELLOW}\$(${DCP}/libexec/git_current_branch.sh --ps1)"
 }
 
 __ps1_uid() {
