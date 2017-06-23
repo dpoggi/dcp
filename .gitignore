@@ -18,6 +18,8 @@ localenv
 localprofile
 # local aliases and init things
 localrc
+# local post_init things (mostly version manager integration)
+localpostrc
 # local logout things
 localexit
 
