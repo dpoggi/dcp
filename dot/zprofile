@@ -1,1 +1,5 @@
+if ! printf "%s" "${PATH}" | grep -Fq 'dcp'; then
+  export PATH="${PATH}:${HOME}/.dcp/bin"
+fi
+
 [[ -e "${HOME}/.dcp/localprofile" ]] && source "${HOME}/.dcp/localprofile"
