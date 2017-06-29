@@ -49,13 +49,9 @@ EOT
   fi
 }
 
-__boop_vim_langs() {
-  if [[ "${DCP_BOOP_VIM_LANGS}" != "true" ]]; then
+__boop_langs() {
+  if [[ "${DCP_BOOP_LINK_LANGS}" != "true" ]]; then
     return
-  fi
-
-  if [[ "$1" != "link" && "$1" != "unlink" ]]; then
-    return 1
   fi
 
   brew "$1" node perl python ruby
@@ -64,7 +60,7 @@ __boop_vim_langs() {
 boop() {
   __boop_check_pyenv
 
-  __boop_vim_langs link
+  __boop_langs link
 
   if ! brew update; then
     return 1
@@ -82,7 +78,7 @@ boop() {
     fi
   fi
 
-  __boop_vim_langs unlink
+  __boop_langs unlink
 
   brew cleanup --prune=all
 }
