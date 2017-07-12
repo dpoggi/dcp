@@ -309,7 +309,7 @@ if [[ -d "/usr/local/opt/emacs" ]]; then
       return 1
     fi
 
-    (cd "${HOME}" && /usr/local/bin/emacs --daemon &> /dev/null)
+    (cd "${HOME}" && /usr/local/bin/emacs --daemon > /dev/null 2>&1)
   }
 
   emacsctl() {

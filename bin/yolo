@@ -1,34 +1,19 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
-log_info() {
-  printf "\033[0;34m[%s]:\033[0m %s\n" \
-         "$(date "+%Y-%m-%d %H:%M:%S")" \
-         "$*"
-}
+if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+  printf >&2 "Must be inside a Git work tree\n"
+  exit 1
+fi
 
-log_error() {
-  printf >&2 "\033[1;37;41m[%s]:\033[0m %s\n" \
-             "$(date "+%Y-%m-%d %H:%M:%S")" \
-             "$*"
-}
+printf >&2 "What's the motto (all caps)? "
+read -r
 
-main() {
-  if ! git rev-parse --is-inside-work-tree &> /dev/null; then
-    log_error "Error: not inside a Git work tree"
-    return 1
-  fi
+if [[ "${REPLY}" = "YOLO" ]]; then
+  printf >&2 "\n"
 
-  read -p "What's the motto (all caps)? " -n 4 -r
+  git commit --all --message="DEAL WITH IT"
 
-  if [[ "${REPLY}" = "YOLO" ]]; then
-    printf >&2 "\n"
-
-    git commit --all --message="DEAL WITH IT"
-
-    git push origin +master
-  fi
-}
-
-main "$@"
+  git push origin +master
+fi

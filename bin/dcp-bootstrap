@@ -43,7 +43,7 @@ clone_repo() {
               --recursive \
               "${repo_url}" \
               "${clone_dir}" \
-              &> /dev/null
+              > /dev/null 2>&1
     log_info "Finished."
   else
     log_info "${clone_dir} already exists, skipping..."

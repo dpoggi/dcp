@@ -56,7 +56,7 @@ update_repo() {
   if [[ -n "$(git status --porcelain --ignore-submodules --untracked-files=all 2>/dev/null)" ]]; then
     log_info "Attempting to stash uncommitted changes:"
     git status --short --ignore-submodules --untracked-files=all
-    git merge --abort &>/dev/null
+    git merge --abort > /dev/null 2>&1
     git -c "user.name=dcp update" \
         -c "user.email=dcp-update@localhost" \
         stash save --quiet --include-untracked
@@ -67,7 +67,7 @@ update_repo() {
 
   if [[ "${initial_branch}" != "master" ]]; then
     log_info "Checking out master..."
-    if git merge-base --is-ancestor master origin/master &>/dev/null; then
+    if git merge-base --is-ancestor master origin/master > /dev/null 2>&1; then
       git checkout --quiet --force master
     else
       git checkout --quiet --force -B master origin/master

@@ -79,6 +79,6 @@ defaults write com.apple.dock showhidden -bool true
 ###############################################################################
 
 for process in Finder Dock SystemUIServer; do
-  killall "${process}" &> /dev/null
+  killall "${process}" > /dev/null 2>&1
 done
 echo "Done. Note that some of these changes require a logout/restart to take effect."
