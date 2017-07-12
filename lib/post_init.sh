@@ -12,28 +12,14 @@ fi
 #
 
 if [[ -n "${DCP_PREVENT_DISABLE}" ]]; then
-  typeset +x DCP_DISABLE_MANAGERS
-  unset DCP_DISABLE_MANAGERS
-
-  typeset +x DCP_DISABLE_NVM
-  unset DCP_DISABLE_NVM
-
-  typeset +x DCP_DISABLE_OPAM
-  unset DCP_DISABLE_OPAM
-
-  typeset +x DCP_DISABLE_PYENV
-  unset DCP_DISABLE_PYENV
-
-  typeset +x DCP_DISABLE_RVM
-  unset DCP_DISABLE_RVM
-  typeset +x DCP_DISABLE_RBENV
-  unset DCP_DISABLE_RBENV
-
-  typeset +x DCP_DISABLE_RUSTUP
-  unset DCP_DISABLE_RUSTUP
-
-  typeset +x DCP_PREVENT_DISABLE
-  unset DCP_PREVENT_DISABLE
+  __unexport DCP_DISABLE_MANAGERS
+  __unexport DCP_DISABLE_NVM
+  __unexport DCP_DISABLE_OPAM
+  __unexport DCP_DISABLE_PYENV
+  __unexport DCP_DISABLE_RVM
+  __unexport DCP_DISABLE_RBENV
+  __unexport DCP_DISABLE_RUSTUP
+  __unexport DCP_PREVENT_DISABLE
 fi
 
 if [[ -n "${DCP_DISABLE_MANAGERS}" ]]; then
@@ -44,8 +30,7 @@ if [[ -n "${DCP_DISABLE_MANAGERS}" ]]; then
   export DCP_DISABLE_RBENV="true"
   export DCP_DISABLE_RUSTUP="true"
 
-  typeset +x DCP_DISABLE_MANAGERS
-  unset DCP_DISABLE_MANAGERS
+  __unexport DCP_DISABLE_MANAGERS
 fi
 
 
