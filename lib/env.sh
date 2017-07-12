@@ -46,7 +46,7 @@ fi
 #
 
 if [[ -s "${DCP}/lib/detect_shell.sh" ]]; then
-  source "${DCP}/lib/detect_shell.sh"
+  . "${DCP}/lib/detect_shell.sh"
 fi
 
 
@@ -55,16 +55,30 @@ fi
 #
 
 if [[ -s "${DCP}/localenv" ]]; then
-  source "${DCP}/localenv"
+  . "${DCP}/localenv"
 fi
 
 readonly DCP_CONFIG_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/dcp"
-mkdir -p "${DCP_CONFIG_DIR}"
+
+if [[ ! -e "${DCP_CONFIG_DIR}" ]]; then
+  mkdir -p "${DCP_CONFIG_DIR}"
+fi
 
 # Add GOPATH bin directories to PATH, if present
+
 if [[ -n "${GOPATH}" ]]; then
   export PATH="${PATH}:$(printf "%s" "${GOPATH}" | sed -e 's#:#/bin:#g' -e 's#$#/bin#')"
 fi
+
+
+#
+# __unexport: Completely rid yourself of a currently exported var
+#
+
+__unexport() {
+  typeset +x "$1"
+  unset "$1"
+}
 
 
 #

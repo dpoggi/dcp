@@ -7,6 +7,10 @@ if [[ -d "${HOME}/.local/bin" ]]; then
 fi
 
 
+#
+# BEGIN VERSION MANAGER SHENANIGANS
+#
+
 if [[ -n "${DCP_PREVENT_DISABLE}" ]]; then
   typeset +x DCP_DISABLE_MANAGERS
   unset DCP_DISABLE_MANAGERS
@@ -45,9 +49,7 @@ if [[ -n "${DCP_DISABLE_MANAGERS}" ]]; then
 fi
 
 
-#
-# Add rustup (~/.cargo/bin) directory to PATH if available
-#
+# rustup
 
 if [[ -z "${DCP_DISABLE_RUSTUP}" ]]; then
   if [[ -d "${HOME}/.cargo" ]]; then
@@ -58,49 +60,52 @@ else
 fi
 
 
-#
-# Configure OPAM environment if available
-#
+# OPAM
 
 if [[ -z "${DCP_DISABLE_OPAM}" ]]; then
   if [[ "${DCP_SHELL}" = "bash" && -s "${HOME}/.opam/opam-init/init.sh" ]]; then
-    source "${HOME}/.opam/opam-init/init.sh"
+    . "${HOME}/.opam/opam-init/init.sh"
   elif [[ "${DCP_SHELL}" = "zsh" && -s "${HOME}/.opam/opam-init/init.zsh" ]]; then
-    source "${HOME}/.opam/opam-init/init.zsh"
+    . "${HOME}/.opam/opam-init/init.zsh"
   fi
 else
   export PATH="$(__path_select "${PATH}" '$_ !~ /opam/')"
 fi
 
 
-#
-# Load nvm if available
-#
+# nvm
 
 if [[ -z "${DCP_DISABLE_NVM}" ]]; then
-  [[ -d "${HOME}/.nvm" ]] && export NVM_DIR="${HOME}/.nvm"
+  if [[ -d "${HOME}/.nvm" ]]; then
+    export NVM_DIR="${HOME}/.nvm"
+  fi
+
   if [[ -s "${NVM_DIR}/nvm.sh" ]]; then
-    source "${NVM_DIR}/nvm.sh"
-  elif [[ -s "/usr/local/opt/nvm/nvm.sh" ]]; then
-    # Because for some reason this doesn't end up in PATH with Homebrew...
-    source "/usr/local/opt/nvm/nvm.sh"
+    . "${NVM_DIR}/nvm.sh"
+  elif [[ -s /usr/local/opt/nvm/nvm.sh ]]; then
+    . /usr/local/opt/nvm/nvm.sh
   fi
 elif [[ -z "${DCP_DISABLE_NVM_NOFILTER}" ]]; then
   export PATH="$(__path_select "${PATH}" '$_ !~ /nvm/')"
 fi
 
 
-#
-# Load pyenv + pyenv-virtualenv if available
-#
+# pyenv + pyenv-virtualenv
 
 if [[ -z "${DCP_DISABLE_PYENV}" ]]; then
   if [[ -d "${HOME}/.pyenv/shims" ]]; then
     export PYENV_ROOT="${HOME}/.pyenv"
-    [[ -d "${PYENV_ROOT}/bin" ]] && export PATH="${PYENV_ROOT}/bin:${PATH}"
+
+    if [[ -d "${PYENV_ROOT}/bin" ]]; then
+      export PATH="${PYENV_ROOT}/bin:${PATH}"
+    fi
   fi
-  hash pyenv 2>/dev/null && eval "$(pyenv init -)"
-  if hash pyenv-virtualenv-init 2>/dev/null; then
+
+  if hash pyenv 2> /dev/null; then
+    eval "$(pyenv init -)"
+  fi
+
+  if hash pyenv-virtualenv-init 2> /dev/null; then
     export PYENV_VIRTUALENV_DISABLE_PROMPT="1"
     eval "$(pyenv-virtualenv-init -)"
   fi
@@ -109,14 +114,15 @@ else
 fi
 
 
-#
-# Load rbenv or RVM (if you have to, I guess) if available
-#
+# rbenv or rvm (if you have to, I guess)
 
 if [[ -d "${HOME}/.rvm" ]]; then
   if [[ -z "${DCP_DISABLE_RVM}" ]]; then
     export PATH="${PATH}:${HOME}/.rvm/bin"
-    [[ -s "${HOME}/.rvm/scripts/rvm" ]] && source "${HOME}/.rvm/scripts/rvm"
+
+    if [[ -s "${HOME}/.rvm/scripts/rvm" ]]; then
+      . "${HOME}/.rvm/scripts/rvm"
+    fi
   else
     export PATH="$(__path_select "${PATH}" '$_ !~ /rvm/')"
   fi
@@ -124,9 +130,15 @@ else
   if [[ -z "${DCP_DISABLE_RBENV}" ]]; then
     if [[ -d "${HOME}/.rbenv/shims" ]]; then
       export RBENV_ROOT="${HOME}/.rbenv"
-      [[ -d "${RBENV_ROOT}/bin" ]] && export PATH="${RBENV_ROOT}/bin:${PATH}"
+
+      if [[ -d "${RBENV_ROOT}/bin" ]]; then
+        export PATH="${RBENV_ROOT}/bin:${PATH}"
+      fi
     fi
-    hash rbenv 2>/dev/null && eval "$(rbenv init -)"
+
+    if hash rbenv 2> /dev/null; then
+      eval "$(rbenv init -)"
+    fi
   else
     export PATH="$(__path_select "${PATH}" '$_ !~ /rbenv/')"
   fi
@@ -143,15 +155,12 @@ if [[ -S "${HOME}/.gnupg/S.gpg-agent.ssh" ]]; then
   export SSH_AUTH_SOCK="${HOME}/.gnupg/S.gpg-agent.ssh"
 fi
 
-if [[ -s "${HOME}/.gnupg/gpg-agent-info" ]]; then
-  . "${HOME}/.gnupg/gpg-agent-info"
+# Base16 colors, if the script path has been set locally
 
-  export GPG_AGENT_INFO
-  export SSH_AGENT_PID
+if [[ -s "${BASE16_SHELL}" && -z "${INSIDE_EMACS}" ]]; then
+  . "${BASE16_SHELL}"
 fi
 
-# Base16 colors, if the script path has been set locally
-[[ -s "${BASE16_SHELL}" && -z "${INSIDE_EMACS}" ]] && source "${BASE16_SHELL}"
-
 # Another round of PATH deduplication after version managers load
+
 export PATH="$(__path_distinct "${PATH}")"
