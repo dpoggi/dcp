@@ -1,55 +1,62 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
-log_info() {
-  printf "\033[0;34m[%s]:\033[0m %s\n" \
-         "$(date "+%Y-%m-%d %H:%M:%S")" \
-         "$*"
+if [[ -t 1 ]]; then
+  __logfln() {
+    local lvl="$1" lvl_clr="$2" fmt="$3"; shift; shift; shift
+    printf "\033[2;39;49m%s ${lvl_clr}${lvl}\033[2;39;49m : \033[0m${fmt}\n" \
+           "$(__log_date)" "$@"
+  }
+else
+  __logfln() {
+    local lvl="$1" fmt="$3"; shift; shift; shift
+    printf "%s ${lvl} : ${fmt}\n" "$(__log_date)" "$@"
+  }
+fi
+
+__log_date() { date "+%Y-%m-%d %H:%M:%S"; }
+
+infofln() { __logfln " INFO" "\033[0;34m" "$@"; }
+errorfln() { __logfln "ERROR" "\033[0;31m" "$@"; }
+
+usage() {
+  printf "Usage: %s [--ios] input1.mkv [input2.mkv]...\n" "$0"
 }
 
-log_error() {
-  printf >&2 "\033[1;37;41m[%s]:\033[0m %s\n" \
-             "$(date "+%Y-%m-%d %H:%M:%S")" \
-             "$*"
-}
-
-print_usage() {
-  printf "Usage: %s [--ios] input1.mkv [input2.mkv]...\n" "$(basename "$0")"
-}
-
-check_deps() {
+assert_deps() {
   if [[ "$(uname -s)" != "Darwin" ]]; then
-    log_error "this script requires afconvert(1) from macOS."
+    errorfln "this script requires afconvert(1) from macOS"
     return 1
   fi
-  if ! hash ffmpeg 2> /dev/null; then
-    log_error "ffmpeg not found."
-    return 1
-  fi
-  if ! hash afconvert 2> /dev/null; then
-    log_error "afconvert not found."
-    return 1
-  fi
+
+  local dep
+
+  for dep in ffmpeg afconvert; do
+    if ! hash "${dep}" 2> /dev/null; then
+      errorfln "%s not found" "${dep}"
+      return 1
+    fi
+  done
 }
 
 __extract_video() {
-  log_info "Extracting video as-is..."
+  infofln "Extracting video as-is..."
   ffmpeg -v warning -i "$1" -an -c:v copy "$2"
 }
 
 __source_to_wav() {
-  log_info "Converting audio from source -> WAV..."
+  infofln "Converting audio from source -> WAV..."
   ffmpeg -v warning -i "$1" -vn -c:a pcm_s16le -ac 2 "$2"
 }
 
 __wav_to_caf() {
-  log_info "Converting audio from WAV -> CAF..."
+  infofln "Converting audio from WAV -> CAF..."
   afconvert "$1" "$2" -d 0 -f caff --soundcheck-generate
 }
 
 __caf_to_aac() {
-  log_info "Converting audio from CAF -> AAC ($(expr $3 / 1000)kbps)..."
+  infofln "Converting audio from CAF -> AAC (%skbps)..." "$(expr $3 / 1000)"
   afconvert "$1" "$2" \
             -d aac -f m4af \
             -u pgcm 2 -b "$3" -q 127 \
@@ -57,7 +64,7 @@ __caf_to_aac() {
 }
 
 __recombine() {
-  log_info "Recombining..."
+  infofln "Recombining..."
   ffmpeg -v warning -i "$1" -i "$2" -c:v copy -c:a copy "$3"
 }
 
@@ -68,7 +75,7 @@ transcode() {
     output="${base}_out.mp4"
   fi
 
-  log_info "Transcoding ${1}..."
+  infofln "Transcoding %s..." "$1"
 
   __extract_video "$1" "${base}_video.mkv"
 
@@ -83,36 +90,39 @@ transcode() {
   __recombine "${base}_video.mkv" "${base}.aac" "${output}"
   rm -f "${base}_video.mkv" "${base}.aac"
 
-  log_info "Finished transcoding ${1}."
+  infofln "Finished transcoding %s." "$1"
 }
 
 main() {
-  check_deps
+  assert_deps
 
-  local -a inputs
-  local bitrate="256000"
+  local -a input_files
+  local audio_bitrate="256000"
+
   while [[ "$#" -gt "0" ]]; do
     case "$1" in
       --ios)
-        bitrate="160000"
+        audio_bitrate="160000"
         ;;
       --help)
-        print_usage
+        usage
         return
         ;;
       *)
-        inputs+=( "$1" )
+        input_files+=( "$1" )
     esac
     shift
   done
 
-  if [[ -z "${inputs[*]}" ]]; then
-    log_error "No input files."
+  if [[ "${#input_files[@]}" -eq "0" ]]; then
+    errorfln "No input files"
     return 1
   fi
 
-  for input in "${inputs[@]}"; do
-    transcode "${input}" "${bitrate}"
+  local input_file
+
+  for input_file in "${input_files[@]}"; do
+    transcode "${input_file}" "${audio_bitrate}"
   done
 }
 
