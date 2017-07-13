@@ -8,7 +8,7 @@ if [[ -z "${CURRENT_BRANCH}" ]]; then
   exit
 fi
 
-if [[ "$#" -gt "0" && "$1" = "--ps1" ]]; then
+if [[ " $* " = *\ --ps1\ * ]]; then
   printf "(%s)" "${CURRENT_BRANCH}"
 else
   printf "%s" "${CURRENT_BRANCH}"

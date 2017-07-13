@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+print_usage() {
+  printf >&2 "Usage: %s [--git-files|-g]\n" "$0"
+}
+
+check_and_remove_existing() {
+  if [[ ! -d ./.mvn/wrapper && ! -x ./mvnw ]]; then
+    return
+  fi
+
+  printf >&2 "Existing Maven wrapper detected. Remove first (y/n)? "
+  read -r
+
+  if [[ "${REPLY}" = y* || "${REPLY}" = Y* ]]; then
+    rm -rf mvnw mvnw.cmd .mvn
+  fi
+}
+
+fix_permissions() {
+  chmod 755 ./mvnw
+  chmod 644 ./mvnw.cmd ./.mvn/wrapper/maven-wrapper.{jar,properties}
+}
+
+fix_mvnw_bug() {
+  perl -pi -e 's/^\s*echo \$MAVEN_PROJECTBASEDIR$//' ./mvnw
+}
+
+write_git_files() {
+  if [[ ! -e ".gitattributes" ]]; then
+    cat "${DCP}/share/gitignore/$1.gitattributes" > .gitattributes
+  else
+    printf >&2 ".gitattributes file already exists, skipping\n"
+  fi
+
+  if [[ ! -e ".gitignore" ]]; then
+    cat "${DCP}/share/gitignore/$1.gitignore" > .gitignore
+  else
+    printf >&2 ".gitignore file already exists, skipping\n"
+  fi
+}
+
+main() {
+  local git_files="false"
+
+  while [[ "$#" -gt "0" ]]; do
+    case "$1" in
+      --help|-h)
+        print_usage
+        return
+        ;;
+      --git-files|-g)
+        git_files="true"
+        ;;
+      *)
+        printf >&2 "Invalid argument: %s\n" "$1"
+        return 1
+    esac
+    shift
+  done
+
+  check_and_remove_existing
+
+  mvn -N io.takari:maven:wrapper
+
+  local exit_status="$?"
+
+  if [[ "${exit_status}" != "0" ]]; then
+    return "${exit_status}"
+  fi
+
+  fix_permissions
+
+  fix_mvnw_bug
+
+  if [[ "${git_files}" = "true" ]]; then
+    write_git_files
+  fi
+}
+
+main "$@"

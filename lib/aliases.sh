@@ -193,7 +193,7 @@ twoline() {
 }
 
 # Use shell functions to override binaries whilst respecting $PATH
-if [[ -n "${ZSH_NAME}" ]]; then
+if [[ "${DCP_SHELL}" = "zsh" ]]; then
   __bin_path() {
     whence -p "$1"
   }
@@ -219,8 +219,16 @@ __job_num() {
 }
 
 # virtualenv-independent pip
+
 gpip() {
   PIP_REQUIRE_VIRTUALENV="" pip "$@"
+}
+
+# __unexport: Completely rid yourself of a currently exported var
+
+__unexport() {
+  declare +x "$1"
+  unset "$1"
 }
 
 # Restart shell with version managers enabled/disabled
@@ -236,149 +244,55 @@ disable_managers() {
 }
 
 enable_rbenv() {
-  declare +x DCP_DISABLE_RBENV
-  unset DCP_DISABLE_RBENV
+  __unexport DCP_DISABLE_RBENV
   eval "${DCP_SHELL_INVOCATION}"
 }
 
 enable_rvm() {
-  declare +x DCP_DISABLE_RVM
-  unset DCP_DISABLE_RVM
+  __unexport DCP_DISABLE_RVM
   eval "${DCP_SHELL_INVOCATION}"
 }
 
 enable_pyenv() {
-  declare +x DCP_DISABLE_PYENV
-  unset DCP_DISABLE_PYENV
+  __unexport DCP_DISABLE_PYENV
   eval "${DCP_SHELL_INVOCATION}"
 }
 
 enable_nvm() {
-  declare +x DCP_DISABLE_NVM
-  unset DCP_DISABLE_NVM
+  __unexport DCP_DISABLE_NVM
   eval "${DCP_SHELL_INVOCATION}"
 }
 
 enable_opam() {
-  declare +x DCP_DISABLE_OPAM
-  unset DCP_DISABLE_OPAM
+  __unexport DCP_DISABLE_OPAM
   eval "${DCP_SHELL_INVOCATION}"
 }
 
 enable_rustup() {
-  declare +x DCP_DISABLE_RUSTUP
-  unset DCP_DISABLE_RUSTUP
+  __unexport DCP_DISABLE_RUSTUP
   eval "${DCP_SHELL_INVOCATION}"
 }
 
-# JABBA
 
-__git_files_write() {
-  if [[ ! -e ".gitattributes" ]]; then
-    cat "${DCP}/share/gitignore/$1.gitattributes" > .gitattributes
-  else
-    printf >&2 ".gitattributes file already exists, skipping\n"
-  fi
+#
+# __path_select: Select elements from a PATH-like string by Perl expression
+#
+# __path_distinct: Use __path_select to simplify a PATH-like string down to its
+# earliest distinct elements. That is, remove duplicates without altering
+# behavior. Also filter out accidental literal '$PATH's, which is a thing.
+#
 
-  if [[ ! -e ".gitignore" ]]; then
-    cat "${DCP}/share/gitignore/$1.gitignore" > .gitignore
-  else
-    printf >&2 ".gitignore file already exists, skipping\n"
-  fi
+if hash perl 2> /dev/null; then
+  __path_select() {
+    printf "%s" "$1" \
+      | perl -e "print join(\":\", grep { $2 } split(/:/, scalar <>))"
+  }
+else
+  __path_select() {
+    printf "%s" "$1"
+  }
+fi
+
+__path_distinct() {
+  __path_select "$1" '!$seen{$_}++ && $_ ne "\$PATH"'
 }
-
-if hash mvn 2> /dev/null; then
-  mvn_wrapper() {
-    local write_git_files="false"
-
-    while [[ "$#" -gt "0" ]]; do
-      case "$1" in
-        --help|-h)
-          printf >&2 "Usage: %s [--write-git-files|-g]\n" "$0"
-          return
-          ;;
-        --write-git-files|-g)
-          write_git_files="true"
-          ;;
-        *)
-          printf >&2 "Invalid argument: %s\n" "$1"
-          return 1
-      esac
-
-      shift
-    done
-
-    if [[ -d ".mvn/wrapper" || -x "mvnw" ]]; then
-      printf >&2 "Existing Maven wrapper detected. Remove first (y/n)? "
-
-      read -r
-
-      if [[ "${REPLY}" = y* || "${REPLY}" = Y* ]]; then
-        rm -rf mvnw mvnw.cmd .mvn
-      fi
-    fi
-
-    mvn -N io.takari:maven:wrapper
-
-    local exit_status="$?"
-
-    if [[ "${exit_status}" != "0" ]]; then
-      return "${exit_status}"
-    fi
-
-    chmod 755 mvnw
-    chmod 644 mvnw.cmd .mvn/wrapper/maven-wrapper.{jar,properties}
-
-    # Fix yet another script bug in the Maven wrapper
-		perl -pi -e 's/^\s*echo \$MAVEN_PROJECTBASEDIR$//' mvnw
-
-    if [[ "${write_git_files}" = "true" ]]; then
-      __git_files_write java
-    fi
-  }
-fi
-
-if hash gradle 2> /dev/null; then
-  gradle_wrapper() {
-    local write_git_files="false"
-
-    while [[ "$#" -gt "0" ]]; do
-      case "$1" in
-        --help|-h)
-          printf >&2 "Usage: %s [--write-git-files|-g]\n" "$0"
-          return
-          ;;
-        --write-git-files|-g)
-          write_git_files="true"
-          ;;
-        *)
-          printf >&2 "Invalid argument: %s\n" "$1"
-          return 1
-      esac
-
-      shift
-    done
-
-    if [[ -d "gradle/wrapper" || -x "gradlew" ]]; then
-      printf >&2 "Existing Gradle wrapper detected. Remove first (y/n)? "
-
-      read -r
-
-      if [[ "${REPLY}" = y* || "${REPLY}" = Y* ]]; then
-        rm -rf .gradle gradle gradlew gradlew.bat
-      fi
-    fi
-
-    gradle --no-daemon wrapper
-
-    local exit_status="$?"
-
-    if [[ "${exit_status}" != "0" ]]; then
-      return "${exit_status}"
-    fi
-
-    if [[ "${write_git_files}" = "true" ]]; then
-      __git_files_write java
-    fi
-  }
-fi

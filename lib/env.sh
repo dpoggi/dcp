@@ -23,30 +23,24 @@ readonly DCP_BLUE="\033[0;34m"
 readonly DCP_CYAN="\033[0;36m"
 readonly DCP_PURPLE="\033[0;35m"
 readonly DCP_YELLOW="\033[0;33m"
-readonly DCP_RESET="\033[0m"
+readonly DCP_RESET="\033[0;39;49m"
 
 
-#
 # Check for Homebrew
-#
 
-# Guard for Darwin because I know nothing about Linuxbrew, and this PATH order
+# Guard for macOS because I know nothing about Linuxbrew, and this PATH order
 # would be inappropriate for most distros.
-if [[ "${DCP_OS}" = "Darwin" && -x "/usr/local/bin/brew" ]]; then
+if [[ "${DCP_OS}" = "Darwin" ]] && hash brew 2> /dev/null; then
   export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin:${PATH}"
 fi
 
 
-#
 # Detect shell + invocation (approximately close enough)
-#
 
 . "${DCP}/lib/detect_shell.sh"
 
 
-#
 # Local environment
-#
 
 . "${DCP}/localenv"
 
@@ -61,39 +55,3 @@ fi
 if [[ -n "${GOPATH}" ]]; then
   export PATH="${PATH}:$(printf "%s" "${GOPATH}" | sed -e 's#:#/bin:#g' -e 's#$#/bin#')"
 fi
-
-
-#
-# __unexport: Completely rid yourself of a currently exported var
-#
-
-__unexport() {
-  typeset +x "$1"
-  unset "$1"
-}
-
-
-#
-# __path_select: Select elements from a PATH-like string by Perl expression
-#
-# __path_distinct: Use __path_select to simplify a PATH-like string down to its
-# earliest distinct elements. That is, remove duplicates without altering
-# behavior. Also filter out accidental literal '$PATH's, which is a thing.
-#
-
-if hash perl 2> /dev/null; then
-  __path_select() {
-    printf "%s" "$1" \
-      | perl -e "print join(\":\", grep { $2 } split(/:/, scalar <>))"
-  }
-else
-  __path_select() {
-    printf "%s" "$1"
-  }
-fi
-
-__path_distinct() {
-  __path_select "$1" '!$seen{$_}++ && $_ ne "\$PATH"'
-}
-
-export PATH="$(__path_distinct "${PATH}")"
