@@ -4,11 +4,7 @@
 
 export PATH="${PATH}:${DCP}/bin"
 
-export DCP_OS="$(uname -s)"
-
-if [[ -z "${ZSH_NAME}" ]]; then
-  alias grep="grep --color=auto"
-fi
+readonly DCP_OS="$(uname -s)"
 
 export EDITOR="vim"
 export LS_OPTIONS="--color=auto"
@@ -45,18 +41,14 @@ fi
 # Detect shell + invocation (approximately close enough)
 #
 
-if [[ -s "${DCP}/lib/detect_shell.sh" ]]; then
-  . "${DCP}/lib/detect_shell.sh"
-fi
+. "${DCP}/lib/detect_shell.sh"
 
 
 #
 # Local environment
 #
 
-if [[ -s "${DCP}/localenv" ]]; then
-  . "${DCP}/localenv"
-fi
+. "${DCP}/localenv"
 
 readonly DCP_CONFIG_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/dcp"
 

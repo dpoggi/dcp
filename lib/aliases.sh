@@ -7,15 +7,8 @@ alias ll="ls -la"
 alias la="ls -a"
 alias h="history | tail -32"
 
-if hash emacsclient 2> /dev/null; then
-  gecl() {
-    emacsclient -c &
-    disown %$(__job_num "$!")
-  }
-
-  cecl() {
-    emacsclient -nw
-  }
+if [[ "${DCP_SHELL}" = "bash" ]]; then
+  alias grep="grep --color=auto"
 fi
 
 ext_ip() {
@@ -24,7 +17,10 @@ ext_ip() {
 
   while [[ "$#" -gt "0" ]]; do
     case "$1" in
-      --json|-j)
+      --html)
+        content_type="text/html"
+        ;;
+      --json)
         content_type="application/json"
         ;;
       6)
@@ -44,7 +40,7 @@ ext_ip() {
     printf >&2 "Error: unable to retrieve external IP.\n"
 
     if [[ "${ip_version}" = "6" ]]; then
-      printf >&2 "\nThis network may not be configured for IPv6.\n"
+      printf >&2 "\nThis may be due to missing or incorrect IPv6 configuration.\n"
     fi
   fi
 }
@@ -130,11 +126,10 @@ gcb() {
 }
 
 gitignore() {
-  if [[ "$#" -lt "1" ]]; then
+  if [[ "$#" -eq "0" ]]; then
     return 1
   fi
-
-  curl -sJL "https://www.gitignore.io/api/${1}"
+  curl -sJL "https://www.gitignore.io/api/$1"
 }
 
 gpub() {
