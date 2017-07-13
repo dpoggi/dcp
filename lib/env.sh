@@ -34,7 +34,9 @@ fi
 
 # Local environment
 
-. "${DCP}/localenv"
+if [[ -s "${DCP}/localenv" ]]; then
+  . "${DCP}/localenv"
+fi
 
 # Check for our spot in XDG_CONFIG_HOME
 
