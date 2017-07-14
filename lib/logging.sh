@@ -2,26 +2,21 @@ __log_date() {
   date "+%Y-%m-%d %H:%M:%S"
 }
 
-if [[ -t 1 ]]; then
-  __logfln() {
-    local lvl="$1"; shift
-    local lvl_clr="$2"; shift
-    local fmt="$3"; shift
+__logfln() {
+  local lvl="$1"; shift
+  local lvl_clr="$1"; shift
+  local fmt="$1"; shift
 
+  if [[ -t 1 ]]; then
     printf "\033[2;39;49m%s ${lvl_clr}${lvl}\033[2;39;49m : \033[0m${fmt}\n" \
            "$(__log_date)" \
            "$@"
-  }
-else
-  __logfln() {
-    local lvl="$1"; shift; shift
-    local fmt="$3"; shift
-
+  else
     printf "%s ${lvl} : ${fmt}\n" \
            "$(__log_date)" \
            "$@"
-  }
-fi
+  fi
+}
 
 infofln() {
   __logfln " INFO" "\033[0;34m" "$@"
