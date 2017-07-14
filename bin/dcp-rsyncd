@@ -3,11 +3,15 @@
 # dcp-rsyncd - start rsyncd in a predictable manner.
 #
 
-set -e
+set -euo pipefail
 
-readonly CONFIG_DIR="${HOME}/.dcp/conf"
+readonly CONFIG_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/dcp"
 readonly CONFIG_PATH="${CONFIG_DIR}/rsyncd.conf"
 readonly LOG_PATH="${CONFIG_DIR}/rsyncd.log"
+
+RSYNC_PID=""
+
+. "${HOME}/.dcp/lib/logging.sh"
 
 print_usage() {
   cat <<EOT
@@ -21,7 +25,7 @@ EOT
 
 write_config() {
   if [[ -s "${CONFIG_PATH}" ]]; then
-    printf >&2 "Error: %s already exists.\n" "${CONFIG_PATH}"
+    errorfln "%s already exists" "${CONFIG_PATH}"
     return 1
   fi
 
@@ -29,7 +33,8 @@ write_config() {
     mkdir -p "${CONFIG_DIR}"
   fi
 
-  printf "Writing default configuration to %s\n" "${CONFIG_PATH}"
+  infofln "Writing default configuration to %s" "${CONFIG_PATH}"
+
   cat > "${CONFIG_PATH}" <<EOF
 uid = nobody
 gid = nobody
@@ -46,17 +51,17 @@ EOF
 }
 
 interrupt() {
-  if [[ -z "${rsync_pid}" ]]; then
+  if [[ -z "${RSYNC_PID}" ]]; then
     return
   fi
-  sudo kill -s INT "${rsync_pid}"
+  sudo kill -s INT "${RSYNC_PID}"
 }
 
 start_rsyncd() {
   if [[ ! -s "${CONFIG_PATH}" ]]; then
-    printf >&2 "Warning: %s does not exist.\n\n" "${CONFIG_PATH}"
+    warnfln "%s does not exist\n" "${CONFIG_PATH}"
     write_config
-    printf >&2 "\n"
+    printf "\n"
   fi
 
   trap interrupt INT
@@ -68,27 +73,29 @@ start_rsyncd() {
              --config="${CONFIG_PATH}" \
              --log-file="${LOG_PATH}" \
              &
-  rsync_pid="$!"
+
+  RSYNC_PID="$!"
 
   while [[ ! -e "${LOG_PATH}" ]]; do
     sleep 1
   done
+
   tail -f "${LOG_PATH}"
 }
 
 main() {
   while [[ "$#" -gt "0" ]]; do
     case "$1" in
-      -h | --help)
+      -h|--help)
         print_usage
         return
         ;;
-      -w | --write-config)
+      -w|--write-config)
         write_config
-        return "$?"
+        return
         ;;
       *)
-        printf >&2 "Error: unknown option %s\n\n" "$1"
+        errorfln "Unknown option %s\n" "$1"
         print_usage
         return 1
         ;;
