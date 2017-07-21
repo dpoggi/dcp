@@ -25,13 +25,13 @@ __mm_cargo_is_comp_loaded() {
 }
 
 __mm_cargo_load_comp_zsh() {
-  rustup completions zsh > "${DCP_ZSH_FUNCTIONS}/_rustup"
+  rustup completions zsh > "${XDG_ZSH_FUNCTIONS}/_rustup"
 
   local toolchain_dir="$(__mm_cargo_get_toolchain_dir)"
 
   if [[ -d "${toolchain_dir}" ]]; then
     cp "${toolchain_dir}/share/zsh/site-functions/_cargo" \
-       "${DCP_ZSH_FUNCTIONS}/_cargo"
+       "${XDG_ZSH_FUNCTIONS}/_cargo"
   fi
 
   cat >&2 <<-EOT
@@ -41,15 +41,15 @@ EOT
 }
 
 __mm_cargo_load_comp_bash() {
-  rustup completions bash > "${DCP_BASH_COMPLETION_D}/rustup.bash-completion"
-  . "${DCP_BASH_COMPLETION_D}/rustup.bash-completion"
+  rustup completions bash > "${XDG_BASH_COMPLETION_D}/rustup.bash-completion"
+  . "${XDG_BASH_COMPLETION_D}/rustup.bash-completion"
 
   local toolchain_dir="$(__mm_cargo_get_toolchain_dir)"
 
   if [[ -d "${toolchain_dir}" ]]; then
     cp "${toolchain_dir}/etc/bash_completion.d/cargo" \
-       "${DCP_BASH_COMPLETION_D}/cargo"
-    . "${DCP_BASH_COMPLETION_D}/cargo"
+       "${XDG_BASH_COMPLETION_D}/cargo"
+    . "${XDG_BASH_COMPLETION_D}/cargo"
   fi
 }
 

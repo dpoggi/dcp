@@ -31,7 +31,7 @@ __mm_nvm_is_comp_loaded() {
 __mm_nvm_load_comp() {
   if [[ -r "${NVM_DIR}/bash_completion" ]]; then
     if __is_bash; then
-      ln -snf "${NVM_DIR}/bash_completion" "${DCP_BASH_COMPLETION_D}/nvm"
+      ln -snf "${NVM_DIR}/bash_completion" "${XDG_BASH_COMPLETION_D}/nvm"
     fi
 
     . "${NVM_DIR}/bash_completion"

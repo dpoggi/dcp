@@ -11,9 +11,9 @@ __mm_on_usage() {
 Usage: mm_on [options] tool ...
 
 OPTIONS:
-  -a, --all                        Enable all tools
-  -s, --soft                       Respect disabled flags and suppress warnings
-  -h, --help                       Display this message
+  -a, --all                                              Enable all tools
+  -s, --soft                                             Respect disabled flags
+  -h, --help                                             Display this message
 
 TOOLS:
   $(__ary_join ", " "${MM_TOOLS[@]}")
@@ -38,7 +38,12 @@ mm_on() {
         return
         ;;
       *)
-        tools+=("$(__strtolower "$1")")
+        if ! __ary_includes "$1" "${MM_TOOLS[@]}"; then
+          printf >&2 "Error: invalid tool %s\n\n" "$1"
+          __mm_on_usage >&2
+          return 1
+        fi
+        tools+=("$1")
     esac
     shift
   done
@@ -96,8 +101,8 @@ __mm_off_usage() {
 Usage: mm_off [options] tool ...
 
 OPTIONS:
-  -a, --all                                  Disable all tools
-  -h, --help                                 Display this message
+  -a, --all                                                Disable all tools
+  -h, --help                                               Display this message
 
 TOOLS:
   $(__ary_join ", " "${MM_TOOLS[@]}")
@@ -118,7 +123,12 @@ mm_off() {
         return
         ;;
       *)
-        tools+=("$(__strtolower "$1")")
+        if ! __ary_includes "$1" "${MM_TOOLS[@]}"; then
+          printf >&2 "Error: invalid tool %s\n\n" "$1"
+          __mm_off_usage >&2
+          return 1
+        fi
+        tools+=("$1")
     esac
     shift
   done
@@ -133,12 +143,10 @@ mm_off() {
     return 1
   fi
 
-  local tool tool_upper
+  local tool
 
   for tool in "${tools[@]}"; do
-    tool_upper="$(__strtoupper "${tool}")"
-
-    export "MM_DISABLE_${tool_upper}"="true"
+    export "MM_DISABLE_$(__strtoupper "${tool}")"="true"
   done
 
   eval "${DCP_SHELL_INVOCATION}"

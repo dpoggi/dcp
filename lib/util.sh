@@ -37,6 +37,13 @@ __is_function() { [[ "$(__typeof "$1")" = "function" ]]; }
 __is_file() { [[ "$(__typeof "$1")" = "file" ]]; }
 
 #
+# __export_select_re: selects the names of exports matching the given regular
+# expression
+#
+
+__export_select_re() { env | sed -e 's/=.*$//' -e "/$1/!d"; }
+
+#
 # __unexport: remove the given var from the environment and unset it. If the
 # given var is readonly, do nothing.
 #
@@ -59,6 +66,21 @@ __ary_join() {
   printf "%s" "$1"
   shift
   printf "%s" "${@/#/${sep}}"
+}
+
+# __ary_includes: returns true if the first argument is included in the array
+__ary_includes() {
+  local search="$1"
+  shift
+
+  local element
+  for element in "$@"; do
+    if [[ "${element}" = "${search}" ]]; then
+      return
+    fi
+  done
+
+  return 1
 }
 
 #

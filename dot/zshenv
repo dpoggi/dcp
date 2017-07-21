@@ -10,15 +10,14 @@ if [[ -e "${DCP}/lib/env.sh" ]]; then
   . "${DCP}/lib/env.sh"
 fi
 
-# Make sure we have a spot in fpath
+# Make sure we have our two spots in fpath
+readonly XDG_ZSH_FUNCTIONS="${XDG_CONFIG_HOME:-${HOME}/.config}/zsh/functions"
 
-readonly DCP_ZSH_FUNCTIONS="${XDG_CONFIG_HOME:-${HOME}/.config}/zsh/functions"
-
-if [[ ! -e "${DCP_ZSH_FUNCTIONS}" ]]; then
-  mkdir -p "${DCP_ZSH_FUNCTIONS}"
+if [[ ! -e "${XDG_ZSH_FUNCTIONS}" ]]; then
+  mkdir -p "${XDG_ZSH_FUNCTIONS}"
 fi
 
-fpath=("${DCP_ZSH_FUNCTIONS}" "${fpath[@]}")
+fpath=("${XDG_ZSH_FUNCTIONS}" "${DCP}/share/completions/zsh" "${fpath[@]}")
 
 # Set oh-my-zsh theme
 if [[ -s "${DCP_CONFIG_DIR}/theme" ]]; then

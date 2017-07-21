@@ -31,13 +31,14 @@ if ! __bash_comp_is_loaded && __bash_comp_is_installed; then
 fi
 
 if __bash_comp_is_loaded; then
-  readonly DCP_BASH_COMPLETION_D="${XDG_CONFIG_HOME:-${HOME}/.config}/bash_completion.d"
+  readonly XDG_BASH_COMPLETION_D="${XDG_CONFIG_HOME:-${HOME}/.config}/bash_completion.d"
 
-  if [[ ! -e "${DCP_BASH_COMPLETION_D}" ]]; then
-    mkdir -p "${DCP_BASH_COMPLETION_D}"
+  if [[ ! -e "${XDG_BASH_COMPLETION_D}" ]]; then
+    mkdir -p "${XDG_BASH_COMPLETION_D}"
   fi
 
-  __bash_comp_load_dir "${DCP_BASH_COMPLETION_D}"
+  __bash_comp_load_dir "${DCP}/share/completions/bash"
+  __bash_comp_load_dir "${XDG_BASH_COMPLETION_D}"
 fi
 
 unset -f __bash_comp_is_loaded __bash_comp_is_installed __bash_comp_load_dir
