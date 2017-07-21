@@ -11,6 +11,8 @@ if [[ "${DCP_SHELL}" = "bash" ]]; then
   alias grep="grep --color=auto"
 fi
 
+. "${DCP}/lib/util.sh"
+
 ext_ip() {
   local ip_version="4"
   local content_type="text/plain"
@@ -34,7 +36,7 @@ ext_ip() {
        "--ipv${ip_version}" \
        --header "Accept: ${content_type}" \
        "https://ip.danpoggi.com" \
-       2> /dev/null
+       2>/dev/null
 
   if [[ "$?" != "0" ]]; then
     printf >&2 "Error: unable to retrieve external IP.\n"
@@ -69,16 +71,10 @@ alias gf="git fetch"
 alias gr="git rebase"
 alias gm="git merge"
 
-__git_current_branch() {
-  git branch 2> /dev/null | awk '$0 ~ /^\*/ { printf "%s", $2 }'
-}
-
-gdt() {
-  git describe --tags --abbrev=0
-}
+gdt() { git describe --tags --abbrev=0; }
 
 gn() {
-  if [[ -e ".git" ]]; then
+  if __git_is_work_tree; then
     return 1
   fi
 
@@ -88,7 +84,7 @@ gn() {
 }
 
 gfco() {
-  local current_branch="$(__git_current_branch)"
+  local current_branch="$(__git_get_current_branch)"
 
   if [[ -z "${current_branch}" ]]; then
     return 1
@@ -112,21 +108,13 @@ alias grv="git remote -v"
 alias ggr="git grep --break --heading --line-number"
 
 gcb() {
-  local current_branch="$(__git_current_branch)"
-  if [[ -z "${current_branch}" ]]; then
-    return 1
-  fi
-
   git fetch --prune
-  git branch --merged \
-    | colrm 1 2 \
-    | grep -v "^${current_branch}$" \
-    | grep -v "^master$" \
-    | xargs git branch -d
+
+  __git_get_merged_branches | xargs git branch -d
 }
 
 gitignore() {
-  if [[ "$#" -eq "0" ]]; then
+  if [[ -z "$1" ]]; then
     return 1
   fi
   curl -sJL "https://www.gitignore.io/api/$1"
@@ -192,107 +180,9 @@ twoline() {
   set_prompt
 }
 
-# Use shell functions to override binaries whilst respecting $PATH
-if [[ "${DCP_SHELL}" = "zsh" ]]; then
-  __bin_path() {
-    whence -p "$1"
-  }
-else
-  __bin_path() {
-    type -P "$1"
-  }
+if [[ "${PIP_REQUIRE_VIRTUALENV}" = "true" ]]; then
+  # virtualenv-independent pip
+  gpip() { PIP_REQUIRE_VIRTUALENV="" command pip "$@"; }
+  gpip2() { PIP_REQUIRE_VIRTUALENV="" command pip2 "$@"; }
+  gpip3() { PIP_REQUIRE_VIRTUALENV="" command pip3 "$@"; }
 fi
-
-# Gets job number from PID after &ing a process
-__job_num() {
-  local job_num="$(jobs -l \
-    | grep -F " $1 " \
-    | tail -n 1 \
-    | cut -d ' ' -f 1 \
-    | sed -e 's/[^0-9]//g')"
-
-  if [[ -z "${job_num}" ]]; then
-    return 1
-  fi
-
-  printf "%s" "${job_num}"
-}
-
-# virtualenv-independent pip
-
-gpip() {
-  PIP_REQUIRE_VIRTUALENV="" pip "$@"
-}
-
-# __unexport: Completely rid yourself of a currently exported var
-
-__unexport() {
-  declare +x "$1"
-  unset "$1"
-}
-
-# Restart shell with version managers enabled/disabled
-
-enable_managers() {
-  export DCP_PREVENT_DISABLE="true"
-  eval "${DCP_SHELL_INVOCATION}"
-}
-
-disable_managers() {
-  export DCP_DISABLE_MANAGERS="true"
-  eval "${DCP_SHELL_INVOCATION}"
-}
-
-enable_rbenv() {
-  __unexport DCP_DISABLE_RBENV
-  eval "${DCP_SHELL_INVOCATION}"
-}
-
-enable_rvm() {
-  __unexport DCP_DISABLE_RVM
-  eval "${DCP_SHELL_INVOCATION}"
-}
-
-enable_pyenv() {
-  __unexport DCP_DISABLE_PYENV
-  eval "${DCP_SHELL_INVOCATION}"
-}
-
-enable_nvm() {
-  __unexport DCP_DISABLE_NVM
-  eval "${DCP_SHELL_INVOCATION}"
-}
-
-enable_opam() {
-  __unexport DCP_DISABLE_OPAM
-  eval "${DCP_SHELL_INVOCATION}"
-}
-
-enable_rustup() {
-  __unexport DCP_DISABLE_RUSTUP
-  eval "${DCP_SHELL_INVOCATION}"
-}
-
-
-#
-# __path_select: Select elements from a PATH-like string by Perl expression
-#
-# __path_distinct: Use __path_select to simplify a PATH-like string down to its
-# earliest distinct elements. That is, remove duplicates without altering
-# behavior. Also filter out accidental literal '$PATH's, which is a thing.
-#
-
-if hash perl 2> /dev/null; then
-  __path_select() {
-    printf "%s" "$1" \
-      | perl -e "print join(\":\", grep { $2 } split(/:/, scalar <>))"
-  }
-else
-  __path_select() {
-    printf "%s" "$1"
-  }
-fi
-
-__path_distinct() {
-  __path_select "$1" '!$seen{$_}++ && $_ ne "\$PATH"'
-}

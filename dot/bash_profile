@@ -1,3 +1,5 @@
+export DCP="${HOME}/.dcp"
+
 if [[ -s "${DCP}/localprofile" ]]; then
   . "${DCP}/localprofile"
 fi

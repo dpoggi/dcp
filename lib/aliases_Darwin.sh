@@ -154,14 +154,14 @@ reset_launch_services() {
 reset_dns_cache() {
   printf >&2 "Flushing the DNS cache (enter your user password if prompted)...\n"
 
-  if hash discoveryutil 2> /dev/null; then
-    # OS X 10.9 - 10.10.3 (RIP discoveryd)
-    sudo -H discoveryutil mdnsflushcache
-    sudo -H discoveryutil udnsflushcache
-  else
+  if ! __is_file discoveryutil; then
     # Sane versions of macOS (mDNSResponder =~ government cheese)
     sudo -H dscacheutil -flushcache
     sudo -H killall -HUP mDNSResponder
+  else
+    # OS X 10.9 - 10.10.3 (RIP discoveryd)
+    sudo -H discoveryutil mdnsflushcache
+    sudo -H discoveryutil udnsflushcache
   fi
 }
 
@@ -179,9 +179,7 @@ reset_quick_look() {
 # environment variables in the Control Panel on Windows. Seen by apps like
 # IntelliJ that pick up on certain vars: JAVA_HOME, etc.
 launchd_export() {
-  local var_name="$1"
-  local var_value="$(eval "printf \"%s\" \"\${${var_name}}\"")"
-  launchctl setenv "${var_name}" "${var_value}"
+  launchctl setenv "$1" "$(__valueof "$1")"
 }
 
 # launchctl wrapper for making things feel a little more... right.

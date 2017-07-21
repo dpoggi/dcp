@@ -1,7 +1,3 @@
-__log_date() {
-  date "+%Y-%m-%d %H:%M:%S"
-}
-
 __logfln() {
   local lvl="$1"; shift
   local lvl_clr="$1"; shift
@@ -18,14 +14,8 @@ __logfln() {
   fi
 }
 
-infofln() {
-  __logfln " INFO" "\033[0;34m" "$@"
-}
+__log_date() { date "+%Y-%m-%d %H:%M:%S"; }
 
-warnfln() {
-  __logfln " WARN" "\033[0;33m" "$@"
-}
-
-errorfln() {
-  __logfln "ERROR" "\033[0;31m" "$@"
-}
+infofln() { __logfln " INFO" "\033[0;34m" "$@"; }
+warnfln() { __logfln " WARN" "\033[0;33m" "$@"; }
+errorfln() { __logfln "ERROR" "\033[0;31m" "$@"; }

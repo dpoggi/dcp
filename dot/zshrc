@@ -3,26 +3,34 @@
 #
 
 # Standard plugins
-plugins=( history jsontools zsh-syntax-highlighting )
+plugins=(history jsontools zsh-syntax-highlighting)
 
 # Emoji probably don't matter in non-256color environments
 if [[ "${TERM}" = *256color* ]]; then
-  plugins+=( emoji )
+  plugins+=(emoji)
 fi
 
 # Mac-specific plugins
 if [[ "${DCP_OS}" = "Darwin" ]]; then
-  plugins+=( brew-cask osx )
+  plugins+=(brew-cask osx)
 fi
 
 # User-specified plugins
-if [[ -s "${DCP}/conf/plugins" ]]; then
-  while read -r plugin; do
-    plugins+=( "${plugin}" )
-  done < <(cat "${DCP}/conf/plugins")
 
-  unset plugin
+__load_plugins() {
+  local plugin
+  while read -r plugin; do
+    plugins+=("${plugin}")
+  done < <(cat "$1")
+}
+
+if [[ -s "${DCP_CONFIG_DIR}/plugins" ]]; then
+  __load_plugins "${DCP_CONFIG_DIR}/plugins"
+elif [[ -s "${DCP}/conf/plugins" ]]; then
+  __load_plugins "${DCP}/conf/plugins"
 fi
+
+unset -f __load_plugins
 
 
 #
@@ -40,7 +48,7 @@ if [[ -e "${ZSH}/oh-my-zsh.sh" ]]; then
 fi
 
 # Completion aliasing for GitHub CLI
-if hash hub 2> /dev/null; then
+if __is_command hub; then
   alias git="hub"
 
   if type compdef > /dev/null; then

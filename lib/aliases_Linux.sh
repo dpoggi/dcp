@@ -3,7 +3,7 @@
 #
 
 __net_open_things() {
-  if ! hash netstat 2> /dev/null; then
+  if ! __is_command netstat; then
     printf >&2 "netstat is not installed!\n"
     return 1
   fi
