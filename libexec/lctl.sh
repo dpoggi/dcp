@@ -22,17 +22,12 @@ __is_errexit() {
 }
 
 __launchctl() {
-  # local was_errexit="$(__is_errexit)"
-
   set +e
 
   "${CMD_PREFIX[@]}" "${LAUNCHCTL_PATH}" "$@" 2>&1 | __filter_output
 
   local exit_status="$?"
-
-  # if [[ "${was_errexit}" = "true" ]]; then
   set -e
-  # fi
 
   case "${exit_status}" in
     36) return ;;
@@ -51,7 +46,7 @@ __launchctl_log() {
   esac
 
   if [[ -n "${verb}" ]]; then
-    infofln "%s %s..." "${verb}" "${SERVICE_TARGET}"
+    infofln "%s %s ..." "${verb}" "${SERVICE_TARGET}"
   fi
 }
 
@@ -78,6 +73,10 @@ launchctl() {
   esac
 }
 
+__hyphen_seq() {
+  seq -f '-' -s '' 1 "$1"
+}
+
 launchctl_status() {
   local line=""
   local reason=""
@@ -88,21 +87,21 @@ launchctl_status() {
   done < <(set +e; launchctl blame; printf "%s" "$?"; set -e)
 
   if [[ "${exit_status}" -eq "0" ]]; then
-    infofln "%s running. Reason: %s" \
-            "${SERVICE_TARGET}" \
-            "${reason}"
+    infofln "%s" "${SERVICE_TARGET}"
+    infofln "%s" "$(__hyphen_seq "${#SERVICE_TARGET}")"
+    infofln "Status: Running"
+    infofln "Reason: %s" "${reason}"
   else
-    infofln "%s not running" "${SERVICE_TARGET}"
+    infofln "%s" "${SERVICE_TARGET}"
+    infofln "%s" "$(__hyphen_seq "${#SERVICE_TARGET}")"
+    infofln "Status: Stopped"
   fi
 }
 
 __get_domain_target() {
   case "$1" in
-    gui|user)
-      printf "%s/%s" "$1" "$(id -u)"
-      ;;
-    *)
-      printf "%s" "$1"
+    gui|user) printf "%s/%s" "$1" "$(id -u)" ;;
+    *)        printf "%s" "$1"
   esac
 }
 
