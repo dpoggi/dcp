@@ -7,8 +7,9 @@
 # of the MIT license. See the LICENSE file for details.
 
 MM_TOOLS=(cargo nvm pyenv rvm rbenv)
+MM_TOOLS_STR="($(__ary_join ' | ' "${MM_TOOLS[@]}"))"
 
-readonly MM_TOOLS
+readonly MM_TOOLS MM_TOOLS_STR
 
 for tool in "${MM_TOOLS[@]}"; do
   tool_upper="$(__strtoupper "${tool}")"

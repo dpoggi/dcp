@@ -26,26 +26,26 @@ haxcode() {
 #
 
 __boop_check_pyenv() {
-  if ! printf "%s" "${PATH}" | grep -Eq 'rbenv|pyenv|nvm'; then
+  if ! __is_function mm_off; then
     return
   fi
 
-  if ! type disable_managers 2>&1 | grep -Fq ' function '; then
+  if [[ -z "$(__path_select_re "${PATH}" 'rbenv|rvm|pyenv|nvm')" ]]; then
     return
   fi
 
   cat >&2 <<-EOT
 rbenv, rvm, pyenv, and/or nvm found in PATH. This will break installing or
-upgrading Vim from Homebrew. Run disable_managers function now to restart this
+upgrading Vim from Homebrew. Run \`mm_off -a' now to restart this shell without
 EOT
 
-  printf >&2 "shell without it/them (y/n)? "
+  printf >&2 "it/them (y/n)? "
 
   read -r
 
   if [[ "${REPLY}" = y* || "${REPLY}" = Y* ]]; then
     printf >&2 "\nRestarting the shell. Please run this command again.\n"
-    disable_managers
+    mm_off -a
   fi
 }
 
@@ -182,66 +182,17 @@ launchd_export() {
   launchctl setenv "$1" "$(__valueof "$1")"
 }
 
-# launchctl wrapper for making things feel a little more... right.
-__lctl() {
-  if [[ "$#" -lt "3" || ! -s "$3" ]]; then
-    return 1
-  fi
-
-  local action="$1"
-  shift
-
-  local target_domain
-  if [[ "$1" = "user" || "$1" = "gui" ]]; then
-    target_domain="$1/$(id -u)"
-  else
-    target_domain="$1"
-  fi
-  shift
-
-  local plist="$(cd "$(dirname "$1")" && pwd -P)/$(basename "$1")"
-  shift
-
-  local service_target="${target_domain}/$(basename "${plist}" .plist)"
-
-  local -a sudo_cmd
-  if [[ "${plist}" = /Library* || "${plist}" = /System/Library* ]]; then
-    sudo_cmd=(sudo -H)
-  fi
-
-  case "${action}" in
-    start)
-      ${sudo_cmd[*]} launchctl bootstrap "${target_domain}" "${plist}"
-      ;;
-    stop)
-      ${sudo_cmd[*]} launchctl bootout "${service_target}"
-      ;;
-    restart)
-      ${sudo_cmd[*]} launchctl kickstart -k "${service_target}"
-      ;;
-    enable)
-      ${sudo_cmd[*]} launchctl enable "${service_target}"
-      ;;
-    disable)
-      ${sudo_cmd[*]} launchctl disable "${service_target}"
-      ;;
-    *)
-      return 1
-      ;;
-  esac
-}
-
 # launchctl wrapper for apsd (Apple Push Service: Messages.app, etc.)
 apsctl() {
-  __lctl "$1" system "/System/Library/LaunchDaemons/com.apple.apsd.plist"
+  "${DCP}/libexec/lctl.sh" system "$1" "/System/Library/LaunchDaemons/com.apple.apsd.plist"
 }
 
 # launchctl wrapper for CoreAudio (because sometimes there be dragons)
 coreaudioctl() {
-  __lctl "$1" system "/System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist"
+  "${DCP}/libexec/lctl.sh" system "$1" "/System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist"
 }
 
-# launchctl wrapper for gpg-agent, if installed by Homebrew
+# gpgconf wrapper for gpg-agent, if installed by Homebrew
 if [[ -h "/usr/local/opt/gnupg" ]]; then
   gpgagentctl() {
     if [[ "$1" = "stop" || "$1" = "restart" ]]; then

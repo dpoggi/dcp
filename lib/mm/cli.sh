@@ -8,15 +8,12 @@
 
 __mm_on_usage() {
   cat <<-EOT
-Usage: mm_on [options] tool ...
+Usage: mm_on [options] ${MM_TOOLS_STR} ...
 
 OPTIONS:
   -a, --all                                              Enable all tools
   -s, --soft                                             Respect disabled flags
   -h, --help                                             Display this message
-
-TOOLS:
-  $(__ary_join ", " "${MM_TOOLS[@]}")
 EOT
 }
 
@@ -36,6 +33,9 @@ mm_on() {
       -h|--help)
         __mm_on_usage
         return
+        ;;
+      --)
+        break
         ;;
       *)
         if ! __ary_includes "$1" "${MM_TOOLS[@]}"; then
@@ -76,9 +76,6 @@ mm_on() {
     fi
 
     if ! __mm_is_installed "${tool}"; then
-      if [[ "${soft}" = "false" ]]; then
-        printf >&2 "Warning: %s not installed\n" "${tool}"
-      fi
       continue
     fi
 
@@ -98,14 +95,11 @@ mm_on() {
 
 __mm_off_usage() {
   cat <<-EOT
-Usage: mm_off [options] tool ...
+Usage: mm_off [options] ${MM_TOOLS_STR} ...
 
 OPTIONS:
   -a, --all                                                Disable all tools
   -h, --help                                               Display this message
-
-TOOLS:
-  $(__ary_join ", " "${MM_TOOLS[@]}")
 EOT
 }
 
@@ -121,6 +115,9 @@ mm_off() {
       -h|--help)
         __mm_off_usage
         return
+        ;;
+      --)
+        break
         ;;
       *)
         if ! __ary_includes "$1" "${MM_TOOLS[@]}"; then

@@ -6,9 +6,10 @@
 # This software may be modified and distributed under the terms
 # of the MIT license. See the LICENSE file for details.
 
+# Cargo always reports as unloaded, so that it will be loaded, so that PATH
+# stays in the proper order. Harmless since we guarantee PATH will be deduped.
 __mm_cargo_is_loaded() {
-  __is_command cargo \
-    && [[ -n "$(__path_select_str "${PATH}" "${CARGO_HOME}/bin")" ]]
+  false
 }
 
 __mm_cargo_is_installed() {
