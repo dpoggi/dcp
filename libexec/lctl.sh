@@ -13,21 +13,23 @@ __filter_output() {
   sed -e '/36: /d'
 }
 
-__is_errexit() {
-  if [[ " $- " = *e* ]]; then
-    printf "true"
-  else
-    printf "false"
-  fi
-}
-
 __launchctl() {
+  local was_errexit=""
+
+  case " $- " in
+      *e*) was_errexit="true" ;;
+      *)   was_errexit="false"
+  esac
+
   set +e
 
   "${CMD_PREFIX[@]}" "${LAUNCHCTL_PATH}" "$@" 2>&1 | __filter_output
 
   local exit_status="$?"
-  set -e
+
+  if "${was_errexit}"; then
+    set -e
+  fi
 
   case "${exit_status}" in
     36) return ;;
@@ -35,7 +37,7 @@ __launchctl() {
   esac
 }
 
-__launchctl_log() {
+__log_launchctl_action() {
   local verb=""
 
   case "$1" in
@@ -61,7 +63,7 @@ launchctl() {
     return 1
   fi
 
-  __launchctl_log "${action}"
+  __log_launchctl_action "${action}"
 
   case "${action}" in
     blame|bootout|disable|"enable")
@@ -73,29 +75,26 @@ launchctl() {
   esac
 }
 
-__hyphen_seq() {
-  seq -f '-' -s '' 1 "$1"
-}
-
 launchctl_status() {
   local line=""
   local reason=""
   local exit_status=""
 
   while IFS='' read -r line || ! exit_status="${line}"; do
-    reason="${reason}${line}"
+    reason+="${line}"
   done < <(set +e; launchctl blame; printf "%s" "$?"; set -e)
 
-  if [[ "${exit_status}" -eq "0" ]]; then
-    infofln "%s" "${SERVICE_TARGET}"
-    infofln "%s" "$(__hyphen_seq "${#SERVICE_TARGET}")"
-    infofln "Status: Running"
-    infofln "Reason: %s" "${reason}"
-  else
-    infofln "%s" "${SERVICE_TARGET}"
-    infofln "%s" "$(__hyphen_seq "${#SERVICE_TARGET}")"
-    infofln "Status: Stopped"
-  fi
+  local service_status=""
+
+  case "${exit_status}" in
+      0) service_status="Running" ;;
+      *) service_status="Stopped"
+  esac
+
+  infofln "%s" "${SERVICE_TARGET}"
+  infofln "%s" "$(seq -f '-' -s '' 1 "${#SERVICE_TARGET}")"
+  infofln "Status: %s" "${service_status}"
+  infofln "Reason: %s" "${reason}"
 }
 
 __get_domain_target() {

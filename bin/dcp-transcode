@@ -2,18 +2,21 @@
 
 set -euo pipefail
 
-if [[ -t 1 ]]; then
-  __logfln() {
-    local lvl="$1" lvl_clr="$2" fmt="$3"; shift; shift; shift
+__logfln() {
+  local lvl="$1"; shift
+  local lvl_clr="$1"; shift
+  local fmt="$1"; shift
+
+  if [[ -t 1 ]]; then
     printf "\033[2;39;49m%s ${lvl_clr}${lvl}\033[2;39;49m : \033[0m${fmt}\n" \
-           "$(__log_date)" "$@"
-  }
-else
-  __logfln() {
-    local lvl="$1" fmt="$3"; shift; shift; shift
-    printf "%s ${lvl} : ${fmt}\n" "$(__log_date)" "$@"
-  }
-fi
+           "$(__log_date)" \
+           "$@"
+  else
+    printf "%s ${lvl} : ${fmt}\n" \
+           "$(__log_date)" \
+           "$@"
+  fi
+}
 
 __log_date() { date "+%Y-%m-%d %H:%M:%S"; }
 
