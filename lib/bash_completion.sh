@@ -1,21 +1,20 @@
-__bash_comp_is_loaded() {
-  [[ -n "${BASH_COMPLETION_COMPAT_DIR}" ]]
-}
+__bash_comp_is_loaded() { [[ -n "${BASH_COMPLETION_COMPAT_DIR}" ]]; }
 
 __bash_comp_is_installed() {
   [[ -r "/usr/local/etc/bash_completion" || -r "/etc/bash_completion" ]]
 }
 
 __bash_comp_load_dir() {
+  local pattern='(?:~$|\.bak$|\.swp$|^#.*#$|\.dpkg.*$|\.rpm(?:new|orig|save)$|^Makefile)'
   local completion
 
-  while read -d $'\x00' -r completion; do
-    if basename "${completion}" | grep -qE '(?:~$|\.bak$|\.swp$|^#.*#$|\.dpkg.*$|\.rpm(?:new|orig|save)$|^Makefile)'; then
+  while IFS='' read -d '' -r completion; do
+    if basename "${completion}" | grep -qE "${pattern}"; then
       continue
     fi
 
     . "${completion}"
-  done < <(find "$1" -mindepth 1 -maxdepth 1 ! -type d -print0)
+  done < <(find "$1" -mindepth 1 -maxdepth 1 ! -type d -print0 2>/dev/null)
 }
 
 if ! __bash_comp_is_loaded && __bash_comp_is_installed; then

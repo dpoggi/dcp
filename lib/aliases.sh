@@ -154,7 +154,7 @@ find_long_lines() {
 
       printf >&2 "${DCP_RED}%s${DCP_RESET}\n" "${line}"
     fi
-  done < <(find . -mindepth 1 -type f -name "*.$1" -print0)
+  done < <(find . -mindepth 1 -type f -name "*.$1" -print0 2>/dev/null)
 }
 
 
