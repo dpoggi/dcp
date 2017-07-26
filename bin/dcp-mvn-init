@@ -2,13 +2,16 @@
 
 set -eo pipefail
 
+readonly MAVEN_VERSION="3.5.0"
+
 usage() {
   cat >&2 <<EOT
 Usage: $(basename "$0") [options] [groupId:artifactId:version]
 
 OPTIONS:
-  --skip-wrapper                        Skip generating Maven wrapper
-  --skip-git                            Skip generating .git{attributes,ignore}
+  -h, --help                             Display this message
+  --skip-wrapper                         Skip generating Maven wrapper
+  --skip-git                             Skip generating .git{attributes,ignore}
 
 USEFUL ARCHETYPES:
   org.apache.maven.archetypes:maven-archetype-quickstart:1.1
@@ -78,7 +81,7 @@ __mvnw_check_existing() {
 generate_mvnw() {
   __mvnw_check_existing
 
-  mvn -N io.takari:maven:wrapper -Dmaven=3.5.0
+  mvn -N io.takari:maven:wrapper -Dmaven="${MAVEN_VERSION}"
 
   # Permissions on these come out all kinds of wrong
   chmod 755 ./mvnw
@@ -97,9 +100,9 @@ __git_cat() {
 }
 
 generate_git() {
-  __git_cat maven.gitattributes > .gitattributes
+  __git_cat maven.gitattributes >.gitattributes
 
-  __git_cat maven.gitignore > .gitignore
+  __git_cat maven.gitignore >.gitignore
 }
 
 main() {
@@ -112,6 +115,12 @@ main() {
       -h|--help)      usage; return       ;;
       --skip-wrapper) skip_wrapper="true" ;;
       --skip-git)     skip_git="true"     ;;
+      --)             break               ;;
+      -*)
+        printf >&2 "Unknown option %s\n" "$1"
+        usage
+        return 1
+        ;;
       *)              archetype="$1"
     esac
     shift
@@ -120,7 +129,7 @@ main() {
   assert_deps
 
   if [[ -n "${archetype}" ]]; then
-    if [[ "${archetype}" = *:*:* ]]; then
+    if printf "%s" "${archetype}" | grep -qE '^[^:]+:[^:]+:[^:]+$'; then
       generate_archetype "${archetype}"
     else
       printf >&2 "Invalid GAV %s, skipping archetype generation\n" \
