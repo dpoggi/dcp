@@ -6,94 +6,88 @@
 # Adapted from http://blog.pkh.me/p/21-high-quality-gif-with-ffmpeg.html
 #
 
-set -e
+set -eo pipefail
 
-log_info() {
-  printf "\033[0;34m[%s]:\033[0m %s\n" \
-         "$(date "+%Y-%m-%dT%H:%M:%SZ")" \
-         "$*"
+__log_date() { date "+%Y-%m-%d %H:%M:%S"; }
+
+__logfln() {
+    local lvl="$1"; shift
+    local lvl_clr="$1"; shift
+    local fmt="$1"; shift
+
+    if [[ -t 1 ]]; then
+      printf "\033[2;39;49m%s ${lvl_clr}${lvl}\033[2;39;49m : \033[0m${fmt}\n" \
+             "$(__log_date)" \
+             "$@"
+    else
+        printf "%s ${lvl} : ${fmt}\n" \
+               "$(__log_date)" \
+               "$@"
+    fi
 }
 
-log_error() {
-  printf >&2 "\033[1;37;41m[%s]:\033[0m %s\n" \
-             "$(date "+%Y-%m-%dT%H:%M:%SZ")" \
-             "$*"
-}
+infofln() { __logfln " INFO" "\033[0;34m" "$@"; }
+errorfln() { __logfln "ERROR" "\033[0;31m" "$@"; }
 
-print_usage() {
-  if [[ "$1" = "--prepend-newline" ]]; then
-    printf "\n"
-  fi
-
+usage() {
   cat <<EOT
 Usage: $(basename "$0") [options] <input file>
 
 OPTIONS:
-  -h, --help                           Display this message
-  -t <time>, --start <time>            Set start time [00:00:00.000] (hours:minutes:seconds.ms)
-  -d <time>, --duration <time>         Set duration after start [max] (hours:minutes:seconds.ms)
+  -h, --help              Display this message
+  -t, --start <time>      Set start time [00:00:00.000] (hours:minutes:seconds.ms)
+  -d, --duration <time>   Set duration after start [max] (hours:minutes:seconds.ms)
+  -a, --algorithm <algo>  Set dithering algorithm [floyd_steinberg]
+  -s, --scale <scale>     Set scale [480] (width in px)
+  -f, --framerate <fps>   Set framerate [15] (in fps)
 
-  -a <algo>, --algorithm <algo>        Set dithering algorithm [floyd_steinberg]
-  Algorithm options to try are bayer, floyd_steinberg, sierra2, sierra2_4a, or none.
-  bayer takes an argument, it can be specified as bayer:bayer_scale=n, where n is 1 to ~3.
-
-  -s <scale>, --scale <scale>          Set scale [480] (width in px)
-  -f <fps>, --framerate <fps>          Set framerate [15] (in fps)
+ALGORITHMS:
+  Algorithm options to try are bayer, floyd_steinberg, sierra2, sierra2_4a,
+  or none. bayer takes an argument, it can be specified as bayer:bayer_scale=n,
+  where n is 1 to ~3.
 EOT
 }
 
-main() {
-  if ! hash ffmpeg 2> /dev/null; then
-    log_error "Couldn't find ffmpeg. Make sure it's somewhere in PATH, then try again."
-    return 1
-  fi
+assert_deps() {
+  local dep
+  for dep in ffmpeg; do
+    if ! command -v "${dep}" >/dev/null; then
+      errorfln "%s not found" "${dep}"
+    fi
+  done
+}
 
+main() {
   local fps="15"
   local scale="480"
   local start_time="00:00:00.000"
   local algorithm="floyd_steinberg"
   local input_file
-  while [[ "$#" -gt "0" ]]; do
+
+  while (( $# > 0 )); do
     case "$1" in
-      -h | --help)
-        print_usage
-        return
-        ;;
-      -t | --start)
-        start_time="$2"
-        shift
-        ;;
-      -d | --duration)
-        duration="$2"
-        shift
-        ;;
-      -a | --algorithm)
-        algorithm="$2"
-        shift
-        ;;
-      -s | --scale)
-        scale="$2"
-        shift
-        ;;
-      -f | --framerate)
-        fps="$2"
-        shift
-        ;;
+      -h|--help)      usage; return           ;;
+      -t|--start)     start_time="$2"; shift  ;;
+      -d|--duration)  duration="$2"; shift    ;;
+      -a|--algorithm) algorithm="$2"; shift   ;;
+      -s|--scale)     scale="$2"; shift       ;;
+      -f|--framerate) fps="$2"; shift         ;;
       -*)
-        log_error "Unknown option: $1"
-        print_usage --prepend-newline >&2
+        errorfln "Unknown option %s\n" "$1"
+        usage >&2
         return 1
         ;;
-      *)
-        input_file="$1"
-        ;;
+      --)             break                   ;;
+      *)              input_file="$1"
     esac
     shift
   done
 
+  assert_deps
+
   if [[ ! -e "${input_file}" ]]; then
-    log_error "No input file."
-    print_usage --prepend-newline >&2
+    errorfln "No input file\n"
+    usage >&2
     return 1
   fi
 
@@ -103,18 +97,21 @@ main() {
   local palette_opts="paletteuse=dither=${algorithm}"
   local filters="fps=${fps},scale=${scale}:-1:flags=lanczos"
   local time_opts="-ss ${start_time}"
+
   if [[ -n "${duration}" ]]; then
     time_opts="${time_opts} -t ${duration}"
   fi
 
-  log_info "Generating palette..."
+  infofln "Generating palette..."
+
   ffmpeg -v warning \
          ${time_opts} \
          -i "${input_file}" \
          -vf "${filters},palettegen" \
          -y "${palette}"
 
-  log_info "Makin' the GIF..."
+  infofln "Makin' the GIF..."
+
   ffmpeg -v warning \
          ${time_opts} \
          -i "${input_file}" \
@@ -122,8 +119,11 @@ main() {
          -lavfi "${filters} [x]; [x][1:v] ${palette_opts}" \
          -y "${output_gif}"
 
+  infofln "Cleanin' up that palette..."
+
   rm -f "${palette}"
-  log_info "Done."
+
+  infofln "Done."
 }
 
 main "$@"

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
+
+__log_date() { date "+%Y-%m-%d %H:%M:%S"; }
 
 __logfln() {
   local lvl="$1"; shift
@@ -18,13 +20,11 @@ __logfln() {
   fi
 }
 
-__log_date() { date "+%Y-%m-%d %H:%M:%S"; }
-
 infofln() { __logfln " INFO" "\033[0;34m" "$@"; }
 errorfln() { __logfln "ERROR" "\033[0;31m" "$@"; }
 
 usage() {
-  printf "Usage: %s [--ios] input1.mkv [input2.mkv]...\n" "$0"
+  printf "Usage: %s [--ios] input1.mkv [input2.mkv]...\n" "$(basename "$0")"
 }
 
 assert_deps() {
@@ -34,9 +34,8 @@ assert_deps() {
   fi
 
   local dep
-
   for dep in ffmpeg afconvert; do
-    if ! hash "${dep}" 2> /dev/null; then
+    if ! command -v "${dep}" >/dev/null; then
       errorfln "%s not found" "${dep}"
       return 1
     fi
@@ -102,17 +101,17 @@ main() {
   local -a input_files
   local audio_bitrate="256000"
 
-  while [[ "$#" -gt "0" ]]; do
+  while (( $# > 0 )); do
     case "$1" in
-      --ios)
-        audio_bitrate="160000"
+      --ios)  audio_bitrate="160000"  ;;
+      --help) usage; return           ;;
+      --)     break                   ;;
+      -*)
+        errorfln "Unknown option %s\n" "$1"
+        usage >&2
+        return 1
         ;;
-      --help)
-        usage
-        return
-        ;;
-      *)
-        input_files+=( "$1" )
+      *)      input_files+=( "$1" )
     esac
     shift
   done
