@@ -1,3 +1,5 @@
+DCP_SHELL_INVOCATION=(exec)
+
 if [[ -n "${ZSH_NAME}" ]]; then
   readonly DCP_SHELL="zsh"
 
@@ -5,9 +7,9 @@ if [[ -n "${ZSH_NAME}" ]]; then
   __is_zsh() { true; }
 
   if [[ "$-" = *l* ]]; then
-    readonly DCP_SHELL_INVOCATION="exec -l zsh -l"
+    DCP_SHELL_INVOCATION+=(-l zsh -l)
   else
-    readonly DCP_SHELL_INVOCATION="exec zsh"
+    DCP_SHELL_INVOCATION+=(zsh)
   fi
 else
   readonly DCP_SHELL="bash"
@@ -15,9 +17,15 @@ else
   __is_bash() { true; }
   __is_zsh() { false; }
 
-  if shopt -q login_shell 2> /dev/null; then
-    readonly DCP_SHELL_INVOCATION="exec -l bash -l"
-  else
-    readonly DCP_SHELL_INVOCATION="exec bash"
+  if [[ "$0" = -* ]]; then
+    DCP_SHELL_INVOCATION+=(-l)
+  fi
+
+  DCP_SHELL_INVOCATION+=(bash)
+
+  if shopt -q login_shell 2>/dev/null; then
+    DCP_SHELL_INVOCATION+=(-l)
   fi
 fi
+
+readonly DCP_SHELL_INVOCATION

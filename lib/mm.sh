@@ -20,13 +20,14 @@ for tool in "${MM_TOOLS[@]}"; do
     while IFS=$'\n' read -r name; do
       __unexport "${name}"
     done < <(__export_select_re "^${tool_upper}")
+    unset name
 
     export PATH="$(__path_reject_re "${PATH}" "${tool}")"
   fi
 
   . "${DCP}/lib/mm/${tool}.sh"
 done
-unset tool tool_upper name
+unset tool tool_upper
 
 . "${DCP}/lib/mm/meta.sh"
 

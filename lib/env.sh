@@ -26,16 +26,14 @@ readonly DCP_RESET="\033[0;39;49m"
 
 # Guard for macOS because I know nothing about Linuxbrew, and this PATH order
 # would be inappropriate for most distros.
-if [[ "${DCP_OS}" = "Darwin" ]] && hash brew 2> /dev/null; then
+if [[ "${DCP_OS}" = "Darwin" ]] && hash brew 2>/dev/null; then
   export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin:${PATH}"
 fi
 
 # Detect shell + invocation (approximately close enough)
-
 . "${DCP}/lib/detect_shell.sh"
 
 # Local environment
-
 if [[ -s "${DCP}/localenv" ]]; then
   . "${DCP}/localenv"
 fi
@@ -49,7 +47,6 @@ if [[ ! -e "${DCP_CONFIG_DIR}" ]]; then
 fi
 
 # Add GOPATH bin directories to PATH, if present
-
 if [[ -n "${GOPATH}" ]]; then
   export PATH="${PATH}:$(printf "%s" "${GOPATH}" | sed -e 's#:#/bin:#g' -e 's#$#/bin#')"
 fi

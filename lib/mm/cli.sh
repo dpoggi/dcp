@@ -7,7 +7,7 @@
 # of the MIT license. See the LICENSE file for details.
 
 __mm_on_usage() {
-  cat <<-EOT
+  cat <<EOT
 Usage: mm_on [options] ${MM_TOOLS_STR} ...
 
 OPTIONS:
@@ -22,21 +22,12 @@ mm_on() {
   local all="false"
   local soft="false"
 
-  while [[ "$#" -gt "0" ]]; do
+  while (( $# > 0 )); do
     case "$1" in
-      -a|--all)
-        all="true"
-        ;;
-      -s|--soft)
-        soft="true"
-        ;;
-      -h|--help)
-        __mm_on_usage
-        return
-        ;;
-      --)
-        break
-        ;;
+      -a|--all)   all="true"            ;;
+      -s|--soft)  soft="true"           ;;
+      -h|--help)  __mm_on_usage; return ;;
+      --)         break                 ;;
       *)
         if ! __ary_includes "$1" "${MM_TOOLS[@]}"; then
           printf >&2 "Error: invalid tool %s\n\n" "$1"
@@ -94,7 +85,7 @@ mm_on() {
 }
 
 __mm_off_usage() {
-  cat <<-EOT
+  cat <<EOT
 Usage: mm_off [options] ${MM_TOOLS_STR} ...
 
 OPTIONS:
@@ -107,18 +98,11 @@ mm_off() {
   local -a tools
   local all="false"
 
-  while [[ "$#" -gt "0" ]]; do
+  while (( $# > 0 )); do
     case "$1" in
-      -a|--all)
-        all="true"
-        ;;
-      -h|--help)
-        __mm_off_usage
-        return
-        ;;
-      --)
-        break
-        ;;
+      -a|--all)   all="true"              ;;
+      -h|--help)  __mm_off_usage; return  ;;
+      --)         break                   ;;
       *)
         if ! __ary_includes "$1" "${MM_TOOLS[@]}"; then
           printf >&2 "Error: invalid tool %s\n\n" "$1"
@@ -146,5 +130,5 @@ mm_off() {
     export "MM_DISABLE_$(__strtoupper "${tool}")"="true"
   done
 
-  eval "${DCP_SHELL_INVOCATION}"
+  eval "${DCP_SHELL_INVOCATION[*]}"
 }

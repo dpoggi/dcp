@@ -24,7 +24,7 @@ __mm_cargo_is_comp_loaded() {
 }
 
 __mm_cargo_load_comp_zsh() {
-  rustup completions zsh > "${USER_ZSH_FUNCTIONS}/_rustup"
+  rustup completions zsh >"${USER_ZSH_FUNCTIONS}/_rustup"
 
   local toolchain_dir="$(__mm_cargo_get_toolchain_dir)"
 
@@ -33,14 +33,14 @@ __mm_cargo_load_comp_zsh() {
        "${USER_ZSH_FUNCTIONS}/_cargo"
   fi
 
-  cat >&2 <<-EOT
+  cat >&2 <<EOT
 Completions for cargo and rustup have been installed. To activate, restart the
-current shell: \`${DCP_SHELL_INVOCATION}'
+current shell: \`${DCP_SHELL_INVOCATION[*]}'
 EOT
 }
 
 __mm_cargo_load_comp_bash() {
-  rustup completions bash > "${USER_BASH_COMPLETION_D}/rustup.bash-completion"
+  rustup completions bash >"${USER_BASH_COMPLETION_D}/rustup.bash-completion"
   . "${USER_BASH_COMPLETION_D}/rustup.bash-completion"
 
   local toolchain_dir="$(__mm_cargo_get_toolchain_dir)"

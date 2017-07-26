@@ -15,7 +15,7 @@ readonly DARWIN_MAJOR_VERSION="$(uname -r | sed -e 's/\..*//')"
 defaults write com.apple.menuextra.battery ShowPercent -string "YES"
 
 # Display ASCII control characters using caret notation in standard text views
-# Try e.g. `cd /tmp; unidecode "\x{0000}" > cc.txt; open -e cc.txt`
+# Try e.g. `cd /tmp; unidecode "\x{0000}" >cc.txt; open -e cc.txt`
 defaults write NSGlobalDomain NSTextShowsControlCharacters -bool true
 
 # Disable Resume system-wide
@@ -79,6 +79,6 @@ defaults write com.apple.dock showhidden -bool true
 ###############################################################################
 
 for process in Finder Dock SystemUIServer; do
-  killall "${process}" > /dev/null 2>&1
+  killall "${process}" >/dev/null 2>&1
 done
 echo "Done. Note that some of these changes require a logout/restart to take effect."

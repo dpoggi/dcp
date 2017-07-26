@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
 
-readonly CURRENT_BRANCH="$(git branch 2> /dev/null | sed -e '/^[^\*]/d' -e 's/\* \(.*\)/\1/')"
+readonly CURRENT_BRANCH="$(git branch 2>/dev/null | sed -e '/^[^\*]/d' -e 's/\* \(.*\)/\1/')"
 
 if [[ -z "${CURRENT_BRANCH}" ]]; then
   exit

@@ -17,17 +17,11 @@ ext_ip() {
   local ip_version="4"
   local content_type="text/plain"
 
-  while [[ "$#" -gt "0" ]]; do
+  while (( $# > 0 )); do
     case "$1" in
-      --html)
-        content_type="text/html"
-        ;;
-      --json)
-        content_type="application/json"
-        ;;
-      6)
-        ip_version="6"
-        ;;
+      --html) content_type="text/html"        ;;
+      --json) content_type="application/json" ;;
+      6)      ip_version="6"
     esac
     shift
   done
