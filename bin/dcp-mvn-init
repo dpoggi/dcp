@@ -3,21 +3,27 @@
 set -eo pipefail
 
 readonly MAVEN_VERSION="3.5.0"
+readonly PRESET_ARCHETYPES=( \
+  "org.apache.maven.archetypes:maven-archetype-quickstart:1.1" \
+  "org.apache.maven.archetypes:maven-archetype-webapp:1.0" \
+  "com.airhacks:javaee7-essentials-archetype:1.3" \
+)
 
 usage() {
   cat >&2 <<EOT
-Usage: $(basename "$0") [options] [groupId:artifactId:version]
+Usage: $(basename "$0") [options] [(preset # | groupId:artifactId:version)]
 
 OPTIONS:
   -h, --help                             Display this message
   --skip-wrapper                         Skip generating Maven wrapper
   --skip-git                             Skip generating .git{attributes,ignore}
 
-USEFUL ARCHETYPES:
-  org.apache.maven.archetypes:maven-archetype-quickstart:1.1
-  org.apache.maven.archetypes:maven-archetype-webapp:1.0
-  com.airhacks:javaee7-essentials-archetype:1.3
+PRESET ARCHETYPES:
 EOT
+  local idx
+  for idx in "${!PRESET_ARCHETYPES[@]}"; do
+    printf >&2 "  %s) %s\n" "$(( ${idx} + 1 ))" "${PRESET_ARCHETYPES[${idx}]}"
+  done
 }
 
 assert_deps() {
@@ -43,6 +49,16 @@ __archetype_move_generated() {
   while IFS='' read -d '' -r item; do
     mv "${item}" ./
   done < <(find "$1" -mindepth 1 -maxdepth 1 -print0 2>/dev/null)
+}
+
+__archetype_num_is_valid() { [[ "$1" -gt 0 && "$1" -le "${#PRESET_ARCHETYPES[@]}" ]]; }
+
+resolve_archetype() {
+  if [[ "$1" =~ ^[^:]+:[^:]+:[^:]+$ ]]; then
+    printf "%s" "$1"
+  elif [[ "$1" =~ ^[[:digit:]]+$ ]] && __archetype_num_is_valid "$1"; then
+    printf "%s" "${PRESET_ARCHETYPES[$(( $1 - 1 ))]}"
+  fi
 }
 
 generate_archetype() {
@@ -128,10 +144,12 @@ main() {
   assert_deps
 
   if [[ -n "${archetype}" ]]; then
-    if printf "%s" "${archetype}" | grep -qE '^[^:]+:[^:]+:[^:]+$'; then
-      generate_archetype "${archetype}"
+    local gav="$(resolve_archetype "${archetype}")"
+
+    if [[ -n "${gav}" ]]; then
+      generate_archetype "${gav}"
     else
-      printf >&2 "Invalid GAV %s, skipping archetype generation\n" \
+      printf >&2 "Invalid archetype %s, skipping generation\n" \
                  "${archetype}"
     fi
   fi
