@@ -77,7 +77,6 @@ main() {
         usage >&2
         return 1
         ;;
-      --)             break                   ;;
       *)              input_file="$1"
     esac
     shift

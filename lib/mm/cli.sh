@@ -27,10 +27,14 @@ mm_on() {
       -a|--all)   all="true"            ;;
       -s|--soft)  soft="true"           ;;
       -h|--help)  __mm_on_usage; return ;;
-      --)         break                 ;;
+      -*)
+        printf >&2 "Unknown option %s\n\n" "$1"
+        __mm_on_usage >&2
+        return 1
+        ;;
       *)
         if ! __ary_includes "$1" "${MM_TOOLS[@]}"; then
-          printf >&2 "Error: invalid tool %s\n\n" "$1"
+          printf >&2 "Invalid tool %s\n\n" "$1"
           __mm_on_usage >&2
           return 1
         fi
@@ -102,10 +106,14 @@ mm_off() {
     case "$1" in
       -a|--all)   all="true"              ;;
       -h|--help)  __mm_off_usage; return  ;;
-      --)         break                   ;;
+      -*)
+        printf >&2 "Unknown option %s\n\n" "$1"
+        __mm_off_usage >&2
+        return 1
+        ;;
       *)
         if ! __ary_includes "$1" "${MM_TOOLS[@]}"; then
-          printf >&2 "Error: invalid tool %s\n\n" "$1"
+          printf >&2 "Invalid tool %s\n\n" "$1"
           __mm_off_usage >&2
           return 1
         fi

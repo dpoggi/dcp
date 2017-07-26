@@ -105,7 +105,6 @@ main() {
     case "$1" in
       --ios)  audio_bitrate="160000"  ;;
       --help) usage; return           ;;
-      --)     break                   ;;
       -*)
         errorfln "Unknown option %s\n" "$1"
         usage >&2

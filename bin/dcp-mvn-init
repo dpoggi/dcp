@@ -115,9 +115,8 @@ main() {
       -h|--help)      usage; return       ;;
       --skip-wrapper) skip_wrapper="true" ;;
       --skip-git)     skip_git="true"     ;;
-      --)             break               ;;
       -*)
-        printf >&2 "Unknown option %s\n" "$1"
+        printf >&2 "Unknown option %s\n\n" "$1"
         usage
         return 1
         ;;
