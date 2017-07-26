@@ -6,22 +6,20 @@ export DISABLE_AUTO_UPDATE="true"
 export PROMPT_EOL_MARK=""
 
 # Set up environment
-if [[ -e "${DCP}/lib/env.sh" ]]; then
-  . "${DCP}/lib/env.sh"
-fi
+. "${DCP}/lib/env.sh"
 
 # Make sure we have our two spots in fpath
-readonly XDG_ZSH_FUNCTIONS="${XDG_CONFIG_HOME:-${HOME}/.config}/zsh/functions"
+readonly USER_ZSH_FUNCTIONS="${XDG_DATA_HOME:-${HOME}/.local/share}/zsh/site-functions"
 
-if [[ ! -e "${XDG_ZSH_FUNCTIONS}" ]]; then
-  mkdir -p "${XDG_ZSH_FUNCTIONS}"
+if [[ ! -e "${USER_ZSH_FUNCTIONS}" ]]; then
+  mkdir -p "${USER_ZSH_FUNCTIONS}"
 fi
 
-fpath=("${XDG_ZSH_FUNCTIONS}" "${DCP}/share/completions/zsh" "${fpath[@]}")
+fpath=("${USER_ZSH_FUNCTIONS}" "${DCP}/share/zsh/site-functions" "${fpath[@]}")
 
 # Set oh-my-zsh theme
-if [[ -s "${DCP_CONFIG_DIR}/theme" ]]; then
-  export ZSH_THEME="$(cat "${DCP_CONFIG_DIR}/theme")"
+if [[ -s "${DCP_CONFIG_DIR}/zsh-theme" ]]; then
+  export ZSH_THEME="$(cat "${DCP_CONFIG_DIR}/zsh-theme")"
 else
   export ZSH_THEME="dpoggi"
 fi

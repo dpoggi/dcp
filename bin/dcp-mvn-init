@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+usage() {
+  cat >&2 <<EOT
+Usage: $(basename "$0") [options] [groupId:artifactId:version]
+
+OPTIONS:
+  --skip-wrapper                        Skip generating Maven wrapper
+  --skip-git                            Skip generating .git{attributes,ignore}
+
+USEFUL ARCHETYPES:
+  org.apache.maven.archetypes:maven-archetype-quickstart:1.1
+  org.apache.maven.archetypes:maven-archetype-webapp:1.0
+  com.airhacks:javaee7-essentials-archetype:1.3
+EOT
+}
+
+assert_deps() {
+  local dep
+  for dep in mvn perl curl; do
+    if ! hash "${dep}" 2>/dev/null; then
+      printf >&2 "%s not found\n" "${dep}"
+      return 1
+    fi
+  done
+}
+
+__archetype_find_generated() {
+  local pomfile
+  while IFS='' read -d '' -r pomfile; do
+    printf "%s" "$(dirname "${pomfile}")"
+    return
+  done < <(find . -mindepth 2 -maxdepth 2 -type f -name pom.xml -print0 2>/dev/null)
+}
+
+__archetype_move_generated() {
+  local item
+  while IFS='' read -d '' -r item; do
+    mv "${item}" ./
+  done < <(find "$1" -mindepth 1 -maxdepth 1 -print0 2>/dev/null)
+}
+
+generate_archetype() {
+  local group_id artifact_id version
+  IFS=':' read -r group_id artifact_id version <<< "$1"
+
+  mvn archetype:generate -DarchetypeGroupId="${group_id}" \
+                         -DarchetypeArtifactId="${artifact_id}" \
+                         -DarchetypeVersion="${version}"
+
+  local generated="$(__archetype_find_generated)"
+
+  if [[ ! -d "${generated}" ]]; then
+    printf >&2 "Unable to find generated project"
+    return 1
+  fi
+
+  __archetype_move_generated "${generated}"
+
+  rmdir "${generated}"
+}
+
+__mvnw_check_existing() {
+  if [[ ! -d "./.mvn/wrapper" && ! -e "./mvnw" ]]; then
+    return
+  fi
+
+  printf >&2 "Existing Maven wrapper detected. Remove first (y/n)? "
+  read -r
+
+  if [[ "${REPLY}" = y* || "${REPLY}" = Y* ]]; then
+    rm -rf mvnw mvnw.cmd .mvn
+  fi
+}
+
+generate_mvnw() {
+  __mvnw_check_existing
+
+  mvn -N io.takari:maven:wrapper -Dmaven=3.5.0
+
+  # Permissions on these come out all kinds of wrong
+  chmod 755 ./mvnw
+  chmod 644 ./mvnw.cmd ./.mvn/wrapper/maven-wrapper.{jar,properties}
+
+  # Zap annoying extra echo in Unix wrapper script
+  perl -pi -e 's/^\s*echo \$MAVEN_PROJECTBASEDIR$//' ./mvnw
+}
+
+__git_cat() {
+  if [[ -d "${HOME}/.dcp/share/git" ]]; then
+    cat "${HOME}/.dcp/share/git/$1"
+  else
+    curl -fsSL "https://raw.githubusercontent.com/dpoggi/dcp/master/share/git/$1"
+  fi
+}
+
+generate_git() {
+  __git_cat maven.gitattributes > .gitattributes
+
+  __git_cat maven.gitignore > .gitignore
+}
+
+main() {
+  local skip_wrapper="false"
+  local skip_git="false"
+  local archetype
+
+  while (( $# > 0 )); do
+    case "$1" in
+      -h|--help)      usage; return       ;;
+      --skip-wrapper) skip_wrapper="true" ;;
+      --skip-git)     skip_git="true"     ;;
+      *)              archetype="$1"
+    esac
+    shift
+  done
+
+  assert_deps
+
+  if [[ -n "${archetype}" ]]; then
+    if [[ "${archetype}" = *:*:* ]]; then
+      generate_archetype "${archetype}"
+    else
+      printf >&2 "Invalid GAV %s, skipping archetype generation\n" \
+                 "${archetype}"
+    fi
+  fi
+
+  if ! "${skip_wrapper}"; then
+    generate_mvnw
+  fi
+
+  if ! "${skip_git}"; then
+    generate_git
+  fi
+}
+
+main "$@"

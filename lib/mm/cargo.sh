@@ -8,9 +8,7 @@
 
 # Cargo always reports as unloaded, so that it will be loaded, so that PATH
 # stays in the proper order. Harmless since we guarantee PATH will be deduped.
-__mm_cargo_is_loaded() {
-  false
-}
+__mm_cargo_is_loaded() { false; }
 
 __mm_cargo_is_installed() {
   [[ -x "$(__mm_cargo_get_home)/bin/cargo" ]] || __is_command cargo
@@ -26,13 +24,13 @@ __mm_cargo_is_comp_loaded() {
 }
 
 __mm_cargo_load_comp_zsh() {
-  rustup completions zsh > "${XDG_ZSH_FUNCTIONS}/_rustup"
+  rustup completions zsh > "${USER_ZSH_FUNCTIONS}/_rustup"
 
   local toolchain_dir="$(__mm_cargo_get_toolchain_dir)"
 
   if [[ -d "${toolchain_dir}" ]]; then
     cp "${toolchain_dir}/share/zsh/site-functions/_cargo" \
-       "${XDG_ZSH_FUNCTIONS}/_cargo"
+       "${USER_ZSH_FUNCTIONS}/_cargo"
   fi
 
   cat >&2 <<-EOT
@@ -42,15 +40,15 @@ EOT
 }
 
 __mm_cargo_load_comp_bash() {
-  rustup completions bash > "${XDG_BASH_COMPLETION_D}/rustup.bash-completion"
-  . "${XDG_BASH_COMPLETION_D}/rustup.bash-completion"
+  rustup completions bash > "${USER_BASH_COMPLETION_D}/rustup.bash-completion"
+  . "${USER_BASH_COMPLETION_D}/rustup.bash-completion"
 
   local toolchain_dir="$(__mm_cargo_get_toolchain_dir)"
 
   if [[ -d "${toolchain_dir}" ]]; then
     cp "${toolchain_dir}/etc/bash_completion.d/cargo" \
-       "${XDG_BASH_COMPLETION_D}/cargo"
-    . "${XDG_BASH_COMPLETION_D}/cargo"
+       "${USER_BASH_COMPLETION_D}/cargo"
+    . "${USER_BASH_COMPLETION_D}/cargo"
   fi
 }
 

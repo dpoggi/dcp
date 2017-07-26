@@ -16,5 +16,10 @@ if [[ -r "${BASE16_SHELL}" && -z "${INSIDE_EMACS}" ]]; then
   . "${BASE16_SHELL}"
 fi
 
+# Local post-init tasks
+if [[ -s "${DCP}/localpostrc" ]]; then
+  . "${DCP}/localpostrc"
+fi
+
 # PATH deduplication
 export PATH="$(__path_distinct "${PATH}")"

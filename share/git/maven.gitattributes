@@ -1,6 +1,7 @@
 * text=auto
+*.icns binary
+*.ico binary
 *.jar binary
-gradlew text eol=lf
-gradlew.bat text eol=crlf
+*.png binary
 mvnw text eol=lf
 mvnw.cmd text eol=crlf

@@ -6,7 +6,7 @@
 plugins=(history jsontools zsh-syntax-highlighting)
 
 # Emoji probably don't matter in non-256color environments
-if [[ "${TERM}" = *256color* ]]; then
+if [[ " ${TERM} " = *256color* ]]; then
   plugins+=(emoji)
 fi
 
@@ -17,37 +17,30 @@ fi
 
 # User-specified plugins
 
-__load_plugins() {
-  local plugin
-  while read -r plugin; do
-    plugins+=("${plugin}")
-  done < <(cat "$1")
-}
+if [[ -s "${DCP}/conf/plugins" ]]; then
+  printf >&2 "DCP: The 'conf' directory is deprecated and will be removed soon.\n"
+  printf >&2 "Moving %s => %s\n" \
+             "${DCP}/conf/plugins" \
+             "${DCP_CONFIG_DIR}/plugins.lst"
 
-if [[ -s "${DCP_CONFIG_DIR}/plugins" ]]; then
-  __load_plugins "${DCP_CONFIG_DIR}/plugins"
-elif [[ -s "${DCP}/conf/plugins" ]]; then
-  __load_plugins "${DCP}/conf/plugins"
+  mv "${DCP}/conf/plugins" "${DCP_CONFIG_DIR}/plugins.lst"
 fi
 
-unset -f __load_plugins
-
-
-#
-# Load all the things!
-#
+if [[ -s "${DCP_CONFIG_DIR}/plugins.lst" ]]; then
+  while IFS='' read -r plugin; do
+    plugins+=("${plugin}")
+  done < <(cat "${DCP_CONFIG_DIR}/plugins.lst")
+  unset plugin
+fi
 
 # Load most of dcp
-if [[ -e "${DCP}/lib/init.sh" ]]; then
-  . "${DCP}/lib/init.sh"
-fi
+. "${DCP}/lib/init.sh"
 
 # Load oh-my-zsh
-if [[ -e "${ZSH}/oh-my-zsh.sh" ]]; then
-  . "${ZSH}/oh-my-zsh.sh"
-fi
+. "${ZSH}/oh-my-zsh.sh"
 
 # Completion aliasing for GitHub CLI
+
 if __is_command hub; then
   alias git="hub"
 
@@ -56,10 +49,8 @@ if __is_command hub; then
   fi
 fi
 
-# Finish up the details
-if [[ -e "${DCP}/lib/post_init.sh" ]]; then
-  . "${DCP}/lib/post_init.sh"
-fi
-
 # Enable fallback behavior when glob matching fails
 unsetopt nomatch
+
+# Finish up the details
+. "${DCP}/lib/post_init.sh"
