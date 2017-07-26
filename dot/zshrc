@@ -1,5 +1,5 @@
 #
-# Add oh-my-zsh plugins
+# oh-my-zsh plugins
 #
 
 # Standard plugins
@@ -29,7 +29,7 @@ fi
 if [[ -s "${DCP_CONFIG_DIR}/plugins.lst" ]]; then
   while IFS='' read -r plugin; do
     plugins+=("${plugin}")
-  done < <(cat "${DCP_CONFIG_DIR}/plugins.lst")
+  done < <(cat "${DCP_CONFIG_DIR}/plugins.lst" 2>/dev/null)
   unset plugin
 fi
 
@@ -40,11 +40,10 @@ fi
 . "${ZSH}/oh-my-zsh.sh"
 
 # Completion aliasing for GitHub CLI
-
 if __is_command hub; then
   alias git="hub"
 
-  if type compdef > /dev/null; then
+  if __is_function compdef; then
      compdef hub=git
   fi
 fi

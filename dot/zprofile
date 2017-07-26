@@ -1,7 +1,3 @@
-if ! printf "%s" "${PATH}" | grep -Fq 'dcp'; then
-  export PATH="${PATH}:${DCP}/bin"
-fi
-
 if [[ -s "${DCP}/localprofile" ]]; then
   . "${DCP}/localprofile"
 fi

@@ -1,7 +1,9 @@
 # Common environment
 
+# Append ~/.dcp/bin directory to PATH
 export PATH="${PATH}:${DCP}/bin"
 
+# Memoize `uname -s`
 readonly DCP_OS="$(uname -s)"
 
 export EDITOR="vim"

@@ -1,4 +1,4 @@
-export DCP="${HOME}/.dcp"
+DCP="${HOME}/.dcp"
 
 if [[ -s "${DCP}/localprofile" ]]; then
   . "${DCP}/localprofile"

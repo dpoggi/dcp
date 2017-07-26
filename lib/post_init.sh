@@ -1,4 +1,4 @@
-# Add ~/.local/bin directory to PATH if it exists
+# Prepend ~/.local/bin directory to PATH if it exists
 if [[ -d "${HOME}/.local/bin" ]]; then
   export PATH="${HOME}/.local/bin:${PATH}"
 fi
