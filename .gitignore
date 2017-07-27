@@ -16,4 +16,3 @@ localexit
 # kwm config is wide open besides the two provided files
 /dot/kwm/*
 !/dot/kwm/kwmrc
-!/dot/kwm/binds
