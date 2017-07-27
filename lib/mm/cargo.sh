@@ -35,7 +35,7 @@ __mm_cargo_load_comp_zsh() {
 
   cat >&2 <<EOT
 Completions for cargo and rustup have been installed. To activate, restart the
-current shell: \`${DCP_SHELL_INVOCATION[*]}'
+current shell: \`${DCP_SHELL_EXEC_CMD[*]}'
 EOT
 }
 

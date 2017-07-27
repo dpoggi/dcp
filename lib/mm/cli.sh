@@ -138,5 +138,5 @@ mm_off() {
     export "MM_DISABLE_$(__strtoupper "${tool}")"="true"
   done
 
-  eval "${DCP_SHELL_INVOCATION[*]}"
+  eval "${DCP_SHELL_EXEC_CMD[*]}"
 }
