@@ -75,6 +75,7 @@ kwmc rule owner="qemu-system-i386" properties={float="true"}
 kwmc rule owner="qemu-system-x86_64" properties={float="true"}
 kwmc rule owner="QuickTime Player" properties={float="true"}
 kwmc rule owner="Screenhero" properties={float="true"}
+kwmc rule owner="Screen Sharing" properties={float="true"}
 kwmc rule owner="Script Editor" name="Library" properties={float="true"}
 kwmc rule owner="Script Editor" name="sdef" properties={float="true"}
 kwmc rule owner="Simulator" properties={float="true"}
