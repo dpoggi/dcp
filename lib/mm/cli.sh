@@ -66,15 +66,16 @@ mm_on() {
       continue
     fi
 
-    if __mm_is_loaded "${tool}"; then
+    if "__mm_${tool}_is_loaded"; then
       continue
     fi
 
-    if ! __mm_is_installed "${tool}"; then
+    if ! "__mm_${tool}_is_installed"; then
       continue
     fi
 
-    __mm_load "${tool}"
+    "__mm_${tool}_load"
+
     if [[ "$?" -ne "0" ]]; then
       printf >&2 "Error: unable to load %s" "${tool}"
       continue
