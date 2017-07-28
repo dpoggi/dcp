@@ -143,8 +143,7 @@ __git_check_overwrite_existing() {
   read -r
 
   if [[ "${REPLY}" =~ ^[Yy] ]]; then
-    # Its contents would be overwritten anyway, but
-    # remove it in case it's a link
+    # It would be overwritten anyway, but remove it in case it's a link
     rm -f "$1"
   else
     return 1
@@ -164,7 +163,6 @@ generate_git() {
   if __git_check_overwrite_existing .gitattributes; then
     __git_cat maven.gitattributes >.gitattributes
   fi
-
   if __git_check_overwrite_existing .gitignore; then
     __git_cat maven.gitignore >.gitignore
   fi
