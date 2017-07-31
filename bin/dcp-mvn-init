@@ -151,11 +151,16 @@ __git_check_overwrite_existing() {
 }
 
 __git_cat() {
-  if [[ -d "${HOME}/.dcp/share/git" ]]; then
+  if [[ -s "${HOME}/.dcp/share/git/$1" ]]; then
     cat "${HOME}/.dcp/share/git/$1"
   else
-    curl -fsSL \
-         "https://raw.githubusercontent.com/dpoggi/dcp/master/share/git/$1"
+    local file_contents="$( \
+      curl -fsSL \
+           "https://raw.githubusercontent.com/dpoggi/dcp/master/share/git/$1" \
+    )"
+    # This is assigned to a local var first so cURL returning > 0 stops
+    # the whole process
+    printf "%s" "${file_contents}"
   fi
 }
 
