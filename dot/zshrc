@@ -16,16 +16,6 @@ if [[ "${DCP_OS}" = "Darwin" ]]; then
 fi
 
 # User-specified plugins
-
-if [[ -s "${DCP}/conf/plugins" ]]; then
-  printf >&2 "DCP: The 'conf' directory is deprecated and will be removed soon.\n"
-  printf >&2 "Moving %s => %s\n" \
-             "${DCP}/conf/plugins" \
-             "${DCP_CONFIG_DIR}/plugins.lst"
-
-  mv "${DCP}/conf/plugins" "${DCP_CONFIG_DIR}/plugins.lst"
-fi
-
 if [[ -s "${DCP_CONFIG_DIR}/plugins.lst" ]]; then
   while IFS='' read -r plugin; do
     plugins+=("${plugin}")
