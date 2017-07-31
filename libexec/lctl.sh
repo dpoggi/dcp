@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
 
 readonly LAUNCHCTL_PATH="$(type -P launchctl)"
 
@@ -14,10 +14,10 @@ __filter_output() {
 }
 
 __launchctl() {
-  local was_errexit=""
+  local was_errexit
 
   case " $- " in
-      *e*) was_errexit="true" ;;
+      *e*) was_errexit="true"   ;;
       *)   was_errexit="false"
   esac
 
@@ -38,7 +38,7 @@ __launchctl() {
 }
 
 __log_launchctl_action() {
-  local verb=""
+  local verb
 
   case "$1" in
     bootout)    verb="Stopping"   ;;
@@ -76,15 +76,13 @@ launchctl() {
 }
 
 launchctl_status() {
-  local line=""
-  local reason=""
-  local exit_status=""
+  local line reason exit_status
 
   while IFS='' read -r line || ! exit_status="${line}"; do
     reason+="${line}"
   done < <(set +e; launchctl blame; printf "%s" "$?"; set -e)
 
-  local service_status=""
+  local service_status
 
   case "${exit_status}" in
       0) service_status="Running" ;;
