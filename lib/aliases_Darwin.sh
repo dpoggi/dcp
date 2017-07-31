@@ -193,6 +193,7 @@ coreaudioctl() {
 }
 
 # gpgconf wrapper for gpg-agent, if installed by Homebrew
+
 if [[ -h "/usr/local/opt/gnupg" ]]; then
   gpgagentctl() {
     if [[ "$1" = "stop" || "$1" = "restart" ]]; then
@@ -207,89 +208,19 @@ if [[ -h "/usr/local/opt/gnupg" ]]; then
   }
 fi
 
-# ctl scripts for kwm, if it and khd are installed via Homebrew
+# ctlscripts for kwm and khd if installed via Homebrew
+
 if [[ -d "/usr/local/opt/kwm" && -d "/usr/local/opt/khd" ]]; then
-  __kwm_khd_stop() {
-    brew services stop koekeishiya/formulae/khd
-    brew services stop koekeishiya/formulae/kwm
-  }
-
-  __kwm_khd_start() {
-    brew services start koekeishiya/formulae/kwm
-    brew services start koekeishiya/formulae/khd
-  }
-
   kwmctl() {
-    case "$1" in
-      start)
-        __kwm_khd_start
-        ;;
-      stop)
-        __kwm_khd_stop
-        ;;
-      restart)
-        __kwm_khd_stop
-        __kwm_khd_start
-        ;;
-      *)
-        return 1
-    esac
+    brew services "$@" "koekeishiya/formulae/kwm"
+  }
+
+  khdctl() {
+    brew services "$@" "koekeishiya/formulae/khd"
   }
 fi
 
-# ctl scripts for Emacs, if it's installed via Homebrew
-if [[ -d "/usr/local/opt/emacs" ]]; then
-  if [[ -s "${HOME}/.spacemacs" || -d "${HOME}/.spacemacs.d" ]]; then
-    readonly DCP_EMACS_KILL_CMD="(spacemacs/kill-emacs)"
-  else
-    readonly DCP_EMACS_KILL_CMD="(kill-emacs)"
-  fi
-
-  __emacs_stop() {
-    /usr/local/bin/emacsclient --eval "${DCP_EMACS_KILL_CMD}" 2> /dev/null
-  }
-
-  __emacs_kill() {
-    killall Emacs
-  }
-
-  __emacs_start() {
-    if ps -A | grep -Fq 'Emacs.app'; then
-      return 1
-    fi
-
-    (cd "${HOME}" && /usr/local/bin/emacs --daemon > /dev/null 2>&1)
-  }
-
-  emacsctl() {
-    case "$1" in
-      start)
-        __emacs_start
-        ;;
-      stop)
-        __emacs_stop
-        ;;
-      kill)
-        __emacs_kill
-        ;;
-      restart)
-        __emacs_stop
-        __emacs_start
-        ;;
-      kickstart)
-        __emacs_kill
-        __emacs_start
-        ;;
-      *)
-        return 1
-    esac
-  }
-fi
-
-
-#
 # Misc
-#
 
 if [[ -d "/usr/local/opt/htop-osx" ]]; then
   alias htop="sudo /usr/local/opt/htop-osx/bin/htop"
