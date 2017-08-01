@@ -103,7 +103,7 @@ boop_cask() {
 
 if [[ -s "${DCP_CONFIG_DIR}/brew_codesign.sha1" ]]; then
   brew_codesign() {
-    if ! file -b "$1" | grep -q '^Mach-O.*executable'; then
+    if [[ ! "$(file -b "$1")" =~ ^Mach-O\ .+\ executable ]]; then
       printf >&2 "Error: argument is not a Mach-O executable\n"
       return 1
     fi
