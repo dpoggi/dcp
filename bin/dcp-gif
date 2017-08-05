@@ -52,7 +52,7 @@ EOT
 
 assert_deps() {
   local dep
-  for dep in ffmpeg; do
+  for dep in "$@"; do
     if ! command -v "${dep}" >/dev/null; then
       errorfln "%s not found" "${dep}"
     fi
@@ -84,7 +84,7 @@ main() {
     shift
   done
 
-  assert_deps
+  assert_deps ffmpeg
 
   if [[ ! -e "${input_file}" ]]; then
     errorfln "No input file\n"

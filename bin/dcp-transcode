@@ -27,14 +27,16 @@ usage() {
   printf "Usage: %s [--ios] input1.mkv [input2.mkv]...\n" "$(basename "$0")"
 }
 
-assert_deps() {
+assert_darwin() {
   if [[ "$(uname -s)" != "Darwin" ]]; then
     errorfln "this script requires afconvert(1) from macOS"
     return 1
   fi
+}
 
+assert_deps() {
   local dep
-  for dep in ffmpeg afconvert; do
+  for dep in "$@"; do
     if ! command -v "${dep}" >/dev/null; then
       errorfln "%s not found" "${dep}"
       return 1
@@ -96,7 +98,9 @@ transcode() {
 }
 
 main() {
-  assert_deps
+  assert_darwin
+
+  assert_deps ffmpeg afconvert
 
   local -a input_files
   local audio_bitrate="256000"
