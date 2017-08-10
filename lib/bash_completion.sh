@@ -1,7 +1,8 @@
 __bash_comp_is_loaded() { [[ -n "${BASH_COMPLETION_COMPAT_DIR}" ]]; }
 
 __bash_comp_is_installed() {
-  [[ -r "/usr/local/etc/bash_completion" || -r "/etc/bash_completion" ]]
+  [[ -r "/usr/local/etc/bash_completion" || -r "/etc/bash_completion" ]] ||
+    [[ -r "/usr/share/bash-completion/bash_completion" ]]
 }
 
 __bash_comp_load_dir() {
@@ -26,6 +27,8 @@ if ! __bash_comp_is_loaded && __bash_comp_is_installed; then
     . /usr/local/etc/bash_completion
   elif [[ -r "/etc/bash_completion" ]]; then
     . /etc/bash_completion
+  elif [[ -r "/usr/share/bash-completion/bash_completion" ]]; then
+    . /usr/share/bash-completion/bash_completion
   fi
 fi
 
