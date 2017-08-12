@@ -1,30 +1,21 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
 
 readonly GIT_BASE_URL="https://github.com/dpoggi"
 
-log_info() {
-  printf "\033[0;34m[%s]:\033[0m %s\n" \
-         "$(date "+%Y-%m-%d %H:%M:%S")" \
-         "$*"
-}
-
-fatal() {
-  printf >&2 "\033[1;37;41m[FATAL]:\033[0m %s\n" "$1"
-  return 1
-}
+. "${HOME}/.dcp/lib/logging.sh"
 
 clone_repo() {
   local name="$(basename "$1")"
   name="${name%.*}"
 
-  log_info "Cloning ${name} into $2..."
+  infofln "Cloning %s into %s..." "${name}" "$2"
 
   export GIT_DIR="$(basename "$2")/.git"
   git clone --quiet --recursive "$1" "$2" 2> /dev/null
 
-  log_info "Finished cloning ${name}."
+  infofln "Finished cloning %s." "${name}"
   printf "\n"
 }
 
@@ -35,13 +26,15 @@ main() {
   fi
 
   if [[ -e "$1" ]]; then
-    fatal "$1: file exists"
+    errorfln "%s already exists" "$1"
+    return 1
   fi
 
   local tmp_dir="$(mktemp -q -d /tmp/dcp-shrinkwrap-XXXXXX)"
 
   if [[ -z "${tmp_dir}" ]]; then
-    fatal "Unable to create temp directory."
+    errorfln "Unable to create temp directory"
+    return 1
   fi
 
   clone_repo "${GIT_BASE_URL}/dcp.git" \
@@ -53,7 +46,7 @@ main() {
   clone_repo "https://github.com/zsh-users/zsh-syntax-highlighting.git" \
              "${tmp_dir}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
 
-  log_info "Updating submodules for dotvim..."
+  infofln "Updating submodules for dotvim..."
 
   pushd "${tmp_dir}/.vim" > /dev/null
 
@@ -65,22 +58,22 @@ main() {
   make clean
   popd > /dev/null
 
-  log_info "Finished."
+  infofln "Finished."
   printf "\n"
 
   popd > /dev/null # back to original CWD
 
-  log_info "Checking out latest release of zsh-syntax-highlighting..."
+  infofln "Checking out latest release of zsh-syntax-highlighting..."
 
   pushd "${tmp_dir}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" > /dev/null
   export GIT_DIR=".git"
   git checkout --quiet --force "$(git describe --tags --abbrev=0)"
   popd > /dev/null
 
-  log_info "Finished."
+  infofln "Finished."
   printf "\n"
 
-  log_info "Compressing archive..."
+  infofln "Compressing archive..."
 
   local archive_name="$(basename "$1")"
 
@@ -88,17 +81,17 @@ main() {
   tar -cJf "${archive_name}" ".oh-my-zsh" ".dcp" ".vim"
   popd > /dev/null
 
-  log_info "Moving archive..."
+  infofln "Moving archive..."
 
   mv "${tmp_dir}/${archive_name}" "$1"
 
-  log_info "Cleaning up..."
+  infofln "Cleaning up..."
 
   if [[ -d "${tmp_dir}" ]]; then
     rm -rf "${tmp_dir}"
   fi
 
-  log_info "Done."
+  infofln "Done."
 }
 
 main "$@"
