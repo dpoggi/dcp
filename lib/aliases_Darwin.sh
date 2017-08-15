@@ -125,10 +125,10 @@ fi
 # Fix obnoxious bug with macOS zsh completion for /usr/bin/du if coreutils is
 # installed via Homebrew.
 
-if [[ -n "${ZSH_NAME}" && -x "/usr/local/opt/coreutils/bin/gdu" ]]; then
-  alias du="gdu"
+if __is_zsh && [[ -x "/usr/local/bin/gdu" ]]; then
+  alias du='gdu'
 
-  if type compdef > /dev/null; then
+  if __is_function compdef; then
      compdef gdu=du
   fi
 fi
@@ -139,14 +139,14 @@ fi
 #
 
 # Reset "Open With..." menus after connecting a drive with applications on it
-
 reset_launch_services() {
-  local framework="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework"
+  local framework_path="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework"
 
-  "${framework}"/Support/lsregister -kill -r \
-                                    -domain local \
-                                    -domain system \
-                                    -domain user
+  "${framework_path}"/Support/lsregister -kill -r \
+                                         -domain local \
+                                         -domain system \
+                                         -domain user
+
   killall Finder
 }
 
@@ -155,11 +155,11 @@ reset_dns_cache() {
   printf >&2 "Flushing the DNS cache (enter your user password if prompted)...\n"
 
   if ! __is_file discoveryutil; then
-    # Sane versions of macOS (mDNSResponder =~ government cheese)
+    # Sane versions of macOS
     sudo -H dscacheutil -flushcache
     sudo -H killall -HUP mDNSResponder
   else
-    # OS X 10.9 - 10.10.3 (RIP discoveryd)
+    # OS X 10.9 - 10.10.3 (rest in pieces, discoveryd)
     sudo -H discoveryutil mdnsflushcache
     sudo -H discoveryutil udnsflushcache
   fi
@@ -184,15 +184,20 @@ launchd_export() {
 
 # launchctl wrapper for apsd (Apple Push Service: Messages.app, etc.)
 apsctl() {
-  "${DCP}/libexec/lctl.sh" system "$1" "/System/Library/LaunchDaemons/com.apple.apsd.plist"
+  "${DCP}/libexec/lctl.sh" system "$1" /System/Library/LaunchDaemons/com.apple.apsd.plist
 }
 
 # launchctl wrapper for CoreAudio (because sometimes there be dragons)
 coreaudioctl() {
-  "${DCP}/libexec/lctl.sh" system "$1" "/System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist"
+  "${DCP}/libexec/lctl.sh" system "$1" /System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist
 }
 
-# gpgconf wrapper for gpg-agent, if installed by Homebrew
+# launchctl wrapper for cfprefsd agent (clear file locks / empty the trash)
+cfprefsctl() {
+  "${DCP}/libexec/lctl.sh" user "$1" /System/Library/LaunchAgents/com.apple.cfprefsd.xpc.agent.plist
+}
+
+# gpgconf wrapper for gpg-agent, if installed via Homebrew
 
 if [[ -h "/usr/local/opt/gnupg" ]]; then
   gpgagentctl() {
@@ -208,20 +213,20 @@ if [[ -h "/usr/local/opt/gnupg" ]]; then
   }
 fi
 
-# ctlscripts for kwm and khd if installed via Homebrew
+# `brew services' wrappers for kwm and khd if installed via Homebrew
 
 if [[ -d "/usr/local/opt/kwm" && -d "/usr/local/opt/khd" ]]; then
   kwmctl() {
-    brew services "$@" "koekeishiya/formulae/kwm"
+    brew services "$@" koekeishiya/formulae/kwm
   }
 
   khdctl() {
-    brew services "$@" "koekeishiya/formulae/khd"
+    brew services "$@" koekeishiya/formulae/khd
   }
 fi
 
 # Misc
 
-if [[ -d "/usr/local/opt/htop-osx" ]]; then
-  alias htop="sudo /usr/local/opt/htop-osx/bin/htop"
+if [[ -x "/usr/local/opt/htop-osx/bin/htop" ]]; then
+  alias htop='sudo /usr/local/opt/htop-osx/bin/htop'
 fi

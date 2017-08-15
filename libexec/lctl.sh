@@ -44,7 +44,7 @@ __log_launchctl_action() {
     bootout)    verb="Stopping"   ;;
     bootstrap)  verb="Starting"   ;;
     disable)    verb="Disabling"  ;;
-    "enable")   verb="Enabling"   ;;
+    enable)     verb="Enabling"   ;;
   esac
 
   if [[ -n "${verb}" ]]; then
@@ -66,7 +66,7 @@ launchctl() {
   __log_launchctl_action "${action}"
 
   case "${action}" in
-    blame|bootout|disable|"enable")
+    blame|bootout|disable|enable)
       __launchctl "${action}" "${SERVICE_TARGET}"
       ;;
     bootstrap)
@@ -90,22 +90,19 @@ launchctl_status() {
   esac
 
   infofln "%s" "${SERVICE_TARGET}"
-  infofln "%s" "$(seq -f '-' -s '' 1 "${#SERVICE_TARGET}")"
+  infofln "%s" "$(seq -f '=' -s '' 1 "${#SERVICE_TARGET}")"
   infofln "Status: %s" "${service_status}"
   infofln "Reason: %s" "${reason}"
 }
 
-__get_domain_target() {
-  case "$1" in
-    gui|user) printf "%s/%s" "$1" "$(id -u)" ;;
-    *)        printf "%s" "$1"
-  esac
-}
+__is_domain_target_global() { [[ "$1" != gui* && "$1" != user* ]]; }
 
-__resolve_path() {
-  printf "%s/%s" \
-         "$(cd "$(dirname "$1")" && pwd -P)" \
-         "$(basename "$1")"
+__get_domain_target() {
+  if __is_domain_target_global "$1"; then
+    printf "%s" "$1"
+  else
+    printf "%s/%s" "$1" "$(id -u)"
+  fi
 }
 
 __get_service_name() {
@@ -114,13 +111,13 @@ __get_service_name() {
 
 configure_service() {
   DOMAIN_TARGET="$(__get_domain_target "$1")"
-  SERVICE_PATH="$(__resolve_path "$2")"
+  SERVICE_PATH="$(realpath -q "$2")"
   SERVICE_TARGET="${DOMAIN_TARGET}/$(__get_service_name "${SERVICE_PATH}")"
 
-  if [[ "${DOMAIN_TARGET}" = */* ]]; then
-    CMD_PREFIX=(command)
-  else
+  if __is_domain_target_global "${DOMAIN_TARGET}"; then
     CMD_PREFIX=(sudo -H)
+  else
+    CMD_PREFIX=(command)
   fi
 
   readonly DOMAIN_TARGET SERVICE_PATH SERVICE_TARGET CMD_PREFIX
@@ -129,9 +126,9 @@ configure_service() {
 main() {
   local domain="$1"
   local action="$2"
-  local service="$3"
+  local service_path="$3"
 
-  configure_service "${domain}" "${service}"
+  configure_service "${domain}" "${service_path}"
 
   case "${action}" in
     start)    launchctl bootstrap ;;
