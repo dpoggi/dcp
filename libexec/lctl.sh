@@ -41,10 +41,11 @@ __log_launchctl_action() {
   local verb
 
   case "$1" in
-    bootout)    verb="Stopping"   ;;
-    bootstrap)  verb="Starting"   ;;
-    disable)    verb="Disabling"  ;;
-    enable)     verb="Enabling"   ;;
+    bootout)    verb="Stopping"     ;;
+    bootstrap)  verb="Starting"     ;;
+    disable)    verb="Disabling"    ;;
+    enable)     verb="Enabling"     ;;
+    kickstart)  verb="Kickstarting" ;;
   esac
 
   if [[ -n "${verb}" ]]; then
@@ -55,13 +56,20 @@ __log_launchctl_action() {
 launchctl() {
   local action="$1"
 
-  if [[ "${action}" = "bootout" ]] && ! launchctl blame >/dev/null; then
-    warnfln "%s not running" "${SERVICE_TARGET}"
-    return 1
-  elif [[ "${action}" = "bootstrap" ]] && launchctl blame >/dev/null; then
-    warnfln "%s already running" "${SERVICE_TARGET}"
-    return 1
-  fi
+  case "${action}" in
+    bootout|kickstart)
+      if ! launchctl blame >/dev/null; then
+        warnfln "%s not running" "${SERVICE_TARGET}"
+        return 1
+      fi
+      ;;
+    bootstrap)
+      if launchctl blame >/dev/null; then
+        warnfln "%s already running" "${SERVICE_TARGET}"
+        return 1
+      fi
+      ;;
+  esac
 
   __log_launchctl_action "${action}"
 
@@ -71,6 +79,9 @@ launchctl() {
       ;;
     bootstrap)
       __launchctl "${action}" "${DOMAIN_TARGET}" "${SERVICE_PATH}"
+      ;;
+    kickstart)
+      __launchctl kickstart -k "${SERVICE_TARGET}"
       ;;
   esac
 }
@@ -131,16 +142,17 @@ main() {
   configure_service "${domain}" "${service_path}"
 
   case "${action}" in
-    start)    launchctl bootstrap ;;
-    stop)     launchctl bootout   ;;
+    start)      launchctl bootstrap ;;
+    stop)       launchctl bootout   ;;
     restart)
       launchctl bootout
       launchctl bootstrap
       ;;
-    enable)   launchctl enable    ;;
-    disable)  launchctl disable   ;;
-    status)   launchctl_status    ;;
-    *)        return 1
+    enable)     launchctl enable    ;;
+    disable)    launchctl disable   ;;
+    kickstart)  launchctl kickstart ;;
+    status)     launchctl_status    ;;
+    *)          return 1
   esac
 }
 

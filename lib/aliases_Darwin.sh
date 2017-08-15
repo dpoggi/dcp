@@ -194,7 +194,15 @@ coreaudioctl() {
 
 # launchctl wrapper for cfprefsd agent (clear file locks / empty the trash)
 cfprefsctl() {
-  "${DCP}/libexec/lctl.sh" user "$1" /System/Library/LaunchAgents/com.apple.cfprefsd.xpc.agent.plist
+  local action
+
+  case "$1" in
+    stop)     return 1            ;;
+    restart)  action="kickstart"  ;;
+    *)        action="$1"
+  esac
+
+  "${DCP}/libexec/lctl.sh" user "${action}" /System/Library/LaunchAgents/com.apple.cfprefsd.xpc.agent.plist
 }
 
 # gpgconf wrapper for gpg-agent, if installed via Homebrew
