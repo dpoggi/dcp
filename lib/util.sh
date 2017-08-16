@@ -112,15 +112,11 @@ __path_reject_re() { __path_select "$1" "\$_ !~ /$2/"; }
 
 __path_distinct() { __path_select "$1" '!$seen{$_}++ && $_ ne "\$PATH"'; }
 
-# __jobnum: returns the job number of the given PID
-__jobnum() {
-  local jobnum="$(jobs -l | sed -e "/[[:space:]]$1[[:space:]]/!d" \
-                                -e 's/[[:space:]].*//' \
-                                -e 's/[^[:digit:]]//g')"
-  if [[ -z "${jobnum}" ]]; then
-    return 1
-  fi
-  printf "%s" "${jobnum}"
+# __get_job_num: returns the job number of the given PID
+__get_job_num() {
+  printf "%s" "$(jobs -l | sed -e "/[[:space:]]$1[[:space:]]/!d" \
+                               -e 's/[[:space:]].*$//' \
+                               -e 's/[^[:digit:]]//g')"
 }
 
 # __git_is_work_tree: returns true if CWD is a Git work tree
