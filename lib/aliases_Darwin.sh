@@ -217,7 +217,9 @@ if [[ -h "/usr/local/opt/gnupg" ]]; then
       fi
     fi
 
-    /usr/local/bin/gpgconf --launch gpg-agent
+    if [[ "$1" != "stop" ]]; then
+      /usr/local/bin/gpgconf --launch gpg-agent
+    fi
   }
 fi
 
