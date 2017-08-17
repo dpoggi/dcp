@@ -102,9 +102,12 @@ alias grv="git remote -v"
 alias ggr="git grep --break --heading --line-number"
 
 gcb() {
-  git fetch --prune
+  git fetch --all --prune
 
-  __git_get_merged_branches | xargs git branch -d
+  local branch
+  while IFS='' read -r branch; do
+    git branch -d "${branch}"
+  done < <(__git_get_merged_branches)
 }
 
 gitignore() {

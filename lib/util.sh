@@ -127,7 +127,7 @@ __git_is_work_tree() {
 # __git_get_current_branch: prints the current Git branch
 __git_get_current_branch() {
   if ! __git_is_work_tree; then
-    return 1
+    return
   fi
 
   git branch 2>/dev/null | awk '$0 ~ /^\*/ { printf "%s", $2 }'
@@ -138,7 +138,7 @@ __git_get_merged_branches() {
   local current_branch="$(__git_get_current_branch)"
 
   if [[ -z "${current_branch}" ]]; then
-    return 1
+    return
   fi
 
   git branch --merged | colrm 1 2 | sed -e '/^master$/d' \
