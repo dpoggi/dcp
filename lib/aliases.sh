@@ -160,6 +160,7 @@ find_long_lines() {
 #
 
 # Set prompt in zsh
+
 if [[ -n "${ZSH_NAME}" ]]; then
   set_prompt() {
     . "${ZSH}/themes/${ZSH_THEME}.zsh-theme"
@@ -167,6 +168,7 @@ if [[ -n "${ZSH_NAME}" ]]; then
 fi
 
 # One-line or two-line prompt
+
 oneline() {
   export DPOGGI_TWOLINE="false"
   set_prompt
@@ -177,9 +179,16 @@ twoline() {
   set_prompt
 }
 
+# virtualenv-independent pip
+
 if [[ "${PIP_REQUIRE_VIRTUALENV}" = "true" ]]; then
-  # virtualenv-independent pip
   gpip() { PIP_REQUIRE_VIRTUALENV="" command pip "$@"; }
   gpip2() { PIP_REQUIRE_VIRTUALENV="" command pip2 "$@"; }
   gpip3() { PIP_REQUIRE_VIRTUALENV="" command pip3 "$@"; }
+fi
+
+# Maven aliases
+
+if __is_command mvn; then
+  alias mvncp="mvn clean package"
 fi
