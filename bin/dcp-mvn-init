@@ -17,8 +17,9 @@ Usage: $(basename "$0") [options] [preset # or groupId:artifactId:version]
 
 OPTIONS:
   -h, --help                            Display this message
-  --skip-wrapper                        Skip generating Maven wrapper
-  --skip-git                            Skip generating .git{attributes,ignore}
+  --skip-archetype                      Skip Maven archetype generation
+  --skip-wrapper                        Skip Maven wrapper generation
+  --skip-git                            Skip .git{attributes,ignore} generation
 
 ARCHETYPE PRESETS:
 EOT
@@ -39,9 +40,8 @@ assert_deps() {
 }
 
 write_settings_xml() {
-  local tmp_path="$(mktemp -q -t dcp-mvn-init)"
-
-  cat >"${tmp_path}" <<EOT
+  local tmpfile="$(mktemp -q -t dcp-mvn-init_settings_xml)"
+  cat >"${tmpfile}" <<EOT
 <?xml version="1.0" encoding="UTF-8"?>
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -66,8 +66,7 @@ write_settings_xml() {
   </profiles>
 </settings>
 EOT
-
-  printf "%s" "${tmp_path}"
+  printf "%s" "${tmpfile}"
 }
 
 mvn() {
@@ -109,12 +108,21 @@ __archetype_move_generated_files() {
 
 __archetype_generate_gav() {
   local dir="$1"
-  local group_id artifact_id version
-  IFS=':' read -r group_id artifact_id version <<< "$2"
 
-  mvn archetype:generate -DarchetypeGroupId="${group_id}" \
-                         -DarchetypeArtifactId="${artifact_id}" \
-                         -DarchetypeVersion="${version}"
+  pushd "${dir}" >/dev/null
+
+  if [[ "$#" -gt "1" ]]; then
+    local group_id artifact_id version
+    IFS=':' read -r group_id artifact_id version <<< "$2"
+
+    mvn archetype:generate -DarchetypeGroupId="${group_id}" \
+                           -DarchetypeArtifactId="${artifact_id}" \
+                           -DarchetypeVersion="${version}"
+  else
+    mvn archetype:generate
+  fi
+
+  popd >/dev/null
 
   local generated_dir="$(__archetype_find_generated_dir "${dir}")"
 
@@ -129,6 +137,11 @@ __archetype_generate_gav() {
 }
 
 generate_archetype() {
+  if [[ "$#" -lt "2" ]]; then
+    __archetype_generate_gav "$1"
+    return
+  fi
+
   local gav="$(__archetype_resolve "$2")"
 
   if [[ -z "${gav}" ]]; then
@@ -165,14 +178,14 @@ generate_mvnw() {
   popd >/dev/null
 
   # Permissions on these come out all kinds of wrong
+  chmod 755 "$1/mvnw"
   chmod 644 "$1/mvnw.cmd" "$1/.mvn/wrapper"/maven-wrapper.{jar,properties}
 
   # Zap annoying extra echo in Unix wrapper script
-  sed -e '/^[[:space:]]*echo \$MAVEN_PROJECTBASEDIR$/d' "$1/mvnw" >"$1/mvnw.fixed"
-  mv "$1/mvnw.fixed" "$1/mvnw"
-
-  # Fix permissions here too (now that it's been overwritten)
-  chmod 755 "$1/mvnw"
+  local tmpfile="$(mktemp -q -t dcp-mvn-init_mvnw)"
+  sed -e '/^[[:space:]]*echo \$MAVEN_PROJECTBASEDIR$/d' "$1/mvnw" >"${tmpfile}"
+  cat "${tmpfile}" >"$1/mvnw"
+  rm -f "${tmpfile}"
 }
 
 __git_check_overwrite_existing() {
@@ -195,12 +208,12 @@ __git_cat() {
   if [[ -s "${HOME}/.dcp/share/git/$1" ]]; then
     cat "${HOME}/.dcp/share/git/$1"
   else
+    # This is assigned to a local var first so cURL returning > 0
+    # stops the whole process
     local file_contents="$( \
       curl -fsSL \
            "https://raw.githubusercontent.com/dpoggi/dcp/master/share/git/$1" \
     )"
-    # This is assigned to a local var first so cURL returning > 0 stops
-    # the whole process
     printf "%s" "${file_contents}"
   fi
 }
@@ -215,21 +228,23 @@ generate_git() {
 }
 
 main() {
+  local skip_archetype="false"
   local skip_wrapper="false"
   local skip_git="false"
   local -a archetypes
 
   while (( $# > 0 )); do
     case "$1" in
-      -h|--help)      print_usage; return ;;
-      --skip-wrapper) skip_wrapper="true" ;;
-      --skip-git)     skip_git="true"     ;;
+      -h|--help)        print_usage; return   ;;
+      --skip-archetype) skip_archetype="true" ;;
+      --skip-wrapper)   skip_wrapper="true"   ;;
+      --skip-git)       skip_git="true"       ;;
       -*)
         printf >&2 "Unknown option %s\n\n" "$1"
         print_usage >&2
         return 1
         ;;
-      *)              archetypes+=("$1")
+      *)                archetypes+=("$1")
     esac
     shift
   done
@@ -239,12 +254,14 @@ main() {
   SETTINGS_XML_PATH="$(write_settings_xml)"
   readonly SETTINGS_XML_PATH
 
-  if [[ "${#archetypes[@]}" -eq "1" ]]; then
-    generate_archetype . "${archetypes[0]}"
-  elif [[ "${#archetypes[@]}" -gt "1" ]]; then
-    printf >&2 "Specifying multiple archetypes is not supported\n\n"
-    print_usage >&2
-    return 1
+  if ! "${skip_archetype}"; then
+    if [[ "${#archetypes[@]}" -gt "1" ]]; then
+      printf >&2 "Specifying multiple archetypes is not supported\n\n"
+      print_usage >&2
+      return 1
+    fi
+
+    generate_archetype . "${archetypes[@]}"
   fi
 
   if ! "${skip_wrapper}"; then
