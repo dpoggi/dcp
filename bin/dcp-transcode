@@ -2,99 +2,177 @@
 
 set -eo pipefail
 
-__log_date() { date "+%Y-%m-%d %H:%M:%S"; }
+################# Configuration #################
+
+readonly DEFAULT_AUDIO_BITRATE_KBPS="256"
+
+#################################################
+
+# https://www.apple.com/iphone-7/specs/
+readonly IOS_AUDIO_BITRATE_KBPS="160"
+
+# `afconvert --help`
+readonly AFCONV_DATA_FORMAT_COPY="0"
+readonly AFCONV_STRATEGY_VBR_CONSTRAINED="2"
+readonly AFCONV_QUALITY_MAX="127"
+
+declare AUDIO_BITRATE_KBPS
 
 __logfln() {
-  local lvl="$1"; shift
-  local lvl_clr="$1"; shift
-  local fmt="$1"; shift
-
-  if [[ -t 1 ]]; then
-    printf "\033[2;39;49m%s ${lvl_clr}${lvl}\033[2;39;49m : \033[0m${fmt}\n" \
-           "$(__log_date)" \
-           "$@"
-  else
-    printf "%s ${lvl} : ${fmt}\n" \
-           "$(__log_date)" \
-           "$@"
-  fi
+  local log="$1"; shift
+  local level="$1"; shift
+  local format="$1"; shift
+  printf "\033[2;39;49m%s ${level}\033[0;35;49m %s\033[2;39;49m --- ${log}\033[2;39;49m : \033[0;39;49m${format}\n" \
+         "$(date "+%Y-%m-%d %H:%M:%S")" \
+         "$$" \
+         "$@"
 }
 
-infofln() { __logfln " INFO" "\033[0;34m" "$@"; }
-errorfln() { __logfln "ERROR" "\033[0;31m" "$@"; }
+readonly LOG_PROGRAM="\033[0;36;49mProgram"
+readonly LOG_VIDEO="\033[0;97;46m Video "
+readonly LOG_AUDIO="\033[0;97;44m Audio "
 
-usage() {
-  printf "Usage: %s [--ios] input1.mkv [input2.mkv]...\n" "$(basename "$0")"
+readonly LOG_LEVEL_INFO="\033[0;34;49m INFO"
+readonly LOG_LEVEL_ERROR="\033[0;31;49mERROR"
+
+infofln() { __logfln "${LOG_PROGRAM}" "${LOG_LEVEL_INFO}" "$@"; }
+infofln_video() { __logfln "${LOG_VIDEO}" "${LOG_LEVEL_INFO}" "$@"; }
+infofln_audio() { __logfln "${LOG_AUDIO}" "${LOG_LEVEL_INFO}" "$@"; }
+
+errorfln() { __logfln "${LOG_PROGRAM}" "${LOG_LEVEL_ERROR}" "$@"; }
+errorfln_video() { __logfln "${LOG_VIDEO}" "${LOG_LEVEL_ERROR}" "$@"; }
+errorfln_audio() { __logfln "${LOG_AUDIO}" "${LOG_LEVEL_ERROR}" "$@"; }
+
+print_usage() {
+  cat <<EOT
+OVERVIEW:
+  Naïvely transplants streams from ffmpeg-compatible input files into an MP4
+  container, encoding audio tracks to 2-channel 256kbps AAC (see OPTIONS). At
+  the end of the transcoding process, the script will relocate the output
+  file's MOOV atom for optimal streaming.
+
+USAGE: $(basename "$0") [options] <input files>
+
+OPTIONS:
+  -h, --help            Display this message
+  -i, --ios             Encode audio at lower (160kbps) bitrate for iOS support
+EOT
 }
 
 assert_darwin() {
   if [[ "$(uname -s)" != "Darwin" ]]; then
-    errorfln "this script requires afconvert(1) from macOS"
+    errorfln "This script can only run on macOS because it depends on afconvert(1). For"
+    errorfln "similar functionality on other systems, multiple AAC encoders are available as"
+    errorfln "part of the ffmpeg (https://www.ffmpeg.org) distribution."
     return 1
   fi
 }
 
 assert_deps() {
-  local dep
-  for dep in "$@"; do
-    if ! command -v "${dep}" >/dev/null; then
-      errorfln "%s not found" "${dep}"
+  while (( $# > 0 )); do
+    if ! command -v "$1" >/dev/null; then
+      errorfln "%s not found" "$1"
       return 1
     fi
+    shift
   done
 }
 
-__extract_video() {
-  infofln "Extracting video as-is..."
-  ffmpeg -v warning -i "$1" -an -c:v copy "$2"
+__assert_output_path() {
+  if [[ -e "$1" ]]; then
+    errorfln "'%s' already exists" "$1"
+    return 1
+  fi
+}
+
+__extract_to_mkv() {
+  infofln_video "Extracting as-is ..."
+  __assert_output_path "$2"
+  ffmpeg -v warning \
+         -i "$1" \
+         -c:v copy \
+         -an \
+         -sn \
+         "$2"
 }
 
 __source_to_wav() {
-  infofln "Converting audio from source -> WAV..."
-  ffmpeg -v warning -i "$1" -vn -c:a pcm_s16le -ac 2 "$2"
+  infofln_audio "Original => WAV ..."
+  __assert_output_path "$2"
+  ffmpeg -v warning \
+         -i "$1" \
+         -vn \
+         -c:a pcm_s16le \
+         -sn \
+         -ac 2 \
+         "$2"
 }
 
 __wav_to_caf() {
-  infofln "Converting audio from WAV -> CAF..."
-  afconvert "$1" "$2" -d 0 -f caff --soundcheck-generate
+  infofln_audio "WAV      => CAF ..."
+  __assert_output_path "$2"
+  afconvert "$1" \
+            "$2" \
+            --data "${AFCONV_DATA_FORMAT_COPY}" \
+            --file caff \
+            --soundcheck-generate
 }
 
 __caf_to_aac() {
-  infofln "Converting audio from CAF -> AAC (%skbps)..." "$(expr $3 / 1000)"
-  afconvert "$1" "$2" \
-            -d aac -f m4af \
-            -u pgcm 2 -b "$3" -q 127 \
-            -s 2 --soundcheck-read
+  infofln_audio "CAF      => AAC @ %skbps ..." "${AUDIO_BITRATE_KBPS}"
+  __assert_output_path "$2"
+  afconvert "$1" \
+            "$2" \
+            --data aac \
+            --file m4af \
+            --strategy "${AFCONV_STRATEGY_VBR_CONSTRAINED}" \
+            --bitrate "$(( ${AUDIO_BITRATE_KBPS} * 1000 ))" \
+            --userproperty pgcm 2 \
+            --quality "${AFCONV_QUALITY_MAX}" \
+            --soundcheck-read
 }
 
-__recombine() {
-  infofln "Recombining..."
-  ffmpeg -v warning -i "$1" -i "$2" -c:v copy -c:a copy "$3"
+__merge_to_mp4() {
+  infofln "Merging streams, relocating MOOV atom ..."
+  __assert_output_path "$3"
+  ffmpeg -v warning \
+         -i "$1" \
+         -i "$2" \
+         -movflags faststart \
+         -c:v copy \
+         -c:a copy \
+         -sn \
+         "$3"
 }
+
+__get_mkv_path() { printf "%s-video.mkv" "${1%.*}"; }
+__get_wav_path() { printf "%s.wav" "${1%.*}"; }
+__get_caf_path() { printf "%s.caf" "${1%.*}"; }
+__get_aac_path() { printf "%s.aac" "${1%.*}"; }
+__get_output_path() { printf "%s.mp4" "${1%.*}"; }
 
 transcode() {
-  local base="${1%.*}"
-  local output="${base}.mp4"
-  if [[ -e "${output}" ]]; then
-    output="${base}_out.mp4"
-  fi
+  infofln "Starting '%s' ..." "$1"
 
-  infofln "Transcoding %s..." "$1"
+  local mkv_path="$(__get_mkv_path "$1")"
+  __extract_to_mkv "$1" "${mkv_path}"
 
-  __extract_video "$1" "${base}_video.mkv"
+  local wav_path="$(__get_wav_path "$1")"
+  __source_to_wav "$1" "${wav_path}"
 
-  __source_to_wav "$1" "${base}.wav"
+  local caf_path="$(__get_caf_path "$1")"
+  __wav_to_caf "${wav_path}" "${caf_path}"
+  rm -f "${wav_path}"
 
-  __wav_to_caf "${base}.wav" "${base}.caf"
-  rm -f "${base}.wav"
+  local aac_path="$(__get_aac_path "$1")"
+  __caf_to_aac "${caf_path}" "${aac_path}"
+  rm -f "${caf_path}"
 
-  __caf_to_aac "${base}.caf" "${base}.aac" "$2"
-  rm -f "${base}.caf"
+  local output_path="$(__get_output_path "$1")"
+  __merge_to_mp4 "${mkv_path}" "${aac_path}" "${output_path}"
+  rm -f "${mkv_path}" "${aac_path}"
 
-  __recombine "${base}_video.mkv" "${base}.aac" "${output}"
-  rm -f "${base}_video.mkv" "${base}.aac"
-
-  infofln "Finished transcoding %s." "$1"
+  infofln "Finished '%s'" "${output_path}"
 }
 
 main() {
@@ -102,32 +180,35 @@ main() {
 
   assert_deps ffmpeg afconvert
 
+  AUDIO_BITRATE_KBPS="${DEFAULT_AUDIO_BITRATE_KBPS}"
+
   local -a input_files
-  local audio_bitrate="256000"
 
   while (( $# > 0 )); do
     case "$1" in
-      --ios)  audio_bitrate="160000"  ;;
-      --help) usage; return           ;;
+      -i|--ios)   AUDIO_BITRATE_KBPS="${IOS_AUDIO_BITRATE_KBPS}"  ;;
+      -h|--help)  print_usage; return                             ;;
       -*)
-        errorfln "Unknown option %s\n" "$1"
-        usage >&2
+        errorfln "Unknown option '%s'\n" "$1"
+        print_usage >&2
         return 1
         ;;
-      *)      input_files+=( "$1" )
+      *)          input_files+=("$1")
     esac
     shift
   done
 
+  readonly AUDIO_BITRATE_KBPS
+
   if [[ "${#input_files[@]}" -eq "0" ]]; then
-    errorfln "No input files"
+    errorfln "No input files\n"
+    print_usage >&2
     return 1
   fi
 
   local input_file
-
   for input_file in "${input_files[@]}"; do
-    transcode "${input_file}" "${audio_bitrate}"
+    transcode "${input_file}"
   done
 }
 
