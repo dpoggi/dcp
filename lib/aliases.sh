@@ -191,4 +191,5 @@ fi
 
 if __is_command mvn; then
   alias mvncp="mvn clean package"
+  alias mvncv="mvn clean verify"
 fi
