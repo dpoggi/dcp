@@ -179,6 +179,11 @@ twoline() {
   set_prompt
 }
 
+# Easy date-based filenames, trailing newline removed
+datestamp() {
+  printf "%s" "$(date "+%Y%m%d%H%M%S")"
+}
+
 # virtualenv-independent pip
 
 if [[ "${PIP_REQUIRE_VIRTUALENV}" = "true" ]]; then
