@@ -122,6 +122,34 @@ if [[ -s "${DCP_CONFIG_DIR}/brew_codesign.sha1" ]]; then
   }
 fi
 
+# Quickly compute and copy a file's hash to the clipboard
+
+copy_md5() {
+  if [[ ! -f "$1" ]]; then
+    printf >&2 "Argument is not a file\n"
+    return 1
+  fi
+  
+  local sum="$(md5 -q "$1")"
+  printf "%s" "${sum}" | pbcopy
+  printf "%s\n" "${sum}"
+}
+
+__copy_sha() {
+  if [[ ! -f "$2" ]]; then
+    printf >&2 "Argument is not a file\n"
+    return 1
+  fi
+
+  local sum="$(shasum -p -a "$1" "$2" | cut -d ' ' -f 1)"
+  printf "%s" "${sum}" | pbcopy
+  printf "%s\n" "${sum}"
+}
+
+copy_sha1() { __copy_sha 1 "$1"; }
+copy_sha256() { __copy_sha 256 "$1"; }
+copy_sha384() { __copy_sha 384 "$1"; }
+
 # Fix obnoxious bug with macOS zsh completion for /usr/bin/du if coreutils is
 # installed via Homebrew.
 
