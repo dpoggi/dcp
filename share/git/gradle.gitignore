@@ -52,6 +52,7 @@ gradle-app.setting
 
 **/.idea/dbnavigator.xml
 **/.idea/gradle.xml
+**/.idea/httpRequests/
 **/.idea/jsLibraryMappings.xml
 **/.idea/libraries
 **/.idea/markdown-exported-files.xml
