@@ -36,10 +36,10 @@ __boop_check_pyenv() {
 
   cat >&2 <<-EOT
 rbenv, rvm, pyenv, and/or nvm found in PATH. This will break installing or
-upgrading Vim from Homebrew. Run \`mm_off -a' now to restart this shell without
+upgrading Vim and/or Yarn from Homebrew. Run \`mm_off -a' now to restart this
 EOT
 
-  printf >&2 "it/them (y/n)? "
+  printf >&2 "shell without it/them (y/n)? "
 
   read -r
 
@@ -54,7 +54,7 @@ __boop_langs() {
     return
   fi
 
-  brew "$1" node perl python ruby
+  brew "$1" node ruby
 }
 
 boop() {
