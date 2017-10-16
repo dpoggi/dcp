@@ -45,6 +45,7 @@ gradle-app.setting
 **/.idea/dataSources.xml
 **/.idea/dataSources.local.xml
 **/.idea/sqlDataSources.xml
+**/.idea/dictionaries/
 **/.idea/dynamic.xml
 **/.idea/tasks.xml
 **/.idea/uiDesigner.xml
