@@ -264,6 +264,6 @@ fi
 
 # Misc
 
-if [[ -x "/usr/local/opt/htop-osx/bin/htop" ]]; then
-  alias htop='sudo /usr/local/opt/htop-osx/bin/htop'
+if [[ -x "/usr/local/opt/htop/bin/htop" ]]; then
+  alias htop='sudo /usr/local/opt/htop/bin/htop'
 fi
