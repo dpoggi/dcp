@@ -49,18 +49,16 @@ EOT
   fi
 }
 
-__boop_langs() {
-  if [[ "${DCP_BOOP_LINK_LANGS}" != "true" ]]; then
-    return
+__boop_ruby() {
+  if [[ "${DCP_BOOP_LINK_RUBY}" = "true" ]]; then
+    brew "$1" ruby
   fi
-
-  brew "$1" node ruby
 }
 
 boop() {
   __boop_check_pyenv
 
-  __boop_langs link
+  __boop_ruby link
 
   if ! brew update; then
     return 1
@@ -78,7 +76,7 @@ boop() {
     fi
   fi
 
-  __boop_langs unlink
+  __boop_ruby unlink
 
   brew cleanup --prune=all
 }
