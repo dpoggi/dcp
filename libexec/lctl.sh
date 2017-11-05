@@ -2,12 +2,12 @@
 
 set -eo pipefail
 
-readonly LAUNCHCTL_PATH="$(type -P launchctl)"
-
-declare -a CMD_PREFIX
-declare DOMAIN_TARGET SERVICE_PATH SERVICE_TARGET
-
 . "${HOME}/.dcp/lib/logging.sh"
+
+readonly LAUNCHCTL_PATH="$(command -v launchctl)"
+
+declare BOOTOUT DOMAIN_TARGET SERVICE_PATH SERVICE_TARGET
+declare -a CMD_PREFIX
 
 __filter_output() {
   sed -e '/36: /d'
@@ -41,7 +41,7 @@ __log_launchctl_action() {
   local verb
 
   case "$1" in
-    bootout)    verb="Stopping"     ;;
+    stop)       verb="Stopping"     ;;
     bootstrap)  verb="Starting"     ;;
     disable)    verb="Disabling"    ;;
     enable)     verb="Enabling"     ;;
@@ -57,15 +57,15 @@ launchctl() {
   local action="$1"
 
   case "${action}" in
-    bootout|kickstart)
+    stop|kickstart)
       if ! launchctl blame >/dev/null; then
-        warnfln "%s not running" "${SERVICE_TARGET}"
+        warnfln "%s is not running" "${SERVICE_TARGET}"
         return 1
       fi
       ;;
     bootstrap)
       if launchctl blame >/dev/null; then
-        warnfln "%s already running" "${SERVICE_TARGET}"
+        warnfln "%s is already running" "${SERVICE_TARGET}"
         return 1
       fi
       ;;
@@ -74,11 +74,18 @@ launchctl() {
   __log_launchctl_action "${action}"
 
   case "${action}" in
-    blame|bootout|disable|enable)
-      __launchctl "${action}" "${SERVICE_TARGET}"
+    stop)
+      if "${BOOTOUT}"; then
+        __launchctl bootout "${SERVICE_TARGET}"
+      else
+        __launchctl unload -F "${SERVICE_PATH}"
+      fi
       ;;
     bootstrap)
       __launchctl "${action}" "${DOMAIN_TARGET}" "${SERVICE_PATH}"
+      ;;
+    blame|disable|enable)
+      __launchctl "${action}" "${SERVICE_TARGET}"
       ;;
     kickstart)
       __launchctl kickstart -k "${SERVICE_TARGET}"
@@ -106,6 +113,10 @@ launchctl_status() {
   infofln "Reason: %s" "${reason}"
 }
 
+__get_macos_version() {
+  /usr/bin/sw_vers -productVersion | command cut -d '.' -f 2
+}
+
 __is_domain_target_global() { [[ "$1" != gui* && "$1" != user* ]]; }
 
 __get_domain_target() {
@@ -121,6 +132,12 @@ __get_service_name() {
 }
 
 configure_service() {
+  if [[ "$(__get_macos_version)" -ge "11" ]]; then
+    BOOTOUT="true"
+  else
+    BOOTOUT="false"
+  fi
+
   DOMAIN_TARGET="$(__get_domain_target "$1")"
   SERVICE_PATH="$(realpath -q "$2")"
   SERVICE_TARGET="${DOMAIN_TARGET}/$(__get_service_name "${SERVICE_PATH}")"
@@ -131,7 +148,7 @@ configure_service() {
     CMD_PREFIX=(command)
   fi
 
-  readonly DOMAIN_TARGET SERVICE_PATH SERVICE_TARGET CMD_PREFIX
+  readonly BOOTOUT DOMAIN_TARGET SERVICE_PATH SERVICE_TARGET CMD_PREFIX
 }
 
 main() {
@@ -142,14 +159,14 @@ main() {
   configure_service "${domain}" "${service_path}"
 
   case "${action}" in
+    stop)       launchctl stop      ;;
     start)      launchctl bootstrap ;;
-    stop)       launchctl bootout   ;;
     restart)
-      launchctl bootout
+      launchctl stop
       launchctl bootstrap
       ;;
-    enable)     launchctl enable    ;;
     disable)    launchctl disable   ;;
+    enable)     launchctl enable    ;;
     kickstart)  launchctl kickstart ;;
     status)     launchctl_status    ;;
     *)          return 1
