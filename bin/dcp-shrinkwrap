@@ -2,9 +2,9 @@
 
 set -eo pipefail
 
-readonly GIT_BASE_URL="https://github.com/dpoggi"
-
 . "${HOME}/.dcp/lib/logging.sh"
+
+readonly GIT_BASE_URL="https://github.com/dpoggi"
 
 clone_repo() {
   local name="$(basename "$1")"
@@ -13,7 +13,7 @@ clone_repo() {
   infofln "Cloning %s into %s..." "${name}" "$2"
 
   export GIT_DIR="$(basename "$2")/.git"
-  git clone --quiet --recursive "$1" "$2" 2> /dev/null
+  git clone --quiet --recursive "$1" "$2" 2>/dev/null
 
   infofln "Finished cloning %s." "${name}"
   printf "\n"
@@ -48,27 +48,37 @@ main() {
 
   infofln "Updating submodules for dotvim..."
 
-  pushd "${tmp_dir}/.vim" > /dev/null
+  pushd "${tmp_dir}/.vim" >/dev/null
 
   export GIT_DIR=".git"
   git submodule update --quiet --init --recursive
   scripts/post_update.sh
 
-  pushd "bundle/vimproc" > /dev/null
+  pushd "bundle/vimproc" >/dev/null
   make clean
-  popd > /dev/null
+  popd >/dev/null
 
   infofln "Finished."
   printf "\n"
 
-  popd > /dev/null # back to original CWD
+  popd >/dev/null # back to original CWD
 
   infofln "Checking out latest release of zsh-syntax-highlighting..."
 
-  pushd "${tmp_dir}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" > /dev/null
+  pushd "${tmp_dir}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" >/dev/null
   export GIT_DIR=".git"
   git checkout --quiet --force "$(git describe --tags --abbrev=0)"
-  popd > /dev/null
+  popd >/dev/null
+
+  infofln "Finished."
+  printf "\n"
+
+  infofln "Removing .git directories..."
+
+  local dotgit_dir
+  while IFS='' read -d '' -r dotgit_dir; do
+    rm -rf "${dotgit_dir}"
+  done < <(find "${tmp_dir}" -type d -name .git -print0)
 
   infofln "Finished."
   printf "\n"
@@ -77,9 +87,9 @@ main() {
 
   local archive_name="$(basename "$1")"
 
-  pushd "${tmp_dir}" > /dev/null
+  pushd "${tmp_dir}" >/dev/null
   tar -cJf "${archive_name}" ".oh-my-zsh" ".dcp" ".vim"
-  popd > /dev/null
+  popd >/dev/null
 
   infofln "Moving archive..."
 
