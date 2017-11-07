@@ -121,7 +121,9 @@ if [[ -s "${DCP_CONFIG_DIR}/brew_codesign.sha1" ]]; then
   }
 fi
 
+#
 # Quickly compute and copy a file's hash to the clipboard
+#
 
 copy_md5() {
   if [[ ! -f "$1" ]]; then
@@ -151,10 +153,8 @@ copy_sha384() { __copy_sha 384 "$1"; }
 
 # Fix obnoxious bug with macOS zsh completion for /usr/bin/du if coreutils is
 # installed via Homebrew.
-
-if __is_zsh && [[ -x "/usr/local/bin/gdu" ]]; then
-  alias du='gdu'
-
+if __is_zsh && [[ -x "/usr/local/opt/coreutils/bin/gdu" ]]; then
+  du() { /usr/local/opt/coreutils/bin/gdu "$@"; }
   if __is_function compdef; then
      compdef gdu=du
   fi
@@ -262,8 +262,7 @@ if [[ -d "/usr/local/opt/kwm" && -d "/usr/local/opt/khd" ]]; then
   }
 fi
 
-# Misc
-
+# htop(1) should generally be run as root on macOS
 if [[ -x "/usr/local/opt/htop/bin/htop" ]]; then
-  alias htop='sudo /usr/local/opt/htop/bin/htop'
+  htop() { sudo /usr/local/opt/htop/bin/htop "$@"; }
 fi

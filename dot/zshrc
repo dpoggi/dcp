@@ -31,8 +31,7 @@ fi
 
 # Completion aliasing for GitHub CLI
 if __is_command hub; then
-  alias git="hub"
-
+  git() { hub "$@"; }
   if __is_function compdef; then
      compdef hub=git
   fi
