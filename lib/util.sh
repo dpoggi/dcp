@@ -114,9 +114,17 @@ __path_distinct() { __path_select "$1" '!$seen{$_}++ && $_ ne "\$PATH"'; }
 
 # __get_job_num: returns the job number of the given PID
 __get_job_num() {
-  printf "%s" "$(jobs -l | sed -e "/[[:space:]]$1[[:space:]]/!d" \
-                               -e 's/[[:space:]].*$//' \
-                               -e 's/[^[:digit:]]//g')"
+  local job pid tmp
+  while IFS='' read -r job; do
+    pid="${job##*+}"
+    IFS=' ' read -r pid tmp <<< "${pid}"
+
+    if [[ "${pid}" = "$1" ]]; then
+      local job_num="${job%%]*}"
+      printf "%s" "${job_num:1}"
+      return
+    fi
+  done < <(jobs -l)
 }
 
 # __git_is_work_tree: returns true if CWD is a Git work tree
