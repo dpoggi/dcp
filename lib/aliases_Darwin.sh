@@ -155,11 +155,7 @@ copy_sha384() { __copy_sha 384 "$1"; }
 # installed via Homebrew.
 if __is_zsh && [[ -x "/usr/local/opt/coreutils/bin/gdu" ]]; then
   du() { /usr/local/opt/coreutils/bin/gdu "$@"; }
-  if __is_function compdef; then
-     compdef gdu=du
-  fi
 fi
-
 
 #
 # System-level resets... these come in handy.
