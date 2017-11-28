@@ -38,12 +38,18 @@ if [[ -s "${DCP}/localenv" ]]; then
   . "${DCP}/localenv"
 fi
 
-# Check for our spot in XDG_CONFIG_HOME
+#
+# Check for our spots in XDG_CONFIG_HOME and XDG_DATA_HOME
+#
 
 readonly DCP_CONFIG_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/dcp"
-
 if [[ ! -e "${DCP_CONFIG_DIR}" ]]; then
   mkdir -p "${DCP_CONFIG_DIR}"
+fi
+
+readonly DCP_DATA_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}/dcp"
+if [[ ! -e "${DCP_DATA_DIR}" ]]; then
+  mkdir -p "${DCP_DATA_DIR}"
 fi
 
 # Add GOPATH bin directories to PATH, if present
