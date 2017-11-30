@@ -61,17 +61,14 @@ __strtolower() { printf "%s" "$1" | tr '[:upper:]' '[:lower:]'; }
 
 # __ary_join: converts an array to a string separated by the first argument
 __ary_join() {
-  local sep="$1"
-  shift
-  printf "%s" "$1"
-  shift
+  local sep="$1"; shift
+  printf "%s" "$1"; shift
   printf "%s" "${@/#/${sep}}"
 }
 
 # __ary_includes: returns true if the first argument is included in the array
 __ary_includes() {
-  local search="$1"
-  shift
+  local search="$1"; shift
 
   local element
   for element in "$@"; do

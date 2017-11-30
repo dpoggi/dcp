@@ -8,25 +8,14 @@
 
 set -eo pipefail
 
-if [[ -t 1 ]]; then
-  __logfln() {
-    local lvl="$1"; shift
-    local lvl_clr="$1"; shift
-    local fmt="$1"; shift
-    printf "\033[2;39;49m%s ${lvl_clr}${lvl}\033[2;39;49m : \033[0m${fmt}\n" \
-           "$(date "+%Y-%m-%d %H:%M:%S")" \
-           "$@"
-  }
-else
-  __logfln() {
-    local lvl="$1"; shift
-    local lvl_clr="$1"; shift
-    local fmt="$1"; shift
-    printf "%s ${lvl} : ${fmt}\n" \
-           "$(date "+%Y-%m-%d %H:%M:%S")" \
-           "$@"
-  }
-fi
+__logfln() {
+  local lvl="$1"; shift
+  local lvl_clr="$1"; shift
+  local fmt="$1"; shift
+  printf "\033[2;39;49m%s ${lvl_clr}${lvl}\033[2;39;49m : \033[0m${fmt}\n" \
+         "$(date "+%Y-%m-%d %H:%M:%S")" \
+         "$@"
+}
 
 infofln() { __logfln " INFO" "\033[0;34m" "$@"; }
 errorfln() { __logfln "ERROR" "\033[0;31m" "$@"; }
