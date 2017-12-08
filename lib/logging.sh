@@ -15,16 +15,11 @@ else
   }
 fi
 
-if [[ -z "${DCP_LOG_LEVEL}" ]]; then
+if [[ " DEBUG INFO WARN ERROR " != *" ${DCP_LOG_LEVEL} "* ]]; then
   DCP_LOG_LEVEL="INFO"
 fi
 readonly DCP_LOG_LEVEL
 export DCP_LOG_LEVEL
-
-if [[ " DEBUG INFO WARN ERROR " != *" ${DCP_LOG_LEVEL} "* ]]; then
-  printf >&2 "Error: invalid DCP_LOG_LEVEL=\"%s\"\n" "${DCP_LOG_LEVEL}"
-  exit 1
-fi
 
 if [[ "${DCP_LOG_LEVEL}" = "DEBUG" ]]; then
   debugf() { __logf "DEBUG" "\033[0;32m" "$@"; }
