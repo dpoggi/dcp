@@ -43,7 +43,7 @@ mm_on() {
     shift
   done
 
-  if [[ "${all}" = "true" ]]; then
+  if "${all}"; then
     tools=("${MM_TOOLS[@]}")
   fi
 
@@ -52,6 +52,8 @@ mm_on() {
     __mm_on_usage >&2
     return 1
   fi
+
+  local error_flag="false"
 
   local tool tool_upper exit_status
   for tool in "${tools[@]}"; do
@@ -68,12 +70,17 @@ mm_on() {
       continue
     fi
     if ! "__mm_${tool}_is_installed"; then
+      if ! "${all}"; then
+        printf >&2 "Error: %s is not installed" "${tool}"
+        error_flag="true"
+      fi
       continue
     fi
 
     "__mm_${tool}_load"
     if [[ "$?" -ne "0" ]]; then
       printf >&2 "Error: unable to load %s" "${tool}"
+      error_flag="true"
       continue
     fi
 
@@ -81,6 +88,10 @@ mm_on() {
       __mm_load_comp "${tool}"
     fi
   done
+
+  if "${error_flag}"; then
+    return 1
+  fi
 }
 
 __mm_off_usage() {
@@ -117,7 +128,7 @@ mm_off() {
     shift
   done
 
-  if [[ "${all}" = "true" ]]; then
+  if "${all}"; then
     tools=("${MM_TOOLS[@]}")
   fi
 
