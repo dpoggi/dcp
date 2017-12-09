@@ -11,16 +11,16 @@
 __mm_cargo_is_loaded() { false; }
 
 __mm_cargo_is_installed() {
-  [[ -x "$(__mm_cargo_get_home)/bin/cargo" ]] || __is_command cargo
+  [[ -x "${CARGO_HOME:-${HOME}/.cargo}/bin/cargo" ]] || __is_command cargo
 }
 
 __mm_cargo_load() {
-  export CARGO_HOME="$(__mm_cargo_get_home)"
+  export CARGO_HOME="${CARGO_HOME:-${HOME}/.cargo}"
   export PATH="${CARGO_HOME}/bin:${PATH}"
 }
 
 __mm_cargo_is_comp_loaded() {
-  ! __is_command rustup || (__is_function _cargo && __is_function _rustup)
+  ! __is_command rustup || { __is_function _cargo && __is_function _rustup; }
 }
 
 __mm_cargo_load_comp_zsh() {
@@ -50,10 +50,6 @@ __mm_cargo_load_comp_bash() {
        "${USER_BASH_COMPLETION_D}/cargo"
     . "${USER_BASH_COMPLETION_D}/cargo"
   fi
-}
-
-__mm_cargo_get_home() {
-  printf "%s" "${CARGO_HOME:-${HOME}/.cargo}"
 }
 
 __mm_cargo_get_toolchain_dir() {
