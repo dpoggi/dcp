@@ -6,9 +6,9 @@
 # This software may be modified and distributed under the terms
 # of the MIT license. See the LICENSE file for details.
 
-# Cargo always reports as unloaded, so that it will be loaded, so that PATH
-# stays in the proper order. Harmless since we guarantee PATH will be deduped.
-__mm_cargo_is_loaded() { false; }
+__mm_cargo_is_loaded() {
+  __is_command rustup
+}
 
 __mm_cargo_is_installed() {
   [[ -x "${CARGO_HOME:-${HOME}/.cargo}/bin/cargo" ]] || __is_command cargo
@@ -17,6 +17,11 @@ __mm_cargo_is_installed() {
 __mm_cargo_load() {
   export CARGO_HOME="${CARGO_HOME:-${HOME}/.cargo}"
   export PATH="${CARGO_HOME}/bin:${PATH}"
+}
+
+__mm_cargo_unload() {
+  export PATH="$(__path_reject_str "${PATH}" "${CARGO_HOME}/bin")"
+  __unexport CARGO_HOME
 }
 
 __mm_cargo_is_comp_loaded() {

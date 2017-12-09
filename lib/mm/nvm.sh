@@ -24,6 +24,10 @@ __mm_nvm_load() {
   fi
 }
 
+__mm_nvm_unload() {
+  nvm unload
+}
+
 __mm_nvm_is_comp_loaded() {
   __is_function __nvm
 }

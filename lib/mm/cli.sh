@@ -64,7 +64,7 @@ mm_on() {
     if __is_true "MM_DISABLE_${tool_upper}"; then
       continue
     fi
-    if "__mm_${tool}_is_loaded"; then
+    if "__mm_${tool}_is_loaded" && [[ "${tool}" != "cargo" ]]; then
       continue
     fi
     if ! "__mm_${tool}_is_installed"; then
@@ -127,10 +127,24 @@ mm_off() {
     return 1
   fi
 
-  local tool
+  local should_reexec="false"
+
+  local tool tool_upper
   for tool in "${tools[@]}"; do
-    export "MM_DISABLE_$(__strtoupper "${tool}")"="true"
+    tool_upper="$(__strtoupper "${tool}")"
+
+    export "MM_DISABLE_${tool_upper}"="true"
+
+    if __is_function "__mm_${tool}_unload"; then
+      if "__mm_${tool}_is_loaded"; then
+        "__mm_${tool}_unload"
+      fi
+    else
+      should_reexec="true"
+    fi
   done
 
-  eval "${DCP_SHELL_EXEC_CMD[*]}"
+  if "${should_reexec}"; then
+    eval "${DCP_SHELL_EXEC_CMD[*]}"
+  fi
 }
