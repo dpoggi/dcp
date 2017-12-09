@@ -24,33 +24,26 @@ fi
 if [[ "${DCP_LOG_LEVEL}" = "DEBUG" ]]; then
   debugf() { __logf "DEBUG" "\033[0;32m" "$@"; }
   debugfln() { debugf "$@"; printf "\n"; }
-  debugnl() { debugfln ""; }
 else
   debugf() { :; }
   debugfln() { :; }
-  debugnl() { :; }
 fi
 
 if [[ "${DCP_LOG_LEVEL}" = "DEBUG" || "${DCP_LOG_LEVEL}" = "INFO" ]]; then
   infof() { __logf " INFO" "\033[0;34m" "$@"; }
   infofln() { infof "$@"; printf "\n"; }
-  infonl() { infofln ""; }
 else
   infof() { :; }
   infofln() { :; }
-  infonl() { :; }
 fi
 
 if [[ "${DCP_LOG_LEVEL}" != "ERROR" ]]; then
   warnf() { __logf " WARN" "\033[0;33m" "$@"; }
   warnfln() { warnf "$@"; printf "\n"; }
-  warnnl() { warnfln ""; }
 else
   warnf() { :; }
   warnfln() { :; }
-  warnnl() { :; }
 fi
 
 errorf() { __logf "ERROR" "\033[1;31m" "$@"; }
 errorfln() { errorf "$@"; printf "\n"; }
-errornl() { errorfln ""; }

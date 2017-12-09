@@ -93,7 +93,7 @@ update_repo() {
   fi
 
   infofln "Finished updating %s." "${name}"
-  infonl
+  infofln ""
   popd >/dev/null
 }
 
@@ -117,7 +117,7 @@ infofln "Updating symlinks..."
 infofln "Done."
 
 if [[ -n "${stashed}" ]]; then
-  infonl
+  infofln ""
   infofln "You may want to restore stashed changes to:"
   infofln "%s" "${stashed}"
   infofln "Use \`git stash pop' to do so."
