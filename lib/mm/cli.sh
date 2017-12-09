@@ -47,14 +47,13 @@ mm_on() {
     tools=("${MM_TOOLS[@]}")
   fi
 
-  if [[ "${#tools[@]}" -eq "0" ]]; then
+  if (( ${#tools[@]} == 0 )); then
     printf >&2 "Error: no tool specified\n\n"
     __mm_on_usage >&2
     return 1
   fi
 
   local tool tool_upper exit_status
-
   for tool in "${tools[@]}"; do
     tool_upper="$(__strtoupper "${tool}")"
 
@@ -65,27 +64,22 @@ mm_on() {
     if __is_true "MM_DISABLE_${tool_upper}"; then
       continue
     fi
-
     if "__mm_${tool}_is_loaded"; then
       continue
     fi
-
     if ! "__mm_${tool}_is_installed"; then
       continue
     fi
 
     "__mm_${tool}_load"
-
     if [[ "$?" -ne "0" ]]; then
       printf >&2 "Error: unable to load %s" "${tool}"
       continue
     fi
 
-    if __mm_is_comp_loaded "${tool}"; then
-      continue
+    if ! __mm_is_comp_loaded "${tool}"; then
+      __mm_load_comp "${tool}"
     fi
-
-    __mm_load_comp "${tool}"
   done
 }
 
@@ -127,14 +121,13 @@ mm_off() {
     tools=("${MM_TOOLS[@]}")
   fi
 
-  if [[ "${#tools[@]}" -eq "0" ]]; then
+  if (( ${#tools[@]} == 0 )); then
     printf >&2 "Error: no tool specified\n\n"
     __mm_off_usage >&2
     return 1
   fi
 
   local tool
-
   for tool in "${tools[@]}"; do
     export "MM_DISABLE_$(__strtoupper "${tool}")"="true"
   done
