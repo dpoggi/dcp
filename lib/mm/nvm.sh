@@ -11,11 +11,11 @@ __mm_nvm_is_loaded() {
 }
 
 __mm_nvm_is_installed() {
-  [[ -r "$(__mm_nvm_get_dir)/nvm.sh" || -r "/usr/local/opt/nvm/nvm.sh" ]]
+  [[ -r "${NVM_DIR:-${HOME}/.nvm}/nvm.sh" || -r "/usr/local/opt/nvm/nvm.sh" ]]
 }
 
 __mm_nvm_load() {
-  export NVM_DIR="$(__mm_nvm_get_dir)"
+  export NVM_DIR="${NVM_DIR:-${HOME}/.nvm}"
 
   if [[ -r "${NVM_DIR}/nvm.sh" ]]; then
     . "${NVM_DIR}/nvm.sh"
@@ -38,8 +38,4 @@ __mm_nvm_load_comp() {
   elif [[ -r "/usr/local/opt/nvm/etc/bash_completion.d/nvm" ]]; then
     . /usr/local/opt/nvm/etc/bash_completion.d/nvm
   fi
-}
-
-__mm_nvm_get_dir() {
-  printf "%s" "${NVM_DIR:-${HOME}/.nvm}"
 }
