@@ -46,83 +46,95 @@ ext_ip() {
 # Git aliases
 #
 
-alias ga="git add"
-alias gp="git push"
-alias gpl="git pull"
-alias gl="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
-alias gll="git log --stat --oneline --decorate"
-alias gs="git status"
-alias gst="git stash"
-alias gsa="git stash apply"
-alias gsl="git stash list"
-alias gd="git diff"
-alias gds="git diff --staged"
-alias gc="git commit"
-alias gcm="git commit -m"
-alias gco="git checkout"
-alias gb="git branch"
-alias gf="git fetch"
-alias gr="git rebase"
-alias gm="git merge"
-
-gdt() { git describe --tags --abbrev=0; }
-
-gn() {
-  if __git_is_work_tree; then
-    return 1
-  fi
-
-  git init \
-    && git add . \
-    && git commit -m 'Initial commit'
-}
-
-gfco() {
-  local current_branch="$(__git_get_current_branch)"
-
-  if [[ -z "${current_branch}" ]]; then
-    return 1
-  fi
-
-  local remote_branch="origin/${current_branch}"
-
-  printf >&2 "Are you sure you want to force-checkout ${current_branch} from ${remote_branch}? "
-
-  read -r
-
-  if [[ "${REPLY}" != "YES" ]]; then
-    printf >&2 "\nError: only YES, in all caps, will continue.\n"
-    return 1
-  fi
-
-  git checkout -B "${current_branch}" "origin/${current_branch}"
-}
-
-alias grv="git remote -v"
-alias ggr="git grep --break --heading --line-number"
+ga() { git add "$@"; }
+gb() { git branch "$@"; }
+gc() { git commit "$@"; }
+gcane() { git commit --amend --no-edit "$@"; }
 
 gcb() {
   git fetch --all --prune
-
   local branch
   while IFS='' read -r branch; do
     git branch -d "${branch}"
   done < <(__git_get_merged_branches)
 }
 
+gcm() { git commit -m "$@"; }
+gco() { git checkout "$@"; }
+gd() { git diff "$@"; }
+gds() { git diff --staged "$@"; }
+gdt() { git describe --tags --abbrev=0 "$@"; }
+gf() { git fetch "$@"; }
+
+gfco() {
+  local current_branch="$(__git_get_current_branch)"
+  if [[ -z "${current_branch}" ]]; then
+    return 1
+  fi
+
+  local remote_branch="origin/${current_branch}"
+
+  printf >&2 "Are you sure you want to force-checkout %s from %s? " \
+             "${current_branch}" \
+             "${remote_branch}"
+
+  local confirmation
+  IFS='' read -r confirmation
+  if [[ "${confirmation}" != "YES" ]]; then
+    printf >&2 "\nOnly YES (all caps) will continue.\n"
+    return 1
+  fi
+
+  git checkout -B "${current_branch}" "origin/${current_branch}"
+}
+
+ggr() { git grep --break --heading --line-number "$@"; }
+
+gl() {
+  git log --abbrev-commit \
+          --graph \
+          --pretty="format:%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" \
+          "$@"
+}
+
+gll() { git log --stat --oneline --decorate "$@"; }
+gm() { git merge "$@"; }
+
+gn() {
+  if __git_is_work_tree; then
+    return 1
+  fi
+  git init &&
+    git add . &&
+    git commit -m "Initial commit"
+}
+
+gp() { git push "$@"; }
+gpl() { git pull "$@"; }
+
+gpub() {
+  if [[ -z "$1" ]]; then
+    return 1
+  fi
+  git push origin "${1}:refs/heads/$1" &&
+    git fetch origin &&
+    git config "branch.${1}.remote" origin &&
+    git config "branch.${1}.merge" "refs/heads/$1" &&
+    git checkout "$1"
+}
+
+gr() { git rebase "$@"; }
+grv() { git remote -v "$@"; }
+gs() { git status "$@"; }
+gsa() { git stash apply "$@"; }
+gsl() { git stash list "$@"; }
+gst() { git stash "$@"; }
+
 gitignore() {
   if [[ -z "$1" ]]; then
     return 1
   fi
   curl -sJL "https://www.gitignore.io/api/$1"
-}
-
-gpub() {
-  git push origin "${1}:refs/heads/$1" \
-    && git fetch origin \
-    && git config "branch.${1}.remote" origin \
-    && git config "branch.${1}.merge" "refs/heads/$1" \
-    && git checkout "$1"
 }
 
 
