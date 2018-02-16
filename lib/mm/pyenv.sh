@@ -32,6 +32,31 @@ __mm_pyenv_load() {
   eval "$(pyenv-virtualenv-init -)"
 }
 
+__mm_pyenv_is_comp_loaded_bash() {
+  ! __is_command pipenv || __is_function _pipenv_completion
+}
+
+__mm_pyenv_is_comp_loaded_zsh() {
+  ! __is_command pipenv || __is_function _pipenv
+}
+
+__mm_pyenv_load_comp_bash() {
+  if ! __is_command pipenv; then
+    return
+  fi
+  if [[ "${SHELL}" = *"zsh" ]]; then
+    export SHELL="/bin/bash"
+  fi
+  eval "$(pipenv --completion)"
+}
+
+__mm_pyenv_load_comp_zsh() {
+  if ! __is_command pipenv; then
+    return
+  fi
+  eval "$(pipenv --completion)"
+}
+
 __mm_pyenv_get_root() {
   printf "%s" "${PYENV_ROOT:-${HOME}/.pyenv}"
 }
