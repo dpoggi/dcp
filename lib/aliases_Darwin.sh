@@ -250,10 +250,16 @@ fi
 
 if [[ -d "/usr/local/opt/kwm" && -d "/usr/local/opt/khd" ]]; then
   kwmctl() {
+    if (($# == 0)); then
+      return 1
+    fi
     brew services "$@" koekeishiya/formulae/kwm
   }
 
   khdctl() {
+    if (($# == 0)); then
+      return 1
+    fi
     brew services "$@" koekeishiya/formulae/khd
   }
 fi
