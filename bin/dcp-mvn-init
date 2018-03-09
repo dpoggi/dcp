@@ -5,11 +5,23 @@ set -eo pipefail
 readonly MAVEN_VERSION="3.5.2"
 readonly ARCHETYPE_PRESETS=(                                    \
   "org.apache.maven.archetypes:maven-archetype-quickstart:1.1"  \
-  "org.jetbrains.kotlin:kotlin-archetype-jvm:1.1.51"            \
+  "org.jetbrains.kotlin:kotlin-archetype-jvm:1.2.30"            \
   "com.github.dpoggi:jee7-archetype:1.0"                        \
 )
 
+readonly KERNEL_NAME="$(uname -s)"
+
 declare SETTINGS_XML_PATH
+
+check_bin() {
+  while (($# > 0)); do
+    if ! command -v "$1" >/dev/null; then
+      printf >&2 "%s not found\n" "$1"
+      return 1
+    fi
+    shift
+  done
+}
 
 print_usage() {
   cat <<EOT
@@ -23,24 +35,37 @@ OPTIONS:
 
 ARCHETYPE PRESETS:
 EOT
+
   local i
   for i in "${!ARCHETYPE_PRESETS[@]}"; do
-    printf "  %s) %s\n" "$(( ${i} + 1 ))" "${ARCHETYPE_PRESETS[${i}]}"
+    printf "  %s) %s\n" "$((i + 1))" "${ARCHETYPE_PRESETS[${i}]}"
   done
 }
 
-assert_deps() {
-  local dep
-  for dep in "$@"; do
-    if ! command -v "${dep}" >/dev/null; then
-      printf >&2 "%s not found\n" "${dep}"
-      return 1
-    fi
-  done
+mktemp() {
+  local template
+  case "${KERNEL_NAME}" in
+    Darwin)
+      template="mvn__$1"
+      ;;
+    Linux)
+      template="mvn__XXXXXX__$1"
+      ;;
+  esac
+  if [[ -z "${template}" ]]; then
+    printf >&2 "Unknown operating system %s\n" "${KERNEL_NAME}"
+    return 1
+  fi
+  
+  command mktemp -q -t "${template}"
+}
+
+mvn() {
+  command mvn --settings "${SETTINGS_XML_PATH}" "$@"
 }
 
 write_settings_xml() {
-  local tmpfile="$(mktemp -q -t dcp-mvn-init_settings_xml)"
+  local tmpfile="$(mktemp settings_xml)"
   cat >"${tmpfile}" <<EOT
 <?xml version="1.0" encoding="UTF-8"?>
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
@@ -69,16 +94,12 @@ EOT
   printf "%s" "${tmpfile}"
 }
 
-mvn() {
-  command mvn --settings "${SETTINGS_XML_PATH}" "$@"
-}
-
 __archetype_resolve() {
   if [[ "$1" =~ ^[^:]+:[^:]+:[^:]+$ ]]; then
     printf "%s" "$1"
   elif [[ "$1" =~ ^[[:digit:]]+$ ]] &&
        [[ "$1" -gt "0" && "$1" -le "${#ARCHETYPE_PRESETS[@]}" ]]; then
-    printf "%s" "${ARCHETYPE_PRESETS[$(( $1 - 1 ))]}"
+    printf "%s" "${ARCHETYPE_PRESETS[$(($1 - 1))]}"
   fi
 }
 
@@ -136,7 +157,7 @@ __archetype_generate_gav() {
   rmdir "${generated_dir}"
 }
 
-generate_archetype() {
+archetype_generate() {
   if [[ "$#" -lt "2" ]]; then
     __archetype_generate_gav "$1"
     return
@@ -168,7 +189,7 @@ __mvnw_check_overwrite_existing() {
   fi
 }
 
-generate_mvnw() {
+mvnw_generate() {
   if ! __mvnw_check_overwrite_existing "$1"; then
     return
   fi
@@ -182,7 +203,7 @@ generate_mvnw() {
   chmod 644 "$1/mvnw.cmd" "$1/.mvn/wrapper"/maven-wrapper.{jar,properties}
 
   # Zap annoying extra echo in Unix wrapper script
-  local tmpfile="$(mktemp -q -t dcp-mvn-init_mvnw)"
+  local tmpfile="$(mktemp mvnw)"
   sed -e '/^[[:space:]]*echo \$MAVEN_PROJECTBASEDIR$/d' "$1/mvnw" >"${tmpfile}"
   cat "${tmpfile}" >"$1/mvnw"
   rm -f "${tmpfile}"
@@ -210,15 +231,14 @@ __git_cat() {
   else
     # This is assigned to a local var first so cURL returning > 0
     # stops the whole process
-    local file_contents="$( \
-      curl -fsSL \
-           "https://raw.githubusercontent.com/dpoggi/dcp/master/share/git/$1" \
+    local file_contents="$(
+      curl -fsSL "https://raw.githubusercontent.com/dpoggi/dcp/master/share/git/$1"
     )"
     printf "%s" "${file_contents}"
   fi
 }
 
-generate_git() {
+git_generate() {
   if __git_check_overwrite_existing "$1/.gitattributes"; then
     __git_cat maven.gitattributes >"$1/.gitattributes"
   fi
@@ -233,7 +253,7 @@ main() {
   local skip_git="false"
   local -a archetypes
 
-  while (( $# > 0 )); do
+  while (($# > 0)); do
     case "$1" in
       -h|--help)        print_usage; return   ;;
       --skip-archetype) skip_archetype="true" ;;
@@ -249,32 +269,27 @@ main() {
     shift
   done
 
-  assert_deps mvn curl
+  check_bin curl mvn
 
   SETTINGS_XML_PATH="$(write_settings_xml)"
   readonly SETTINGS_XML_PATH
 
   if ! "${skip_archetype}"; then
-    if [[ "${#archetypes[@]}" -gt "1" ]]; then
+    if ((${#archetypes[@]} > 1)); then
       printf >&2 "Specifying multiple archetypes is not supported\n\n"
       print_usage >&2
       return 1
     fi
-
-    generate_archetype . "${archetypes[@]}"
+    archetype_generate . "${archetypes[@]}"
   fi
-
   if ! "${skip_wrapper}"; then
-    generate_mvnw .
+    mvnw_generate .
   fi
-
   if ! "${skip_git}"; then
-    generate_git .
+    git_generate .
   fi
 
-  if [[ -f "${SETTINGS_XML_PATH}" ]]; then
-    rm -f "${SETTINGS_XML_PATH}"
-  fi
+  rm -f "${SETTINGS_XML_PATH}"
 }
 
 main "$@"
