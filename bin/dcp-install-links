@@ -3,16 +3,16 @@
 set -eo pipefail
 
 readonly OS="$(uname -s)"
-readonly NON_DCP_DOTFILES=( \
-  .bash_login               \
-  .profile                  \
-  .zlogin                   \
+readonly NON_DCP_DOTFILES=(
+  ".bash_login"
+  ".profile"
+  ".zlogin"
 )
 readonly DCP_CONFIG_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/dcp"
 readonly WARNING_SHOWN_FLAG_PATH="${DCP_CONFIG_DIR}/symlink-warning-shown"
-readonly PATH_MIGRATIONS=(                                  \
-	"${HOME}/.dcp/conf/plugins:${DCP_CONFIG_DIR}/plugins.lst" \
-	"${HOME}/.dcp/conf/theme:${DCP_CONFIG_DIR}/zsh-theme"     \
+readonly PATH_MIGRATIONS=(
+	"${HOME}/.dcp/conf/plugins:${DCP_CONFIG_DIR}/plugins.lst"
+	"${HOME}/.dcp/conf/theme:${DCP_CONFIG_DIR}/zsh-theme"
 )
 
 warnfln() {
@@ -57,8 +57,9 @@ if [[ "${OS}" = "Darwin" ]]; then
 else
   link_dotfile() {
     case "$(basename "$1")" in
-      khdrc|kwm|osx)  : ;;
-      *)              __link_dotfile "$@"
+      khdrc|kwm|macos)  : ;;
+      *)
+        __link_dotfile "$@"
     esac
   }
 fi
@@ -67,7 +68,10 @@ standard_cleanup() {
   if [[ "${OS}" = "Darwin" && ! -e "${HOME}/.hushlogin" ]]; then
     touch "${HOME}/.hushlogin"
   fi
-  if [[ "${OS}" != "Darwin" && -h "${HOME}/.osx" ]]; then
+  if [[ "${OS}" != "Darwin" && -h "${HOME}/.macos" ]]; then
+    rm -f "${HOME}/.macos"
+  fi
+  if [[ -h "${HOME}/.osx" ]]; then
     rm -f "${HOME}/.osx"
   fi
   if [[ -h "${HOME}/.gitignore_global" ]]; then
@@ -189,7 +193,6 @@ main() {
   fi
 
   if command -v git >/dev/null; then
-    # Only Git Things (tm)
     configure_git
   fi
 }

@@ -1,0 +1,178 @@
+#!/bin/bash
+
+readonly APPS=(
+  "Activity Monitor"
+  "Disk Utility"
+  "Dock"
+  "Finder"
+  "SystemUIServer"
+  "TextEdit"
+)
+readonly LAUNCH_AGENTS=(
+  "com.apple.cfprefsd.xpc.agent"
+)
+
+readonly OS_NAME="$(uname -s)"
+if [[ "${OS_NAME}" != "Darwin" ]]; then
+  printf >&2 "macOS required (\`uname -s\` was '%s')\n" \
+             "${OS_NAME}"
+  exit 1
+fi
+
+readonly OS_RELEASE="$(uname -r)"
+if [[ "${OS_RELEASE%%.*}" != "17" ]]; then
+  printf >&2 "macOS High Sierra required (\`uname -r\` was '%s')\n" \
+             "${OS_RELEASE}"
+  exit 1
+fi
+
+# Quit System Preferences to prevent overrides during script execution
+osascript -e 'tell application "System Preferences" to quit'
+
+# Ask for administrator privileges
+sudo -v
+
+# Ensure sudo's cached credentials stay valid
+while true; do
+  sudo -H -n /usr/bin/true
+  sleep 30
+  if ! kill -0 "$$"; then
+    exit
+  fi
+done >/dev/null 2>&1 &
+
+#
+# General UI/UX
+#
+
+# Set Help Viewer windows to non-floating mode
+defaults write com.apple.helpviewer DevMode -bool true
+
+# Show remaining battery percentage in the menu bar
+defaults write com.apple.menuextra.battery ShowPercent -string "YES"
+
+# Increase window resize speed
+defaults write -g NSWindowResizeTime -float 0.001
+
+# Save to disk by default
+defaults write -g NSDocumentSaveNewDocumentsToCloud -bool false
+
+# Expand save panel by default
+defaults write -g NSNavPanelExpandedStateForSaveMode -bool true
+defaults write -g NSNavPanelExpandedStateForSaveMode2 -bool true
+
+# Expand print panel by default
+defaults write -g PMPrintingExpandedStateForPrint -bool true
+defaults write -g PMPrintingExpandedStateForPrint2 -bool true
+
+# Display ASCII control characters using caret notation in standard text views
+defaults write -g NSTextShowsControlCharacters -bool true
+
+# Disable smart capitalization/dashes/periods/quotes for typing code
+defaults write -g NSAutomaticCapitalizationEnabled -bool false
+defaults write -g NSAutomaticDashSubstitutionEnabled -bool false
+defaults write -g NSAutomaticPeriodSubstitutionEnabled -bool false
+defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool false
+
+# Disable resuming apps on login
+defaults write -g NSQuitAlwaysKeepsWindows -bool false
+
+# Disable automatic termination of inactive apps
+defaults write -g NSDisableAutomaticTermination -bool true
+
+# Set standby delay (time until hibernate after entering sleep) to 12 hours
+sudo -H pmset -a standbydelay 43200
+
+# Restart automatically if the computer freezes
+sudo -H systemsetup -setrestartfreeze on
+
+#
+# Keyboard
+#
+
+# Set a stupid fast key repeat rate
+defaults write -g ApplePressAndHoldEnabled -bool false
+defaults write -g InitialKeyRepeat -int 25
+defaults write -g KeyRepeat -int 1
+
+#
+# Finder
+#
+
+# Don't creating .DS_Store files on network or USB volumes
+defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
+
+# Show all filename extensions
+defaults write -g AppleShowAllExtensions -bool true
+
+# Disable the warning when changing a file extension
+defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
+
+# Show the status bar
+defaults write com.apple.finder ShowStatusBar -bool true
+
+# Show the path bar
+defaults write com.apple.finder ShowPathbar -bool true
+
+# Show the /Volumes folder
+sudo -H chflags nohidden /Volumes
+
+# Show the ~/Library folder
+chflags nohidden "${HOME}/Library"
+
+#
+# Dock and Mission Control
+#
+
+# Automatically hide and show the Dock
+defaults write com.apple.dock autohide -bool true
+
+# Speed up Mission Control animations
+defaults write com.apple.dock expose-animation-duration -float 0.1
+
+# Change minimize/maximize window effect to scale
+defaults write com.apple.dock mineffect -string "scale"
+
+# Don’t automatically rearrange Spaces based on most recent use
+defaults write com.apple.dock mru-spaces -bool false
+
+# Make Dock icons of hidden applications translucent
+defaults write com.apple.dock showhidden -bool true
+
+#
+# Activity Monitor, Disk Utility, and TextEdit
+#
+
+# Visualize CPU usage in the Activity Monitor Dock icon
+defaults write com.apple.ActivityMonitor IconType -int 5
+
+# Show all processes in Activity Monitor
+defaults write com.apple.ActivityMonitor ShowCategory -int 0
+
+# Enable the debug menu in Disk Utility
+defaults write com.apple.DiskUtility advanced-image-options -bool true
+defaults write com.apple.DiskUtility DUDebugMenuEnabled -bool true
+
+# Use plain text mode for new TextEdit documents
+defaults write com.apple.TextEdit RichText -int 0
+
+# Open and save files as UTF-8 in TextEdit
+defaults write com.apple.TextEdit PlainTextEncoding -int 4
+defaults write com.apple.TextEdit PlainTextEncodingForWrite -int 4
+
+#
+# Finish
+#
+
+# Kill affected apps
+for app in "${APPS[@]}"; do
+  killall "${app}" >/dev/null 2>&1
+done
+
+# Kickstart affected agents
+for agent in "${LAUNCH_AGENTS[@]}"; do
+  launchctl kickstart -k "gui/${UID}/${agent}" >/dev/null 2>&1
+done
+
+printf "Done. Some changes will require a logout/reboot to take effect.\n"
