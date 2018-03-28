@@ -3,38 +3,38 @@
 #
 
 # Border colors... seems more like modes just need to be enumerated this way.
-khd mode default on_enter /usr/local/bin/kwmc config border focused color 0xddd5c4a1
-khd mode resize on_enter /usr/local/bin/kwmc config border focused color 0xddbdd322
+khd mode default on_enter chunkc set focused_border_color 0xffbdd322
+khd mode resize on_enter chunkc set focused_border_color 0xddbdd322
 
 
 #
 # ~~~ Resize Mode ~~~
 #
 
-alt + cmd - r                :   /usr/local/bin/khd -e "mode activate resize"
+alt + cmd - r                :   khd -e "mode activate resize"
 
 # Need to be able to jump around for this to be useful
-resize - h                   :   /usr/local/bin/kwmc display -f prev
-resize - j                   :   /usr/local/bin/kwmc window -f prev
-resize - k                   :   /usr/local/bin/kwmc window -f next
-resize - l                   :   /usr/local/bin/kwmc display -f next
+resize - h                   :   chunkc tiling::monitor -f prev
+resize - j                   :   chunkc tiling::window --focus prev
+resize - k                   :   chunkc tiling::window --focus next
+resize - l                   :   chunkc tiling::monitor -f next
 # 0x29 = ;
-resize - 0x29                :   /usr/local/bin/kwmc display -f next
+resize - 0x29                :   chunkc tiling::monitor -f next
 
 # Actual resize commands
-resize - left                :   /usr/local/bin/kwmc window -c expand 0.05 west
-resize + shift - left        :   /usr/local/bin/kwmc window -c reduce 0.05 west
-resize - down                :   /usr/local/bin/kwmc window -c expand 0.05 south
-resize + shift - down        :   /usr/local/bin/kwmc window -c reduce 0.05 south
-resize - up                  :   /usr/local/bin/kwmc window -c expand 0.05 north
-resize + shift - up          :   /usr/local/bin/kwmc window -c reduce 0.05 north
-resize - right               :   /usr/local/bin/kwmc window -c expand 0.05 east
-resize + shift - right       :   /usr/local/bin/kwmc window -c reduce 0.05 east
+resize - left                :   chunkc tiling::window --use-temporary-ratio 0.05 --adjust-window-edge west
+resize + shift - left        :   chunkc tiling::window --use-temporary-ratio -0.05 --adjust-window-edge west
+resize - down                :   chunkc tiling::window --use-temporary-ratio 0.05 --adjust-window-edge south
+resize + shift - down        :   chunkc tiling::window --use-temporary-ratio -0.05 --adjust-window-edge south
+resize - up                  :   chunkc tiling::window --use-temporary-ratio 0.05 --adjust-window-edge north
+resize + shift - up          :   chunkc tiling::window --use-temporary-ratio -0.05 --adjust-window-edge north
+resize - right               :   chunkc tiling::window --use-temporary-ratio 0.05 --adjust-window-edge east
+resize + shift - right       :   chunkc tiling::window --use-temporary-ratio -0.05 --adjust-window-edge east
 
 # Leave resize mode
 # 0x35 = esc
-resize - 0x35                :   /usr/local/bin/khd -e "mode activate default"
-resize - return              :   /usr/local/bin/khd -e "mode activate default"
+resize - 0x35                :   khd -e "mode activate default"
+resize - return              :   khd -e "mode activate default"
 
 
 #
@@ -42,70 +42,65 @@ resize - return              :   /usr/local/bin/khd -e "mode activate default"
 #
 
 # App launchers
-ctrl + alt + cmd - return    :   /usr/bin/osascript -e 'if application "iTerm" is running' -e 'tell application "iTerm" to create window with default profile' -e 'else' -e 'tell application "iTerm" to activate' -e 'end if'
-ctrl + alt + cmd - e         :   /usr/bin/osascript -e 'tell application "Emacs" to activate'
+ctrl + alt + cmd - return    :   osascript -e 'if application "iTerm" is running' -e 'tell application "iTerm" to create window with default profile' -e 'else' -e 'tell application "iTerm" to activate' -e 'end if'
+ctrl + alt + cmd - e         :   osascript -e 'tell application "Emacs" to activate'
 
 # Move focus by container
-alt + cmd - h                :   /usr/local/bin/kwmc window -f west
-alt + cmd - j                :   /usr/local/bin/kwmc window -f south
-alt + cmd - k                :   /usr/local/bin/kwmc window -f north
-alt + cmd - l                :   /usr/local/bin/kwmc window -f east
+alt + cmd - h                :   chunkc tiling::window --focus west
+alt + cmd - j                :   chunkc tiling::window --focus south
+alt + cmd - k                :   chunkc tiling::window --focus north
+alt + cmd - l                :   chunkc tiling::window --focus east
 # 0x29 = ;
-alt + cmd - 0x29             :   /usr/local/bin/kwmc window -f east
+alt + cmd - 0x29             :   chunkc tiling::window --focus east
 
 # Move focus by space - what a hack lol
-alt + shift - h              :   /usr/local/bin/kwmc space -fExperimental left; \
-                                 killall Dock
-alt + shift - l              :   /usr/local/bin/kwmc space -fExperimental right; \
-                                 killall Dock
+#alt + shift - h              :   kwmc space -fExperimental left; \
+#                                 killall Dock
+#alt + shift - l              :   kwmc space -fExperimental right; \
+#                                 killall Dock
 # # 0x29 = ;
-alt + shift - 0x29           :   /usr/local/bin/kwmc space -fExperimental right; \
-                                 killall Dock
+#alt + shift - 0x29           :   kwmc space -fExperimental right; \
+#                                 killall Dock
 
 # Move focus by display
-ctrl + alt + cmd - h         :   /usr/local/bin/kwmc display -f prev
-ctrl + alt + cmd - l         :   /usr/local/bin/kwmc display -f next
+ctrl + alt + cmd - h         :   chunkc tiling::monitor -f prev
+ctrl + alt + cmd - l         :   chunkc tiling::monitor -f next
 # 0x29 = ;
-ctrl + alt + cmd - 0x29      :   /usr/local/bin/kwmc display -f next
+ctrl + alt + cmd - 0x29      :   chunkc tiling::monitor -f next
 
 # Move window by container
-alt + cmd - left             :   /usr/local/bin/kwmc window -s west
-alt + cmd - down             :   /usr/local/bin/kwmc window -s south
-alt + cmd - up               :   /usr/local/bin/kwmc window -s north
-alt + cmd - right            :   /usr/local/bin/kwmc window -s east
+alt + cmd - left             :   chunkc tiling::window --warp west
+alt + cmd - down             :   chunkc tiling::window --warp south
+alt + cmd - up               :   chunkc tiling::window --warp north
+alt + cmd - right            :   chunkc tiling::window --warp east
 
 # Move window by space
-alt + shift - left           :   /usr/local/bin/kwmc window -m space left
-alt + shift - right          :   /usr/local/bin/kwmc window -m space right
-
-# Move window by space, move to that space - also what a hack lol
-alt + cmd + shift - left     :   /usr/local/bin/kwmc window -m space left; \
-                                 /usr/local/bin/kwmc space -fExperimental left; \
-                                 killall Dock
-alt + cmd + shift - right    :   /usr/local/bin/kwmc window -m space right; \
-                                 /usr/local/bin/kwmc space -fExperimental right; \
-                                 killall Dock
+alt + shift - left           :   chunkc tiling::window --send-to-desktop left
+alt + shift - right          :   chunkc tiling::window --send-to-desktop right
 
 # Move window by display
-ctrl + alt + cmd - left      :   /usr/local/bin/kwmc window -m display prev
-ctrl + alt + cmd - right     :   /usr/local/bin/kwmc window -m display next
+ctrl + alt + cmd - left      :   chunkc tiling::window --send-to-monitor prev
+ctrl + alt + cmd - right     :   chunkc tiling::window --send-to-monitor next
 
-# Fix the current space, for when things get screwy - instead of restarting kwm
-alt + cmd - space            :   /usr/local/bin/kwmc space -r focused
 # Make the current window fullscreen
-alt + cmd - f                :   /usr/local/bin/kwmc window -z fullscreen
+alt + cmd - f                :   chunkc tiling::window --toggle fullscreen
 # Toggle optimal/horizontal/vertical split mode
-alt + cmd - m                :   /usr/local/bin/kwmc window -c split-mode toggle
+alt + cmd - m                :   chunkc tiling::desktop --mirror horizontal
+alt + cmd + shift - m        :   chunkc tiling::desktop --mirror vertical
 # Float the current window
-alt + cmd - o                :   /usr/local/bin/kwmc window -t focused
+alt + cmd - o                :   chunkc tiling::window --toggle float
 
 # "Big global-ish sorts of things"
-ctrl + alt + cmd - b         :   /usr/local/bin/kwmc space -t bsp
-ctrl + alt + cmd - f         :   /usr/local/bin/kwmc space -t float
-ctrl + alt + cmd - m         :   /usr/local/bin/kwmc space -t monocle
-ctrl + alt + cmd - r         :   /usr/local/bin/kwmc tree rotate 90
+ctrl + alt + cmd - b         :   chunkc tiling::desktop --layout bsp
+ctrl + alt + cmd - f         :   chunkc tiling::desktop --layout float
+ctrl + alt + cmd - m         :   chunkc tiling::desktop --layout monocle
+ctrl + alt + cmd - r         :   chunkc tiling::desktop --rotate 90
 # Start screensaver
 alt + shift - space          :   sleep 1; \
-                                 /usr/bin/open -a /System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app
+                                 open -a /System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app
 # Lock the screen <3
-ctrl + alt + cmd - space     :   /usr/bin/pmset displaysleepnow
+ctrl + alt + cmd - space     :   pmset displaysleepnow
+
+# Fix screenshots with chunkwm
+cmd + shift - 3 ->           :   chunkc border::clear
+cmd + shift - 4 ->           :   chunkc border::clear

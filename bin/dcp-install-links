@@ -57,7 +57,7 @@ if [[ "${OS}" = "Darwin" ]]; then
 else
   link_dotfile() {
     case "$(basename "$1")" in
-      chunkwmrc|khdrc|kwm|macos)
+      chunkwmrc|khdrc|macos)
         :
         ;;
       *)
@@ -73,12 +73,13 @@ standard_cleanup() {
   if [[ "${OS}" != "Darwin" && -h "${HOME}/.macos" ]]; then
     rm -f "${HOME}/.macos"
   fi
-  if [[ -h "${HOME}/.osx" ]]; then
-    rm -f "${HOME}/.osx"
-  fi
-  if [[ -h "${HOME}/.gitignore_global" ]]; then
-    rm -f "${HOME}/.gitignore_global"
-  fi
+
+  local dotfile
+  for dotfile in gitignore_global kwm osx; do
+    if [[ -h "${HOME}/.${dotfile}" ]]; then
+      rm -f "${HOME}/.${dotfile}"
+    fi
+  done
 }
 
 perform_migrations() {
