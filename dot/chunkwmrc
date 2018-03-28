@@ -1,0 +1,146 @@
+#!/bin/bash
+
+#
+# NOTE: specify the absolutepath of the file to use for logging.
+#       'stdout' and 'stderr' are valid values.
+#
+
+chunkc core::log_file stdout
+
+#
+# NOTE: specify the desired level of logging.
+#
+#       - none, debug, warn, error
+#
+
+chunkc core::log_level warn
+
+#
+# NOTE: specify the absolutepath to the directory to use when
+#       loading a plugin. '~' expansion is supported.
+#
+
+chunkc core::plugin_dir /usr/local/opt/chunkwm/share/chunkwm/plugins
+
+#
+# NOTE: if enabled, chunkwm will monitor the specified plugin_dir
+#       and automatically reload any '.so' file that is changed.
+#
+
+chunkc core::hotload 0
+
+#
+# NOTE: the following are config variables for the chunkwm-tiling plugin.
+#
+
+chunkc set global_desktop_mode           bsp
+chunkc set 1_desktop_mode                monocle
+
+chunkc set global_desktop_offset_top     4
+chunkc set global_desktop_offset_bottom  4
+chunkc set global_desktop_offset_left    4
+chunkc set global_desktop_offset_right   4
+chunkc set global_desktop_offset_gap     4
+
+chunkc set desktop_padding_step_size     4.0
+chunkc set desktop_gap_step_size         4.0
+
+chunkc set bsp_spawn_left                1
+chunkc set bsp_optimal_ratio             1.618
+chunkc set bsp_split_mode                optimal
+chunkc set bsp_split_ratio               0.5
+
+chunkc set monitor_focus_cycle           1
+chunkc set window_focus_cycle            monitor
+
+chunkc set mouse_follows_focus           intrinsic
+chunkc set window_float_next             0
+chunkc set window_region_locked          1
+
+chunkc set mouse_modifier                fn
+
+chunkc set preselect_border_color        0xffcc5577
+chunkc set preselect_border_width        3
+chunkc set preselect_border_radius       6
+
+#
+# NOTE: these settings require chwm-sa.
+#       (https://github.com/koekeishiya/chwm-sa)
+#
+
+#chunkc set window_float_topmost          0
+#chunkc set window_fade_inactive          0
+#chunkc set window_fade_alpha             0.85
+#chunkc set window_fade_duration          0.25
+#chunkc set window_use_cgs_move           0
+
+#
+# NOTE: the following are config variables for the chunkwm-border plugin.
+#
+
+chunkc set focused_border_color          0xffbdd322
+chunkc set focused_border_width          1
+chunkc set focused_border_radius         6
+chunkc set focused_border_skip_floating  1
+
+#
+# NOTE: specify plugins to load when chunkwm starts.
+#       if chunkc plugin_dir is not set, the absolutepath is necessary.
+#
+
+chunkc core::load border.so
+chunkc core::load tiling.so
+#chunkc core::load ffm.so
+
+#
+# NOTE: shell commands require escaped quotes
+#       to pass value containing a whitespace.
+#
+
+chunkc tiling::rule --owner Emacs --except \"^$\" --state tile
+chunkc tiling::rule --owner iTerm --state tile
+chunkc tiling::rule --owner iTerm2 --state tile
+
+chunkc tiling::rule --owner \"App Store\" --state float
+chunkc tiling::rule --owner \"Android Studio\" --name \"Platform and Plugin Updates\" --state float
+chunkc tiling::rule --owner \"Android Studio\" --name Preferences --state float
+chunkc tiling::rule --owner \"Android Studio\" --name \"Project Structure\" --state float
+chunkc tiling::rule --owner \"Android Studio\" --name \"Welcome to Android Studio\" --state float
+chunkc tiling::rule --name \"Android Emulator\" --state float
+chunkc tiling::rule --owner \"Archive Utility\" --state float
+chunkc tiling::rule --owner Archiver --state float
+chunkc tiling::rule --owner Calculator --state float
+chunkc tiling::rule --owner Calendar --state float
+chunkc tiling::rule --owner Changes --state float
+chunkc tiling::rule --owner Contacts --state float
+chunkc tiling::rule --owner Dash --state float
+chunkc tiling::rule --owner Dropbox --state float
+chunkc tiling::rule --owner emulator64-arm --state float
+chunkc tiling::rule --owner FaceTime --state float
+chunkc tiling::rule --owner Finder --name Copy --state float
+chunkc tiling::rule --owner Firefox --name \"Launch Application\" --state float
+chunkc tiling::rule --owner Installer --state float
+chunkc tiling::rule --owner \"IntelliJ IDEA\" --name \"Platform and Plugin Updates\" --state float
+chunkc tiling::rule --owner \"IntelliJ IDEA\" --name Preferences --state float
+chunkc tiling::rule --owner \"IntelliJ IDEA\" --name \"Project Structure\" --state float
+chunkc tiling::rule --owner \"IntelliJ IDEA\" --name \"Welcome to IntelliJ IDEA\" --state float
+chunkc tiling::rule --owner \"League of Legends\" --state float
+chunkc tiling::rule --owner licecap --state float
+chunkc tiling::rule --owner Messages --state float
+chunkc tiling::rule --owner Photoshop --state float
+chunkc tiling::rule --owner qemu-system-i386 --state float
+chunkc tiling::rule --owner qemu-system-x86_64 --state float
+chunkc tiling::rule --owner \"QuickTime Player\" --state float
+chunkc tiling::rule --owner Screenhero --state float
+chunkc tiling::rule --owner \"Screen Sharing\" --state float
+chunkc tiling::rule --owner \"Script Editor\" --name Library --state float
+chunkc tiling::rule --owner \"Script Editor\" --name sdef --state float
+chunkc tiling::rule --owner Simulator --state float
+chunkc tiling::rule --owner \"Simulator \(Watch\)\" --state float
+chunkc tiling::rule --owner Steam --state float
+chunkc tiling::rule --owner \"System Preferences\" --state float
+chunkc tiling::rule --owner Transmission --state float
+chunkc tiling::rule --owner VirtualBox --state float
+chunkc tiling::rule --owner Viscosity --state float
+chunkc tiling::rule --owner \"VMware Fusion\" --state float
+chunkc tiling::rule --owner Zandronum --state float

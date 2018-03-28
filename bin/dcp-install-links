@@ -57,7 +57,9 @@ if [[ "${OS}" = "Darwin" ]]; then
 else
   link_dotfile() {
     case "$(basename "$1")" in
-      khdrc|kwm|macos)  : ;;
+      chunkwmrc|khdrc|kwm|macos)
+        :
+        ;;
       *)
         __link_dotfile "$@"
     esac
