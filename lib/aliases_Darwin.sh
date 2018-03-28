@@ -246,21 +246,30 @@ if [[ -h "/usr/local/opt/gnupg" ]]; then
   }
 fi
 
-# `brew services' wrappers for kwm and khd if installed via Homebrew
+# `brew services' wrappers for chunkwm, khd, and kwm if installed via Homebrew
 
-if [[ -d "/usr/local/opt/kwm" && -d "/usr/local/opt/khd" ]]; then
-  kwmctl() {
+if [[ -d "/usr/local/opt/chunkwm" ]]; then
+  chunkwmctl() {
     if (($# == 0)); then
       return 1
     fi
-    brew services "$@" koekeishiya/formulae/kwm
+    brew services "$@" crisidev/chunkwm/chunkwm
   }
-
+fi
+if [[ -d "/usr/local/opt/khd" ]]; then
   khdctl() {
     if (($# == 0)); then
       return 1
     fi
     brew services "$@" koekeishiya/formulae/khd
+  }
+fi
+if [[ -d "/usr/local/opt/kwm" ]]; then
+  kwmctl() {
+    if (($# == 0)); then
+      return 1
+    fi
+    brew services "$@" koekeishiya/formulae/kwm
   }
 fi
 
