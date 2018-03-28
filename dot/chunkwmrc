@@ -98,8 +98,6 @@ chunkc core::load tiling.so
 #
 
 chunkc tiling::rule --owner Emacs --except \"^$\" --state tile
-chunkc tiling::rule --owner iTerm --state tile
-chunkc tiling::rule --owner iTerm2 --state tile
 
 chunkc tiling::rule --owner \"App Store\" --state float
 chunkc tiling::rule --owner \"Android Studio\" --name \"Platform and Plugin Updates\" --state float
