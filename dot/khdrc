@@ -75,8 +75,8 @@ alt + cmd - up               :   chunkc tiling::window --warp north
 alt + cmd - right            :   chunkc tiling::window --warp east
 
 # Move window by space
-alt + shift - left           :   chunkc tiling::window --send-to-desktop left
-alt + shift - right          :   chunkc tiling::window --send-to-desktop right
+alt + shift - left           :   chunkc tiling::window --send-to-desktop prev
+alt + shift - right          :   chunkc tiling::window --send-to-desktop next
 
 # Move window by display
 ctrl + alt + cmd - left      :   chunkc tiling::window --send-to-monitor prev
