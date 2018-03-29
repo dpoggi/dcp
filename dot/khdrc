@@ -84,9 +84,10 @@ ctrl + alt + cmd - right     :   chunkc tiling::window --send-to-monitor next
 
 # Make the current window fullscreen
 alt + cmd - f                :   chunkc tiling::window --toggle fullscreen
-# Toggle optimal/horizontal/vertical split mode
-alt + cmd - m                :   chunkc tiling::desktop --mirror horizontal
-alt + cmd + shift - m        :   chunkc tiling::desktop --mirror vertical
+# Toggle horizontal/vertical split mode
+alt + cmd - m                :   chunkc tiling::window --toggle split
+# Equalize windows
+alt + cmd + shift - m        :   chunkc tiling::desktop --equalize
 # Float the current window
 alt + cmd - o                :   chunkc tiling::window --toggle float
 
