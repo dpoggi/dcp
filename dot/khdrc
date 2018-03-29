@@ -69,10 +69,14 @@ ctrl + alt + cmd - l         :   chunkc tiling::monitor -f next
 ctrl + alt + cmd - 0x29      :   chunkc tiling::monitor -f next
 
 # Move window by container
-alt + cmd - left             :   chunkc tiling::window --warp west
-alt + cmd - down             :   chunkc tiling::window --warp south
-alt + cmd - up               :   chunkc tiling::window --warp north
-alt + cmd - right            :   chunkc tiling::window --warp east
+alt + cmd - left             :   chunkc tiling::window --swap west
+alt + cmd + shift - left     :   chunkc tiling::window --warp west
+alt + cmd - down             :   chunkc tiling::window --swap south
+alt + cmd + shift - down     :   chunkc tiling::window --warp south
+alt + cmd - up               :   chunkc tiling::window --swap north
+alt + cmd + shift - up       :   chunkc tiling::window --warp north
+alt + cmd - right            :   chunkc tiling::window --swap east
+alt + cmd + shift - right    :   chunkc tiling::window --warp east
 
 # Move window by space
 alt + shift - left           :   chunkc tiling::window --send-to-desktop prev
