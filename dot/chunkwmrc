@@ -125,6 +125,7 @@ chunkc tiling::rule --owner \"IntelliJ IDEA\" --name \"Welcome to IntelliJ IDEA\
 chunkc tiling::rule --owner \"League of Legends\" --state float
 chunkc tiling::rule --owner licecap --state float
 chunkc tiling::rule --owner Messages --state float
+chunkc tiling::rule --owner muCommander --name \"Quit muCommander\" --state float
 chunkc tiling::rule --owner Photoshop --state float
 chunkc tiling::rule --owner qemu-system-i386 --state float
 chunkc tiling::rule --owner qemu-system-x86_64 --state float
