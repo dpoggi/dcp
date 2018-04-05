@@ -117,6 +117,7 @@ chunkc tiling::rule --owner emulator64-arm --state float
 chunkc tiling::rule --owner FaceTime --state float
 chunkc tiling::rule --owner Finder --name Copy --state float
 chunkc tiling::rule --owner Firefox --name \"Launch Application\" --state float
+chunkc tiling::rule --owner Firefox --name Library --state float
 chunkc tiling::rule --owner Installer --state float
 chunkc tiling::rule --owner \"IntelliJ IDEA\" --name \"Platform and Plugin Updates\" --state float
 chunkc tiling::rule --owner \"IntelliJ IDEA\" --name Preferences --state float
