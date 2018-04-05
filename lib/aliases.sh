@@ -2,16 +2,16 @@
 # General aliases
 #
 
+. "${DCP}/lib/util.sh"
+
 alias c="clear"
 alias ll="ls -la"
 alias la="ls -a"
 alias h="history | tail -32"
 
-if [[ "${DCP_SHELL}" = "bash" ]]; then
+if __is_bash; then
   alias grep="grep --color=auto"
 fi
-
-. "${DCP}/lib/util.sh"
 
 ext_ip() {
   local ip_version="4"

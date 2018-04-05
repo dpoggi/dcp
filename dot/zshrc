@@ -29,6 +29,10 @@ fi
 # Load oh-my-zsh
 . "${ZSH}/oh-my-zsh.sh"
 
+# Completion aliasing for Git aliases
+compdef _git gp=git-push
+compdef _git gpl=git-pull
+
 # Completion aliasing for GitHub CLI
 if __is_command hub; then
   git() { hub "$@"; }
