@@ -135,6 +135,7 @@ chunkc tiling::rule --owner Screenhero --state float
 chunkc tiling::rule --owner \"Screen Sharing\" --state float
 chunkc tiling::rule --owner \"Script Editor\" --name Library --state float
 chunkc tiling::rule --owner \"Script Editor\" --name sdef --state float
+chunkc tiling::rule --owner \"SD Card Formatter\" --state float
 chunkc tiling::rule --owner Simulator --state float
 chunkc tiling::rule --owner \"Simulator \(Watch\)\" --state float
 chunkc tiling::rule --owner Steam --state float
