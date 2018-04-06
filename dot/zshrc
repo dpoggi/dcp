@@ -10,7 +10,7 @@ if [[ " ${TERM} " = *256color* ]]; then
   plugins+=(emoji)
 fi
 
-# Mac-specific plugins
+# macOS-specific plugins
 if [[ "${DCP_OS}" = "Darwin" ]]; then
   plugins+=(brew-cask osx)
 fi
@@ -26,18 +26,46 @@ fi
 # Load most of dcp
 . "${DCP}/lib/init.sh"
 
+# Remove broken Homebrew Git completions before they cause a problem
+if [[ "${DCP_OS}" = "Darwin" && -h "/usr/local/share/zsh/site-functions/_git" ]]; then
+  rm -f "/usr/local/share/zsh/site-functions/_git"
+fi
+
 # Load oh-my-zsh
 . "${ZSH}/oh-my-zsh.sh"
 
-# Completion aliasing for Git aliases
-compdef _git gp=git-push
-compdef _git gpl=git-pull
-
-# Completion aliasing for GitHub CLI
+# GitHub CLI
 if __is_command hub; then
   git() { hub "$@"; }
-  if __is_function compdef; then
-     compdef hub=git
+fi
+
+# Completion aliasing
+if __is_function compdef; then
+  compdef _git ga=git-add
+  compdef _git gb=git-branch
+  compdef _git gc=git-commit
+  compdef _git gcane=git-commit
+  compdef _git gcm=git-commit
+  compdef _git gco=git-checkout
+  compdef _git gd=git-diff
+  compdef _git gds=git-diff
+  compdef _git gdt=git-describe
+  compdef _git gf=git-fetch
+  compdef _git ggr=git-grep
+  compdef _git gl=git-log
+  compdef _git gll=git-log
+  compdef _git gm=git-merge
+  compdef _git gp=git-push
+  compdef _git gpl=git-pull
+  compdef _git gr=git-rebase
+  compdef _git grv=git-remote
+  compdef _git gs=git-status
+  compdef _git gsa=git-stash
+  compdef _git gsl=git-stash
+  compdef _git gst=git-stash
+
+  if __is_command hub; then
+    compdef hub=git
   fi
 fi
 
