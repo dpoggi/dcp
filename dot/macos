@@ -92,7 +92,7 @@ sudo -H systemsetup -setrestartfreeze on
 
 # Set a stupid fast key repeat rate
 defaults write -g ApplePressAndHoldEnabled -bool false
-defaults write -g InitialKeyRepeat -int 25
+defaults write -g InitialKeyRepeat -int 30
 defaults write -g KeyRepeat -int 1
 
 #
