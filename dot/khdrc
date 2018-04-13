@@ -43,7 +43,7 @@ resize - return              :   khd -e "mode activate default"
 
 # App launchers
 ctrl + alt + cmd - return    :   osascript -e 'if application "iTerm" is running' -e 'tell application "iTerm" to create window with default profile' -e 'else' -e 'tell application "iTerm" to activate' -e 'end if'
-ctrl + alt + cmd - e         :   osascript -e 'tell application "Emacs" to activate'
+ctrl + alt + cmd - e         :   open -a Emacs
 
 # Move focus by container
 alt + cmd - h                :   chunkc tiling::window --focus west
@@ -101,8 +101,7 @@ ctrl + alt + cmd - f         :   chunkc tiling::desktop --layout float
 ctrl + alt + cmd - m         :   chunkc tiling::desktop --layout monocle
 ctrl + alt + cmd - r         :   chunkc tiling::desktop --rotate 90
 # Start screensaver
-alt + shift - space          :   sleep 1; \
-                                 open -a /System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app
+alt + shift - space          :   sleep 1; open -a ScreenSaverEngine
 # Lock the screen <3
 ctrl + alt + cmd - space     :   pmset displaysleepnow
 
