@@ -215,10 +215,21 @@ coreaudioctl() {
   "${DCP}/libexec/lctl.sh" system "$1" /System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist
 }
 
+# launchctl wrapper for bluetoothd
+bluetoothctl() {
+  local action
+  case "$1" in
+    stop)     return 1            ;;
+    restart)  action="kickstart"  ;;
+    *)        action="$1"
+  esac
+
+  "${DCP}/libexec/lctl.sh" system "${action}" /System/Library/LaunchDaemons/com.apple.bluetoothd.plist
+}
+
 # launchctl wrapper for cfprefsd agent (clear file locks / empty the trash)
 cfprefsctl() {
   local action
-
   case "$1" in
     stop)     return 1            ;;
     restart)  action="kickstart"  ;;
