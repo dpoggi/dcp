@@ -11,12 +11,15 @@ declare -a PREFIX
 
 __filter_stdout() { sed -e '/36: /d'; }
 
-__launchctl() {
-  local was_errexit
+__get_errexit_flag() {
   case " $- " in
-    *e*)  was_errexit="true";;
-    *)    was_errexit="false"
+    *e*)  printf "true";;
+    *)    printf "false"
   esac
+}
+
+__launchctl() {
+  local was_errexit="$(__get_errexit_flag)"
 
   if "${was_errexit}"; then set +e; fi
 
@@ -65,6 +68,7 @@ launchctl() {
   __log_action "${action}"
 
   case "${action}" in
+    bootstrap)            __launchctl "${action}" "${DOMAIN_TARGET}" "${SERVICE_PATH}";;
     stop)
       if "${BOOTOUT}"; then
         __launchctl bootout "${SERVICE_TARGET}"
@@ -72,9 +76,8 @@ launchctl() {
         __launchctl unload -F "${SERVICE_PATH}"
       fi
       ;;
-    bootstrap)            __launchctl "${action}" "${DOMAIN_TARGET}" "${SERVICE_PATH}";;
-    blame|disable|enable) __launchctl "${action}" "${SERVICE_TARGET}";;
     kickstart)            __launchctl kickstart -k "${SERVICE_TARGET}";;
+    blame|enable|disable) __launchctl "${action}" "${SERVICE_TARGET}";;
   esac
 }
 
@@ -91,10 +94,9 @@ launchctl_status() {
   )
 
   local service_status
-
   case "${exit_status}" in
-      0) service_status="Running" ;;
-      *) service_status="Stopped"
+      0)  service_status="Running";;
+      *)  service_status="Stopped"
   esac
 
   infofln "%s" "${SERVICE_TARGET}"
@@ -102,8 +104,6 @@ launchctl_status() {
   infofln "Status: %s" "${service_status}"
   infofln "Reason: %s" "${reason}"
 }
-
-__get_macos_version() { sw_vers -productVersion | cut -d '.' -f 2; }
 
 __is_domain_target_global() { [[ "$1" != gui* && "$1" != user* ]]; }
 
@@ -118,7 +118,8 @@ __get_domain_target() {
 __get_service_name() { /usr/libexec/PlistBuddy -c 'Print :Label' "$1"; }
 
 configure_service() {
-  if [[ "$(__get_macos_version)" -ge "11" ]]; then
+  local macos_version="$(sw_vers -productVersion | cut -d '.' -f 2)"
+  if ((${macos_version} >= 11)); then
     BOOTOUT="true"
   else
     BOOTOUT="false"
@@ -143,25 +144,20 @@ EOT
 }
 
 main() {
-  local wrapper="$1"
-  local domain="$2"
-  local service_path="$3"
+  local wrapper="$1" domain="$2" service_path="$3"
   local action="$4"
 
   configure_service "${wrapper}" "${domain}" "${service_path}"
 
   case "${action}" in
-    help)       print_usage; return ;;
-    status)     launchctl_status    ;;
-    start)      launchctl bootstrap ;;
-    stop)       launchctl stop      ;;
-    restart)
-      launchctl stop
-      launchctl bootstrap
-      ;;
-    kickstart)  launchctl kickstart ;;
-    enable)     launchctl enable    ;;
-    disable)    launchctl disable   ;;
+    help)       print_usage; return;;
+    status)     launchctl_status;;
+    start)      launchctl bootstrap;;
+    stop)       launchctl stop;;
+    restart)    launchctl stop; launchctl bootstrap;;
+    kickstart)  launchctl kickstart;;
+    enable)     launchctl enable;;
+    disable)    launchctl disable;;
     unstoppable)
       errorfln >&2 "%s cannot be stopped" "${SERVICE_TARGET}"
       return 1
