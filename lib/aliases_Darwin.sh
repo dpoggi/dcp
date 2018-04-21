@@ -205,38 +205,41 @@ launchd_export() {
   launchctl setenv "$1" "$(__valueof "$1")"
 }
 
+# "action transformer" for protected services that can't be stopped traditionally
+__lctl_protected_action() {
+  case "$1" in
+    stop)     printf "unstoppable";;
+    restart)  printf "kickstart";;
+    *)        printf "%s" "$1"
+  esac
+}
+
 # launchctl wrapper for apsd (Apple Push Service: Messages.app, etc.)
 apsctl() {
-  "${DCP}/libexec/lctl.sh" system "$1" /System/Library/LaunchDaemons/com.apple.apsd.plist
+  "${DCP}/libexec/lctl.sh" apsctl \
+                           system /System/Library/LaunchDaemons/com.apple.apsd.plist \
+                           "$(__lctl_protected_action "$1")"
 }
 
 # launchctl wrapper for CoreAudio (because sometimes there be dragons)
 coreaudioctl() {
-  "${DCP}/libexec/lctl.sh" system "$1" /System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist
+  "${DCP}/libexec/lctl.sh" coreaudioctl \
+                           system /System/Library/LaunchDaemons/com.apple.audio.coreaudiod.plist \
+                           "$1"
 }
 
 # launchctl wrapper for bluetoothd
 bluetoothctl() {
-  local action
-  case "$1" in
-    stop)     return 1            ;;
-    restart)  action="kickstart"  ;;
-    *)        action="$1"
-  esac
-
-  "${DCP}/libexec/lctl.sh" system "${action}" /System/Library/LaunchDaemons/com.apple.bluetoothd.plist
+  "${DCP}/libexec/lctl.sh" bluetoothctl \
+                           system /System/Library/LaunchDaemons/com.apple.bluetoothd.plist \
+                           "$(__lctl_protected_action "$1")"
 }
 
 # launchctl wrapper for cfprefsd agent (clear file locks / empty the trash)
 cfprefsctl() {
-  local action
-  case "$1" in
-    stop)     return 1            ;;
-    restart)  action="kickstart"  ;;
-    *)        action="$1"
-  esac
-
-  "${DCP}/libexec/lctl.sh" user "${action}" /System/Library/LaunchAgents/com.apple.cfprefsd.xpc.agent.plist
+  "${DCP}/libexec/lctl.sh" cfprefsctl \
+                           user /System/Library/LaunchAgents/com.apple.cfprefsd.xpc.agent.plist \
+                           "$(__lctl_protected_action "$1")"
 }
 
 # gpgconf wrapper for gpg-agent, if installed via Homebrew

@@ -1,77 +1,68 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -eo pipefail
 
 . "${HOME}/.dcp/lib/logging.sh"
 
-readonly LAUNCHCTL_PATH="$(command -v launchctl)"
+readonly LAUNCHCTL="$(command -v launchctl)"
 
-declare BOOTOUT DOMAIN_TARGET SERVICE_PATH SERVICE_TARGET
-declare -a CMD_PREFIX
+declare BOOTOUT WRAPPER DOMAIN_TARGET SERVICE_PATH SERVICE_TARGET
+declare -a PREFIX
 
-__filter_output() {
-  sed -e '/36: /d'
-}
+__filter_stdout() { sed -e '/36: /d'; }
 
 __launchctl() {
   local was_errexit
-
   case " $- " in
-      *e*) was_errexit="true"   ;;
-      *)   was_errexit="false"
+    *e*)  was_errexit="true";;
+    *)    was_errexit="false"
   esac
 
-  set +e
+  if "${was_errexit}"; then set +e; fi
 
-  "${CMD_PREFIX[@]}" "${LAUNCHCTL_PATH}" "$@" 2>&1 | __filter_output
-
+  "${PREFIX[@]}" "${LAUNCHCTL}" "$@" 2>&1 | __filter_stdout
   local exit_status="$?"
 
-  if "${was_errexit}"; then
-    set -e
-  fi
+  if "${was_errexit}"; then set -e; fi
 
   case "${exit_status}" in
-    36) return ;;
-    *)  return "${exit_status}"
+    36) return;;
   esac
+
+  return "${exit_status}"
 }
 
-__log_launchctl_action() {
-  local verb
-
+__log_action() {
+  local participle
   case "$1" in
-    stop)       verb="Stopping"     ;;
-    bootstrap)  verb="Starting"     ;;
-    disable)    verb="Disabling"    ;;
-    enable)     verb="Enabling"     ;;
-    kickstart)  verb="Kickstarting" ;;
+    stop)       participle="Stopping";;
+    bootstrap)  participle="Starting";;
+    disable)    participle="Disabling";;
+    enable)     participle="Enabling";;
+    kickstart)  participle="Kickstarting";;
   esac
 
-  if [[ -n "${verb}" ]]; then
-    infofln "%s %s ..." "${verb}" "${SERVICE_TARGET}"
+  if [[ -n "${participle}" ]]; then
+    infofln "%s %s ..." "${participle}" "${SERVICE_TARGET}"
   fi
 }
 
 launchctl() {
   local action="$1"
 
-  case "${action}" in
-    stop|kickstart)
-      if ! launchctl blame >/dev/null; then
-        warnfln "%s is not running" "${SERVICE_TARGET}"
-        return 1
-      fi
-      ;;
-    bootstrap)
-      if launchctl blame >/dev/null; then
-        warnfln "%s is already running" "${SERVICE_TARGET}"
-        return 1
-      fi
-      ;;
-  esac
+  if [[ "${action}" = "stop" ]]; then
+    if ! launchctl blame >/dev/null; then
+      warnfln "%s is not running" "${SERVICE_TARGET}"
+      return 1
+    fi
+  elif [[ "${action}" = "bootstrap" ]]; then
+    if launchctl blame >/dev/null; then
+      warnfln "%s is already running" "${SERVICE_TARGET}"
+      return 1
+    fi
+  fi
 
-  __log_launchctl_action "${action}"
+  __log_action "${action}"
 
   case "${action}" in
     stop)
@@ -81,15 +72,9 @@ launchctl() {
         __launchctl unload -F "${SERVICE_PATH}"
       fi
       ;;
-    bootstrap)
-      __launchctl "${action}" "${DOMAIN_TARGET}" "${SERVICE_PATH}"
-      ;;
-    blame|disable|enable)
-      __launchctl "${action}" "${SERVICE_TARGET}"
-      ;;
-    kickstart)
-      __launchctl kickstart -k "${SERVICE_TARGET}"
-      ;;
+    bootstrap)            __launchctl "${action}" "${DOMAIN_TARGET}" "${SERVICE_PATH}";;
+    blame|disable|enable) __launchctl "${action}" "${SERVICE_TARGET}";;
+    kickstart)            __launchctl kickstart -k "${SERVICE_TARGET}";;
   esac
 }
 
@@ -98,7 +83,12 @@ launchctl_status() {
 
   while IFS='' read -r line || ! exit_status="${line}"; do
     reason+="${line}"
-  done < <(set +e; launchctl blame; printf "%s" "$?"; set -e)
+  done < <(
+    set +e
+    launchctl blame
+    printf "%s" "$?"
+    set -e
+  )
 
   local service_status
 
@@ -113,9 +103,7 @@ launchctl_status() {
   infofln "Reason: %s" "${reason}"
 }
 
-__get_macos_version() {
-  /usr/bin/sw_vers -productVersion | command cut -d '.' -f 2
-}
+__get_macos_version() { sw_vers -productVersion | cut -d '.' -f 2; }
 
 __is_domain_target_global() { [[ "$1" != gui* && "$1" != user* ]]; }
 
@@ -127,9 +115,7 @@ __get_domain_target() {
   fi
 }
 
-__get_service_name() {
-  /usr/libexec/PlistBuddy -c 'Print :Label' "$1"
-}
+__get_service_name() { /usr/libexec/PlistBuddy -c 'Print :Label' "$1"; }
 
 configure_service() {
   if [[ "$(__get_macos_version)" -ge "11" ]]; then
@@ -138,38 +124,52 @@ configure_service() {
     BOOTOUT="false"
   fi
 
-  DOMAIN_TARGET="$(__get_domain_target "$1")"
-  SERVICE_PATH="$(realpath -q "$2")"
+  WRAPPER="$1"
+  DOMAIN_TARGET="$(__get_domain_target "$2")"
+  SERVICE_PATH="$(cd "$(dirname "$3")" && pwd -P)/$(basename "$3")"
   SERVICE_TARGET="${DOMAIN_TARGET}/$(__get_service_name "${SERVICE_PATH}")"
 
   if __is_domain_target_global "${DOMAIN_TARGET}"; then
-    CMD_PREFIX=(sudo -H)
-  else
-    CMD_PREFIX=(command)
+    PREFIX=(sudo -H)
   fi
 
-  readonly BOOTOUT DOMAIN_TARGET SERVICE_PATH SERVICE_TARGET CMD_PREFIX
+  readonly BOOTOUT WRAPPER DOMAIN_TARGET SERVICE_PATH SERVICE_TARGET PREFIX
+}
+
+print_usage() {
+  cat <<EOT
+Usage: ${WRAPPER} (help|status|start|stop|restart|kickstart|enable|disable)
+EOT
 }
 
 main() {
-  local domain="$1"
-  local action="$2"
+  local wrapper="$1"
+  local domain="$2"
   local service_path="$3"
+  local action="$4"
 
-  configure_service "${domain}" "${service_path}"
+  configure_service "${wrapper}" "${domain}" "${service_path}"
 
   case "${action}" in
-    stop)       launchctl stop      ;;
+    help)       print_usage; return ;;
+    status)     launchctl_status    ;;
     start)      launchctl bootstrap ;;
+    stop)       launchctl stop      ;;
     restart)
       launchctl stop
       launchctl bootstrap
       ;;
-    disable)    launchctl disable   ;;
-    enable)     launchctl enable    ;;
     kickstart)  launchctl kickstart ;;
-    status)     launchctl_status    ;;
-    *)          return 1
+    enable)     launchctl enable    ;;
+    disable)    launchctl disable   ;;
+    unstoppable)
+      errorfln >&2 "%s cannot be stopped" "${SERVICE_TARGET}"
+      return 1
+      ;;
+    *)
+      errorfln >&2 "'%s' is not a valid action\n" "${action}"
+      print_usage >&2
+      return 1
   esac
 }
 
