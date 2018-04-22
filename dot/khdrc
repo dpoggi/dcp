@@ -100,6 +100,9 @@ ctrl + alt + cmd - b         :   chunkc tiling::desktop --layout bsp
 ctrl + alt + cmd - f         :   chunkc tiling::desktop --layout float
 ctrl + alt + cmd - m         :   chunkc tiling::desktop --layout monocle
 ctrl + alt + cmd - r         :   chunkc tiling::desktop --rotate 90
+
+ctrl + alt + cmd + shift - r :   brew services restart crisidev/chunkwm/chunkwm
+
 # Start screensaver
 alt + shift - space          :   sleep 1; open -a ScreenSaverEngine
 # Lock the screen <3
