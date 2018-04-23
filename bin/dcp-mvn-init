@@ -2,11 +2,11 @@
 
 set -eo pipefail
 
-readonly MAVEN_VERSION="3.5.2"
+readonly MAVEN_VERSION="3.5.3"
 readonly ARCHETYPE_PRESETS=(                                    \
   "org.apache.maven.archetypes:maven-archetype-quickstart:1.1"  \
-  "org.jetbrains.kotlin:kotlin-archetype-jvm:1.2.30"            \
-  "com.github.dpoggi:jee7-archetype:1.0"                        \
+  "org.jetbrains.kotlin:kotlin-archetype-jvm:1.2.40"            \
+  "com.github.dpoggi:jee7-archetype:1.1"                        \
 )
 
 readonly KERNEL_NAME="$(uname -s)"
