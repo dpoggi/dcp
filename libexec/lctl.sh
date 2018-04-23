@@ -115,7 +115,7 @@ __get_domain_target() {
   fi
 }
 
-__get_service_name() { /usr/libexec/PlistBuddy -c 'Print :Label' "$1"; }
+__get_service_label() { /usr/libexec/PlistBuddy -c 'Print :Label' "$1" 2>/dev/null; }
 
 configure_service() {
   local macos_version="$(sw_vers -productVersion | cut -d '.' -f 2)"
@@ -127,8 +127,13 @@ configure_service() {
 
   WRAPPER="$1"
   DOMAIN_TARGET="$(__get_domain_target "$2")"
+
   SERVICE_PATH="$(cd "$(dirname "$3")" && pwd -P)/$(basename "$3")"
-  SERVICE_TARGET="${DOMAIN_TARGET}/$(__get_service_name "${SERVICE_PATH}")"
+  if [[ ! -s "${SERVICE_PATH}" ]]; then
+    return 1
+  fi
+
+  SERVICE_TARGET="${DOMAIN_TARGET}/$(__get_service_label "${SERVICE_PATH}")"
 
   if __is_domain_target_global "${DOMAIN_TARGET}"; then
     PREFIX=(sudo -H)
