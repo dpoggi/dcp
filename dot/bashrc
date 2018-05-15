@@ -6,6 +6,11 @@ readonly DCP="${HOME}/.dcp"
 # Set up completion
 . "${DCP}/lib/bash_completion.sh"
 
+# fzf, if applicable
+if [[ -s "${HOME}/.fzf.bash" ]]; then
+  . "${HOME}/.fzf.bash"
+fi
+
 # PS1
 . "${DCP}/lib/ps1.sh"
 

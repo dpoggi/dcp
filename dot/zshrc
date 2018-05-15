@@ -69,6 +69,11 @@ if __is_function compdef; then
   fi
 fi
 
+# fzf, if applicable
+if [[ -s "${HOME}/.fzf.zsh" ]]; then
+  . "${HOME}/.fzf.zsh"
+fi
+
 # Enable fallback behavior when glob matching fails
 unsetopt nomatch
 
