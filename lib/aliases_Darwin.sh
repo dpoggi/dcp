@@ -2,21 +2,38 @@
 # Xcode aliases
 #
 
+# Get the path of the currently selected Xcode.
+__xcode_path() {
+  local developer_dir
+
+  developer_dir="$(xcode-select -p 2>/dev/null)"
+  if [[ "${developer_dir}" != *".app"* ]]; then
+    return
+  fi
+
+  while [[ "${developer_dir##*.}" != "app" ]]; do
+    developer_dir="$(dirname "${developer_dir}")"
+    if [[ "${#developer_dir}" -le 1 ]]; then
+      return
+    fi
+  done
+
+  printf "%s" "${developer_dir}"
+}
+
 # Open Xcode for current folder (prefers workspace to project)
 xc() {
-  open -a "/Applications/Xcode.app" "${1:-.}"
+  open -a "$(__xcode_path)" "${1:-.}"
 }
-# Same for Xcode beta versions (has __nothing__ to do with X11 :o)
-xcb() {
-  open -a "/Applications/Xcode-beta.app" "${1:-.}"
-}
+
 # Dammit Xcode (delete derived data twice a day for entire career as needed)
 fuxcode() {
   rm -rf "${HOME}/Library/Developer/Xcode/DerivedData"
 }
+
 # Verify Xcode installation
 haxcode() {
-  spctl --assess --verbose "/Applications/Xcode.app"
+  spctl --assess --verbose "$(__xcode_path)"
 }
 
 
