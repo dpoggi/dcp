@@ -116,6 +116,8 @@ chunkc tiling::rule --owner Archiver --state float
 chunkc tiling::rule --owner Calculator --state float
 chunkc tiling::rule --owner Calendar --state float
 chunkc tiling::rule --owner Changes --state float
+chunkc tiling::rule --owner Charles --name \"Preferences\" --state float
+chunkc tiling::rule --owner Charles --name \"Settings\" --state float
 chunkc tiling::rule --owner Contacts --state float
 chunkc tiling::rule --owner Dash --state float
 chunkc tiling::rule --owner DisplayCAL --state float
