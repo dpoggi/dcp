@@ -2,18 +2,21 @@
 # Xcode aliases
 #
 
-# Get the path of the currently selected Xcode.
-__xcode_path() {
+# Get the path of the currently selected Xcode, or use the app name
+# if the command line tools are selected.
+__xcode_app() {
   local developer_dir
 
   developer_dir="$(xcode-select -p 2>/dev/null)"
   if [[ "${developer_dir}" != *".app"* ]]; then
+    printf "Xcode"
     return
   fi
 
   while [[ "${developer_dir##*.}" != "app" ]]; do
     developer_dir="$(dirname "${developer_dir}")"
     if [[ "${#developer_dir}" -le 1 ]]; then
+      printf "Xcode"
       return
     fi
   done
@@ -23,7 +26,7 @@ __xcode_path() {
 
 # Open Xcode for current folder (prefers workspace to project)
 xc() {
-  open -a "$(__xcode_path)" "${1:-.}"
+  open -a "$(__xcode_app)" "${1:-.}"
 }
 
 # Dammit Xcode (delete derived data twice a day for entire career as needed)
@@ -33,7 +36,7 @@ fuxcode() {
 
 # Verify Xcode installation
 haxcode() {
-  spctl --assess --verbose "$(__xcode_path)"
+  spctl --assess --verbose "$(__xcode_app)"
 }
 
 
