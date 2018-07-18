@@ -146,15 +146,18 @@ configure_git() {
 
   if [[ "${OS}" = "Darwin" ]]; then
     __maybe_git_config "core.trustctime" "false"
+    __maybe_git_config "diff.mobileprovision.textconv" "openssl smime -inform der -verify -in"
     __maybe_git_config "diff.plist.textconv" "plutil -convert xml1 -o -"
-    __maybe_git_config "diff.provision.textconv" "openssl smime -inform der -verify -in"
+    __maybe_git_config "diff.utf16.textconv" "iconv -f utf-16 -t utf-8"
 
+    if ! grep -q '^\*\.mobileprovision' "${HOME}/.gitattributes"; then
+      printf "*.mobileprovision diff=mobileprovision\n" >>"${HOME}/.gitattributes"
+    fi
     if ! grep -q '^\*\.plist' "${HOME}/.gitattributes"; then
       printf "*.plist diff=plist\n" >>"${HOME}/.gitattributes"
     fi
-
-    if ! grep -q '^\*\.mobileprovision' "${HOME}/.gitattributes"; then
-      printf "*.mobileprovision diff=provision\n" >>"${HOME}/.gitattributes"
+    if ! grep -q '^\*\.strings' "${HOME}/.gitattributes"; then
+      printf "*.strings diff=utf16\n" >>"${HOME}/.gitattributes"
     fi
   fi
 }
