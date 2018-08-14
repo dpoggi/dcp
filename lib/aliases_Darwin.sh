@@ -98,7 +98,7 @@ boop() {
 
   __boop_ruby unlink
 
-  brew cleanup --prune=all
+  brew cleanup --prune=all -s
 }
 
 boop_cask() {
@@ -114,7 +114,7 @@ boop_cask() {
     return 1
   fi
 
-  brew cask cleanup
+  brew cleanup --prune=all -s
 }
 
 # Code signing helper for Homebrew binaries (notably GDB)
