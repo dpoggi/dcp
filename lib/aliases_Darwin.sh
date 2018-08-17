@@ -151,7 +151,7 @@ copy_md5() {
     return 1
   fi
   
-  local sum="$(md5 -q "$1")"
+  local sum="$(/sbin/md5 -q "$1")"
   printf "%s" "${sum}" | pbcopy
   printf "%s\n" "${sum}"
 }
@@ -162,7 +162,7 @@ __copy_sha() {
     return 1
   fi
 
-  local sum="$(shasum -p -a "$1" "$2" | cut -d ' ' -f 1)"
+  local sum="$(/usr/bin/shasum -p -a "$1" "$2" | cut -d ' ' -f 1)"
   printf "%s" "${sum}" | pbcopy
   printf "%s\n" "${sum}"
 }
