@@ -141,6 +141,7 @@ chunkc tiling::rule --owner Photoshop --state float
 chunkc tiling::rule --owner qemu-system-i386 --state float
 chunkc tiling::rule --owner qemu-system-x86_64 --state float
 chunkc tiling::rule --owner \"QuickTime Player\" --state float
+chunkc tiling::rule --owner SceneBuilder --state float
 chunkc tiling::rule --owner Screenhero --state float
 chunkc tiling::rule --owner \"Screen Sharing\" --state float
 chunkc tiling::rule --owner \"Script Editor\" --name Library --state float
