@@ -4,13 +4,13 @@
 
 . "${DCP}/lib/util.sh"
 
-alias c="clear"
-alias ll="ls -la"
-alias la="ls -a"
-alias h="history | tail -32"
+c() { clear "$@"; }
+ll() { ls -la "$@"; }
+la() { ls -a "$@"; }
+h() { history "$@" | tail -n 32; }
 
 if __is_bash; then
-  alias grep="grep --color=auto"
+  grep() { grep --color=auto "$@"; }
 fi
 
 ext_ip() {
@@ -207,6 +207,6 @@ fi
 # Maven aliases
 
 if __is_command mvn; then
-  alias mvncp="mvn clean package"
-  alias mvncv="mvn clean verify"
+  mvncp() { mvn clean package "$@"; }
+  mvncv() { mvn clean verify "$@"; }
 fi
