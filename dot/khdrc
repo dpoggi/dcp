@@ -2,7 +2,7 @@
 # ~~~ Settings ~~~
 #
 
-# Border colors... seems more like modes just need to be enumerated this way.
+# Border colors
 khd mode default on_enter chunkc set focused_border_color 0xffbdd322
 khd mode resize on_enter chunkc set focused_border_color 0xddbdd322
 
@@ -103,6 +103,8 @@ ctrl + alt + cmd - r         :   chunkc tiling::desktop --rotate 90
 
 ctrl + alt + cmd + shift - r :   brew services restart crisidev/chunkwm/chunkwm
 
+# Empty the trash from any app
+cmd + shift - backspace      :   osascript ~/.dcp/libexec/empty_trash.js
 # Start screensaver
 alt + shift - space          :   sleep 1; open -a ScreenSaverEngine
 # Lock the screen <3
