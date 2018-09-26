@@ -3,13 +3,11 @@
 # dcp-rsyncd - start rsyncd in a predictable manner.
 #
 
-set -euo pipefail
+set -eo pipefail
 
 readonly CONFIG_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/dcp"
 readonly CONFIG_PATH="${CONFIG_DIR}/rsyncd.conf"
 readonly LOG_PATH="${CONFIG_DIR}/rsyncd.log"
-
-RSYNC_PID=""
 
 . "${HOME}/.dcp/lib/logging.sh"
 
