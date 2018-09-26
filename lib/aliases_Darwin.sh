@@ -121,23 +121,21 @@ boop_cask() {
 
 if [[ -s "${DCP_CONFIG_DIR}/brew_codesign.sha1" ]]; then
   brew_codesign() {
-    if [[ ! "$(file -b "$1")" =~ ^Mach-O\ .+\ executable ]] &&
-       ! [[ -d "$1" && -d "$1/Contents" ]]; then
-      printf >&2 "Error: argument is not a Mach-O executable or bundle\n"
+    if [[ ! "$(file -b "$1" 2>/dev/null)" =~ ^Mach-O\ .+\ (bundle|executable) ]] \
+       && ! [[ -d "$1" && -d "$1/Contents" ]]; then
+      printf >&2 "Error: argument is not a Mach-O bundle or executable file.\\n"
       return 1
     fi
 
-    local executable_path
-
-    if [[ ! -h "$1" ]]; then
-      executable_path="$1"
-    else
-      executable_path="$(cd "$(dirname "$1")" && realpath -q "$(readlink -n "$1")")"
+    local target_path="$1"
+    if [[ -h "${target_path}" ]]; then
+      target_path="$(cd "$(dirname "${target_path}")" && realpath -q "$(readlink -n "${target_path}")")"
     fi
 
-    /usr/bin/codesign --force \
-                      --sign "$(cat "${DCP_CONFIG_DIR}/brew_codesign.sha1")" \
-                      "${executable_path}"
+    local fingerprint
+    fingerprint="$(<"${DCP_CONFIG_DIR}/brew_codesign.sha1")"
+
+    xcrun codesign --force --sign "${fingerprint}" "${target_path}"
   }
 fi
 
