@@ -34,6 +34,11 @@ fuxcode() {
   rm -rf "${HOME}/Library/Developer/Xcode/DerivedData"
 }
 
+# Dammit CoreSimulator (kill simulator service twice a day for entire career as needed)
+fucoresim() {
+  launchctl bootout "user/$(id -u)/com.apple.CoreSimulator.CoreSimulatorService"
+}
+
 # Verify Xcode installation
 haxcode() {
   spctl --assess --verbose "$(__xcode_app)"
