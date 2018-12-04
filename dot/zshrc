@@ -3,24 +3,22 @@
 #
 
 # Standard plugins
-plugins=(history jsontools zsh-syntax-highlighting)
+plugins=( history jsontools zsh-syntax-highlighting )
 
-# Emoji probably don't matter in non-256color environments
+# Conditional plugins
 if [[ " ${TERM} " = *256color* ]]; then
-  plugins+=(emoji)
+  plugins+=( emoji )
 fi
-
-# macOS-specific plugins
 if [[ "${DCP_OS}" = "Darwin" ]]; then
-  plugins+=(brew-cask osx)
+  plugins+=( osx )
 fi
 
 # User-specified plugins
 if [[ -s "${DCP_CONFIG_DIR}/plugins.lst" ]]; then
-  while IFS='' read -r plugin; do
-    plugins+=("${plugin}")
-  done < <(cat "${DCP_CONFIG_DIR}/plugins.lst" 2>/dev/null)
-  unset plugin
+  while IFS='' read -r user_plugin; do
+    plugins+=( "${user_plugin}" )
+  done <"${DCP_CONFIG_DIR}/plugins.lst"
+  unset user_plugin
 fi
 
 # Load most of dcp
