@@ -54,72 +54,59 @@ __boop_check_pyenv() {
   if ! __is_function mm_off; then
     return
   fi
-
   if [[ -z "$(__path_select_re "${PATH}" 'rbenv|rvm|pyenv|nvm')" ]]; then
     return
   fi
 
-  cat >&2 <<-EOT
-rbenv, rvm, pyenv, and/or nvm found in PATH. This will break installing or
-upgrading Vim and/or Yarn from Homebrew. Run \`mm_off -a' now to restart this
+  cat >&2 <<EOT
+rbenv, rvm, pyenv, and/or nvm found in PATH. This can break installing or
+upgrading software from Homebrew. Run \`mm_off -a\` now to restart this
 EOT
-
   printf >&2 "shell without it/them (y/n)? "
 
-  read -r
-
-  if [[ "${REPLY}" = y* || "${REPLY}" = Y* ]]; then
+  local confirmation
+  read -r confirmation
+  if [[ "${confirmation}" =~ ^[Yy] ]]; then
     printf >&2 "\nRestarting the shell. Please run this command again.\n"
     mm_off -a
-  fi
-}
-
-__boop_ruby() {
-  if [[ "${DCP_BOOP_LINK_RUBY}" = "true" ]]; then
-    brew "$1" ruby
   fi
 }
 
 boop() {
   __boop_check_pyenv
 
-  __boop_ruby link
+  local result
 
-  if ! brew update; then
-    return 1
+  brew update; result="$?"
+  [[ "${result}" = "0" ]] || return "${result}"
+
+  brew upgrade; result="$?"
+  [[ "${result}" = "0" ]] || return "${result}"
+
+  if (($# > 0)); then
+    brew install "$@"; result="$?"
+    [[ "${result}" = "0" ]] || return "${result}"
   fi
 
-  brew upgrade
-
-  if ! brew upgrade; then
-    return 1
-  fi
-
-  if [[ "$#" -gt "0" ]]; then
-    if ! brew install "$@"; then
-      return 1
-    fi
-  fi
-
-  __boop_ruby unlink
-
-  brew cleanup --prune=all -s
+  brew cleanup --prune=all -s; result="$?"
+  [[ "${result}" = "0" ]] || return "${result}"
 }
 
 boop_cask() {
-  if [[ "$#" = "0" ]]; then
+  if (($# == 0)); then
     return 1
   fi
 
-  if ! brew update; then
-    return 1
-  fi
+  local result
 
-  if ! brew cask install "$@"; then
-    return 1
-  fi
+  brew update; result="$?"
+  [[ "${result}" = "0" ]] || return "${result}"
 
-  brew cleanup --prune=all -s
+  brew cask install "$@"; result="$?"
+  [[ "${result}" = "0" ]] || return "${result}"
+
+  brew cleanup --prune=all -s; result="$?"
+  [[ "${result}" = "0" ]] || return "${result}"
 }
 
 # Code signing helper for Homebrew binaries (notably GDB)
