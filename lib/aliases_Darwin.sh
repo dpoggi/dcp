@@ -277,7 +277,7 @@ if [[ -d "/usr/local/opt/chunkwm" ]]; then
     if (($# == 0)); then
       return 1
     fi
-    brew services "$@" crisidev/chunkwm/chunkwm
+    brew services "$@" koekeishiya/formulae/chunkwm
   }
 fi
 if [[ -d "/usr/local/opt/khd" ]]; then
