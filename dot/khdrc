@@ -101,7 +101,7 @@ ctrl + alt + cmd - f         :   chunkc tiling::desktop --layout float
 ctrl + alt + cmd - m         :   chunkc tiling::desktop --layout monocle
 ctrl + alt + cmd - r         :   chunkc tiling::desktop --rotate 90
 
-ctrl + alt + cmd + shift - r :   brew services restart crisidev/chunkwm/chunkwm
+ctrl + alt + cmd + shift - r :   brew services restart koekeishiya/formulae/chunkwm
 
 # Empty the trash from any app
 cmd + shift - backspace      :   osascript ~/.dcp/libexec/empty_trash.js
