@@ -3,6 +3,11 @@ if [[ -d "${HOME}/.local/bin" ]]; then
   export PATH="${HOME}/.local/bin:${PATH}"
 fi
 
+# Travis CI completions
+if [[ -s "${HOME}/.travis/travis.sh" ]]; then
+  . "${HOME}/.travis/travis.sh"
+fi
+
 # MultiMan
 . "${DCP}/lib/mm.sh"
 
