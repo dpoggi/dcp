@@ -146,6 +146,8 @@ __git_get_merged_branches() {
     return
   fi
 
+  current_branch="$(sed -e 's/\//\\\//g' <<< "${current_branch}")"
+
   git branch --merged | colrm 1 2 | sed -e '/^master$/d' \
                                         -e "/^${current_branch}\$/d"
 }
