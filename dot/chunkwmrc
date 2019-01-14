@@ -100,21 +100,17 @@ chunkc core::load tiling.so
 chunkc tiling::rule --owner Emacs --except \"^$\" --state tile
 
 chunkc tiling::rule --owner \"App Store\" --state float
+chunkc tiling::rule --owner \"Android Studio\" --name \"Delete\" --state float
 chunkc tiling::rule --owner \"Android Studio\" --name \"Inline Method\" --state float
 chunkc tiling::rule --owner \"Android Studio\" --name \"Move\" --state float
+chunkc tiling::rule --owner \"Android Studio\" --name \"New Class\" --state float
+chunkc tiling::rule --owner \"Android Studio\" --name \"New Kotlin File/Class\" --state float
 chunkc tiling::rule --owner \"Android Studio\" --name \"Platform and Plugin Updates\" --state float
 chunkc tiling::rule --owner \"Android Studio\" --name Preferences --state float
 chunkc tiling::rule --owner \"Android Studio\" --name \"Project Structure\" --state float
 chunkc tiling::rule --owner \"Android Studio\" --name \"Tip of the Day\" --state float
 chunkc tiling::rule --owner \"Android Studio\" --name \"Welcome to Android Studio\" --state float
 chunkc tiling::rule --name \"Android Emulator\" --state float
-chunkc tiling::rule --owner \"AppCode\" --name \"Inline Method\" --state float
-chunkc tiling::rule --owner \"AppCode\" --name \"Move\" --state float
-chunkc tiling::rule --owner \"AppCode\" --name \"Platform and Plugin Updates\" --state float
-chunkc tiling::rule --owner \"AppCode\" --name Preferences --state float
-chunkc tiling::rule --owner \"AppCode\" --name \"Project Structure\" --state float
-chunkc tiling::rule --owner \"AppCode\" --name \"Tip of the Day\" --state float
-chunkc tiling::rule --owner \"AppCode\" --name \"Welcome to AppCode\" --state float
 chunkc tiling::rule --owner \"Archive Utility\" --state float
 chunkc tiling::rule --owner Archiver --state float
 chunkc tiling::rule --owner Calculator --state float
@@ -132,8 +128,11 @@ chunkc tiling::rule --owner Finder --name Copy --state float
 chunkc tiling::rule --owner Firefox --name \"Launch Application\" --state float
 chunkc tiling::rule --owner Firefox --name Library --state float
 chunkc tiling::rule --owner Installer --state float
+chunkc tiling::rule --owner \"IntelliJ IDEA\" --name \"Delete\" --state float
 chunkc tiling::rule --owner \"IntelliJ IDEA\" --name \"Inline Method\" --state float
 chunkc tiling::rule --owner \"IntelliJ IDEA\" --name \"Move\" --state float
+chunkc tiling::rule --owner \"IntelliJ IDEA\" --name \"New Class\" --state float
+chunkc tiling::rule --owner \"IntelliJ IDEA\" --name \"New Kotlin File/Class\" --state float
 chunkc tiling::rule --owner \"IntelliJ IDEA\" --name \"Platform and Plugin Updates\" --state float
 chunkc tiling::rule --owner \"IntelliJ IDEA\" --name Preferences --state float
 chunkc tiling::rule --owner \"IntelliJ IDEA\" --name \"Project Structure\" --state float
