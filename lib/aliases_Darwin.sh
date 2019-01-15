@@ -2,48 +2,71 @@
 # Xcode aliases
 #
 
-# Get the path of the currently selected Xcode, or use the app name
-# if the command line tools are selected.
-__xcode_app() {
-  local developer_dir
-
-  developer_dir="$(xcode-select -p 2>/dev/null)"
-  if [[ "${developer_dir}" != *".app"* ]]; then
-    printf "Xcode"
-    return
-  fi
-
-  while [[ "${developer_dir##*.}" != "app" ]]; do
-    developer_dir="$(dirname "${developer_dir}")"
-    if [[ "${#developer_dir}" -le 1 ]]; then
-      printf "Xcode"
-      return
-    fi
-  done
-
-  printf "%s" "${developer_dir}"
-}
-
 # Open Xcode for current folder (prefers workspace to project)
 xc() {
-  open -a "$(__xcode_app)" "${1:-.}"
+  /usr/bin/open -a "$(__get_xcode_app)" "${1:-.}"
 }
 
 # Dammit Xcode (delete derived data twice a day for entire career as needed)
 fuxcode() {
-  rm -rf "${HOME}/Library/Developer/Xcode/DerivedData"
+  __check_dt_not_running || return 1
+
+  if [[ -d "${HOME}/Library/Developer/Xcode/DerivedData" ]]; then
+    rm -rf "${HOME}/Library/Developer/Xcode/DerivedData"
+  fi
 }
 
 # Dammit CoreSimulator (kill simulator service twice a day for entire career as needed)
 fucoresim() {
-  launchctl bootout "user/$(id -u)/com.apple.CoreSimulator.CoreSimulatorService"
+  __check_dt_not_running || return 1
+
+  /bin/launchctl bootout "user/${UID}/com.apple.CoreSimulator.CoreSimulatorService"
+  return "$?"
+}
+
+# Dammit Interface Builder (ibtool)
+fuibtool() {
+  __check_dt_not_running || return 1
+
+  /usr/bin/pkill -KILL -x -U "${UID}" "ibtoold"
+  return "$?"
 }
 
 # Verify Xcode installation
 haxcode() {
-  spctl --assess --verbose "$(__xcode_app)"
+  /usr/sbin/spctl --assess --verbose "$(__get_xcode_app)"
+  return "$?"
 }
 
+__check_dt_not_running() {
+  if /usr/bin/pgrep -x -U "${UID}" "Simulator" >/dev/null 2>&1; then
+    printf >&2 'Error: Simulator is running.\n'
+    return 1
+  fi
+  if /usr/bin/pgrep -x -U "${UID}" "Xcode" >/dev/null 2>&1; then
+    printf >&2 'Error: Xcode is running.\n'
+    return 1
+  fi
+}
+
+# Get the path of the currently selected Xcode, or use the app name
+# if one cannot be found.
+__get_xcode_app() {
+  local developer_dir="$(/usr/bin/xcode-select --print-path 2>/dev/null)"
+  if [[ "${developer_dir}" != *".app/Contents/Developer" ]]; then
+    printf 'Xcode\n'; return
+  fi
+
+  local xcode_app="${developer_dir}"
+  while [[ "${xcode_app##*.}" != "app" ]]; do
+    xcode_app="$(dirname "${xcode_app}")"
+    if ((${#xcode_app} <= 1)); then
+      printf 'Xcode\n'; return
+    fi
+  done
+
+  printf '%s\n' "${xcode_app}"
+}
 
 #
 # Homebrew - fully update/upgrade, clean up the mess, optionally
