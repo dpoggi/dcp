@@ -45,15 +45,16 @@ EOT
 }
 
 __mm_cargo_load_comp_bash() {
-  rustup completions bash >"${USER_BASH_COMPLETION_D}/rustup.bash-completion"
-  . "${USER_BASH_COMPLETION_D}/rustup.bash-completion"
+  rustup completions bash >"${BASH_COMPLETION_USER_DIR}/rustup.bash-completion"
+  . "${BASH_COMPLETION_USER_DIR}/rustup.bash-completion"
 
   local toolchain_dir="$(__mm_cargo_get_toolchain_dir)"
-
   if [[ -d "${toolchain_dir}" ]]; then
-    cp "${toolchain_dir}/etc/bash_completion.d/cargo" \
-       "${USER_BASH_COMPLETION_D}/cargo"
-    . "${USER_BASH_COMPLETION_D}/cargo"
+    cp \
+      "${toolchain_dir}/etc/bash_completion.d/cargo" \
+      "${BASH_COMPLETION_USER_DIR}/cargo"
+
+    . "${BASH_COMPLETION_USER_DIR}/cargo"
   fi
 }
 

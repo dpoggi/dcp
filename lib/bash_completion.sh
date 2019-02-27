@@ -1,46 +1,75 @@
-__bash_comp_is_loaded() { [[ -n "${BASH_COMPLETION_COMPAT_DIR}" ]]; }
+COMP_LOAD_PATHS=(
+  "/usr/local/etc/profile.d/bash_completion.sh"
+  "/usr/local/etc/bash_completion"
+  "/etc/bash_completion"
+  "/usr/share/bash-completion/bash_completion"
+)
 
-__bash_comp_is_installed() {
-  [[ -r "/usr/local/etc/bash_completion" || -r "/etc/bash_completion" ]] ||
-    [[ -r "/usr/share/bash-completion/bash_completion" ]]
+__comp_is_loaded() {
+  [[ -n "${BASH_COMPLETION_COMPAT_DIR}" ]]
 }
 
-__bash_comp_load_dir() {
-  local pattern='(?:~$|\.bak$|\.swp$|^#.*#$|\.dpkg.*$|\.rpm(?:new|orig|save)$|^Makefile)'
-  local completion
+__comp_is_installed() {
+  local load_path
+  for load_path in "${COMP_LOAD_PATHS[@]}"; do
+    if [[ -r "${load_path}" ]]; then
+      return
+    fi
+  done
+  return 1
+}
 
-  while IFS='' read -d '' -r completion; do
-    if basename "${completion}" | grep -qE "${pattern}"; then
-      continue
+__comp_is_comp_ignored() {
+  local comp_name
+  comp_name="$(basename "$1")"
+  grep -q -E \
+    '(?:~$|\.bak$|\.swp$|^#.*#$|\.dpkg.*$|\.rpm(?:new|orig|save)$|^Makefile)' \
+    <<<"${comp_name}" 2>/dev/null
+}
+
+__comp_load_dir() {
+  local comp
+  while IFS='' read -d '' -r comp; do
+    if ! __comp_is_comp_ignored "${comp}" && [[ -r "${comp}" ]]; then
+      . "${comp}"
+    fi
+  done < <(
+    find "$1" \
+      -mindepth 1 \
+      -maxdepth 1 \
+      ! -type d \
+      -print0 2>/dev/null
+  )
+}
+
+if __comp_is_installed; then
+  if ! __comp_is_loaded; then
+    for COMP_LOAD_PATH in "${COMP_LOAD_PATHS[@]}"; do
+      if [[ -r "${COMP_LOAD_PATH}" ]]; then
+        . "${COMP_LOAD_PATH}"
+        break
+      fi
+    done
+    unset COMP_LOAD_PATH
+  fi
+
+  if __comp_is_loaded; then
+    BASH_COMPLETION_USER_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/bash_completion.d"
+    if [[ ! -e "${BASH_COMPLETION_USER_DIR}" ]]; then
+      mkdir -p "${BASH_COMPLETION_USER_DIR}"
     fi
 
-    . "${completion}"
-  done < <(find "$1" -mindepth 1 -maxdepth 1 ! -type d -print0 2>/dev/null)
-}
-
-if ! __bash_comp_is_loaded && __bash_comp_is_installed; then
-  if [[ -r "${XDG_CONFIG_HOME:-${HOME}/.config}/bash_completion" ]]; then
-    . "${XDG_CONFIG_HOME:-${HOME}/.config}/bash_completion"
-  fi
-
-  if [[ -r "/usr/local/etc/bash_completion" ]]; then
-    . /usr/local/etc/bash_completion
-  elif [[ -r "/etc/bash_completion" ]]; then
-    . /etc/bash_completion
-  elif [[ -r "/usr/share/bash-completion/bash_completion" ]]; then
-    . /usr/share/bash-completion/bash_completion
+    __comp_load_dir "${DCP}/etc/bash_completion.d"
+    __comp_load_dir "${BASH_COMPLETION_USER_DIR}"
   fi
 fi
 
-if __bash_comp_is_loaded; then
-  readonly USER_BASH_COMPLETION_D="${XDG_CONFIG_HOME:-${HOME}/.config}/bash_completion.d"
+unset -f \
+  __comp_is_loaded \
+  __comp_is_installed \
+  __comp_is_comp_ignored \
+  __comp_load \
+  __comp_load_dir
 
-  if [[ ! -e "${USER_BASH_COMPLETION_D}" ]]; then
-    mkdir -p "${USER_BASH_COMPLETION_D}"
-  fi
-
-  __bash_comp_load_dir "${DCP}/etc/bash_completion.d"
-  __bash_comp_load_dir "${USER_BASH_COMPLETION_D}"
-fi
-
-unset -f __bash_comp_is_loaded __bash_comp_is_installed __bash_comp_load_dir
+unset \
+  COMP_LOAD_PATHS
