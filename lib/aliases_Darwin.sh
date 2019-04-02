@@ -198,6 +198,17 @@ fi
 # System-level resets... these come in handy.
 #
 
+# Set hostname on (at least) Mojave and up
+set_hostname() {
+  if [[ -z "$1" ]]; then
+    return 1
+  fi
+
+  sudo -H scutil --set ComputerName "$1"
+  sudo -H scutil --set LocalHostName "$1"
+  sudo -H scutil --set HostName "$1"
+}
+
 # Reset "Open With..." menus after connecting a drive with applications on it
 reset_launch_services() {
   local framework_path="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework"
