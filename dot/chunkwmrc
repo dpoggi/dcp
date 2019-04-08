@@ -110,6 +110,7 @@ chunkc tiling::rule --owner \"Android Studio\" --name \"Platform and Plugin Upda
 chunkc tiling::rule --owner \"Android Studio\" --name Preferences --state float
 chunkc tiling::rule --owner \"Android Studio\" --name \"Project Structure\" --state float
 chunkc tiling::rule --owner \"Android Studio\" --name \"Rename\" --state float
+chunkc tiling::rule --owner \"Android Studio\" --name \"Select Deployment Target\" --state float
 chunkc tiling::rule --owner \"Android Studio\" --name \"Tip of the Day\" --state float
 chunkc tiling::rule --owner \"Android Studio\" --name \"Welcome to Android Studio\" --state float
 chunkc tiling::rule --name \"Android Emulator\" --state float
