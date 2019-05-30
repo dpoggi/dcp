@@ -204,6 +204,18 @@ if [[ "${PIP_REQUIRE_VIRTUALENV}" = "true" ]]; then
   gpip3() { PIP_REQUIRE_VIRTUALENV="" command pip3 "$@"; }
 fi
 
+# Gradle aliases
+
+fugradle() {
+  rm -rf \
+    "${HOME}/.gradle/caches" \
+    "${HOME}/.gradle/daemon" \
+    "${HOME}/.gradle/native" \
+    "${HOME}/.gradle/notifications" \
+    "${HOME}/.gradle/workers" \
+    "${HOME}/.gradle/wrapper"
+}
+
 # Maven aliases
 
 if __is_command mvn; then
