@@ -1,16 +1,22 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-set -eo pipefail
+set -e
 
-if [[ " $* " = *" --ps1 "* ]]; then
-  FOR_PS1="true"
-else
-  FOR_PS1="false"
-fi
+FOR_PS1="false"
+while [ "$#" -gt "0" ]; do
+  if [ "$1" = "--ps1" ]; then
+    FOR_PS1="true"
+  fi
+  shift
+done
 
 CURRENT_BRANCH="$(git branch 2>/dev/null | sed -e '/^[^\*]/d' -e 's/\* \(.*\)/\1/')"
-if [[ -z "${CURRENT_BRANCH}" ]]; then
-  "${FOR_PS1}" && exit || exit 1
+if [ -z "${CURRENT_BRANCH}" ]; then
+  if "${FOR_PS1}"; then
+    exit
+  else
+    exit 1
+  fi
 fi
 
 if "${FOR_PS1}"; then
