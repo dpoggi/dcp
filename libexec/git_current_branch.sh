@@ -2,14 +2,19 @@
 
 set -eo pipefail
 
-readonly CURRENT_BRANCH="$(git branch 2>/dev/null | sed -e '/^[^\*]/d' -e 's/\* \(.*\)/\1/')"
-
-if [[ -z "${CURRENT_BRANCH}" ]]; then
-  exit
+if [[ " $* " = *" --ps1 "* ]]; then
+  FOR_PS1="true"
+else
+  FOR_PS1="false"
 fi
 
-if [[ " $* " = *\ --ps1\ * ]]; then
-  printf "(%s)" "${CURRENT_BRANCH}"
+CURRENT_BRANCH="$(git branch 2>/dev/null | sed -e '/^[^\*]/d' -e 's/\* \(.*\)/\1/')"
+if [[ -z "${CURRENT_BRANCH}" ]]; then
+  "${FOR_PS1}" && exit || exit 1
+fi
+
+if "${FOR_PS1}"; then
+  printf '(%s)\n' "${CURRENT_BRANCH}"
 else
-  printf "%s" "${CURRENT_BRANCH}"
+  printf '%s\n' "${CURRENT_BRANCH}"
 fi

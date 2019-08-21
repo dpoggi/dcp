@@ -1,40 +1,29 @@
-# Wrapped colors
-
-readonly DCP_PS1_RED="\[${DCP_RED}\]"
-readonly DCP_PS1_GREEN="\[${DCP_GREEN}\]"
-readonly DCP_PS1_WHITE="\[${DCP_WHITE}\]"
-readonly DCP_PS1_BLUE="\[${DCP_BLUE}\]"
-readonly DCP_PS1_CYAN="\[${DCP_CYAN}\]"
-readonly DCP_PS1_PURPLE="\[${DCP_PURPLE}\]"
-readonly DCP_PS1_YELLOW="\[${DCP_YELLOW}\]"
-readonly DCP_PS1_RESET="\[${DCP_RESET}\]"
-
 # Component functions
 
 __ps1_preamble() {
   if [[ "${UID}" = "0" ]]; then
-    printf "${DCP_PS1_RED}"
+    printf '%b' "${DCP_RED}"
   else
-    printf "${DCP_PS1_GREEN}"
+    printf '%b' "${DCP_GREEN}"
   fi
 
-  printf "\\\\u${DCP_PS1_WHITE}@${DCP_PS1_CYAN}\\h"
+  printf '\\u%b@%b\\h' "${DCP_WHITE}" "${DCP_CYAN}"
 
-  printf "${DCP_PS1_WHITE}:${DCP_PS1_PURPLE}\\w"
+  printf '%b:%b\\w' "${DCP_WHITE}" "${DCP_PURPLE}"
 }
 
 __ps1_git() {
-  printf "${DCP_PS1_YELLOW}\$(${DCP}/libexec/git_current_branch.sh --ps1)"
+  printf '%b$(%s)' "${DCP_YELLOW}" "${DCP}/libexec/git_current_branch.sh --ps1"
 }
 
 __ps1_uid() {
   if [[ "${DPOGGI_TWOLINE}" = "true" ]]; then
-    printf "\n"
+    printf '\n'
   else
-    printf " "
+    printf ' '
   fi
 
-  printf "${DCP_PS1_RED}\\\$${DCP_PS1_RESET} "
+  printf '%b\\$%b ' "${DCP_RED}" "${DCP_RESET}"
 }
 
 # Set prompt
