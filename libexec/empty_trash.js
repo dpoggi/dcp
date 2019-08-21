@@ -1,20 +1,15 @@
 #!/usr/bin/osascript -l JavaScript
 "use strict";
 
-const finderApp = Application("Finder");
-const systemEventsApp = Application("System Events");
-
 (() => {
+  const finderApp = Application("Finder");
   if (finderApp.trash().items().length === 0) {
     return;
   }
 
-  const frontmostApp = Application(
-    systemEventsApp
-      .processes
-      .whose({ frontmost: true })[0]
-      .displayedName()
-  );
+  const systemEventsApp = Application("System Events");
+  const frontmostProcess = systemEventsApp.processes.whose({ frontmost: true })[0];
+  const frontmostApp = Application(frontmostProcess.displayedName());
 
   finderApp.includeStandardAdditions = true;
   finderApp.activate();
