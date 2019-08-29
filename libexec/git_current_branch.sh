@@ -3,6 +3,7 @@
 set -e
 
 FOR_PS1="false"
+
 while [ "$#" -gt "0" ]; do
   if [ "$1" = "--ps1" ]; then
     FOR_PS1="true"
@@ -11,6 +12,7 @@ while [ "$#" -gt "0" ]; do
 done
 
 CURRENT_BRANCH="$(git branch 2>/dev/null | sed -e '/^[^\*]/d' -e 's/\* \(.*\)/\1/')"
+
 if [ -z "${CURRENT_BRANCH}" ]; then
   if "${FOR_PS1}"; then
     exit
@@ -19,7 +21,7 @@ if [ -z "${CURRENT_BRANCH}" ]; then
   fi
 fi
 
-if "${FOR_PS1}"; then
+if "${FOR_PS1}" && [ -n "${CURRENT_BRANCH%%(*}" ]; then
   printf '(%s)\n' "${CURRENT_BRANCH}"
 else
   printf '%s\n' "${CURRENT_BRANCH}"
