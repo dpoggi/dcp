@@ -4,7 +4,7 @@
 # __typeof: prints the type of command the given name is hashed as
 #
 
-if [[ "${DCP_SHELL}" = "zsh" ]]; then
+if __is_zsh; then
   __valueof() { printf "%s" "${(P)1}"; }
 
   __typeof() {
@@ -14,7 +14,7 @@ if [[ "${DCP_SHELL}" = "zsh" ]]; then
                          -e 's/^reserved$/keyword/' \
                          -e '/^none$/d'
   }
-elif [[ "${DCP_SHELL}" = "bash" ]]; then
+elif __is_bash; then
   __valueof() { printf "%s" "${!1}"; }
 
   __typeof() { type -t "$@"; }
@@ -49,6 +49,8 @@ __export_select_re() { env | sed -e 's/=.*$//' -e "/$1/!d"; }
 #
 
 __unexport() { declare +x "$@"; unset "$@"; }
+__unalias() { unalias "$@"; }
+__unfunction() { unset -f "$@"; }
 
 #
 # __strtoupper: upcases a string
