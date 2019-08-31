@@ -25,7 +25,8 @@ __mm_cargo_unload() {
 }
 
 __mm_cargo_is_comp_loaded() {
-  ! __is_command rustup || { __is_function _cargo && __is_function _rustup; }
+#  ! __is_command rustup || { __is_function _cargo && __is_function _rustup; }
+  ! __is_command rustup || __is_function _rustup
 }
 
 __mm_cargo_load_comp_zsh() {
