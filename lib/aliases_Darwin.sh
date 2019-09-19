@@ -237,7 +237,9 @@ reset_dns_cache() {
 }
 
 # Clear Quick Look's file locks (so you can empty the trash)
-reset_quick_look() { qlmanage -r; }
+reset_quick_look() {
+  qlmanage -r
+}
 
 #
 # Just launchd things (tm)
@@ -247,7 +249,10 @@ reset_quick_look() { qlmanage -r; }
 # environment variables in the Control Panel on Windows. Seen by apps like
 # IntelliJ that pick up on certain vars: JAVA_HOME, etc.
 launchd_export() {
-  launchctl setenv "$1" "$(__valueof "$1")"
+  while (($# > 0)); do
+    launchctl setenv "$1" "$(__valueof "$1")"
+    shift
+  done
 }
 
 # launchctl wrapper for apsd (Apple Push Service: Messages.app, etc.)
