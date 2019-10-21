@@ -183,7 +183,7 @@ __copy_sha() {
     return 1
   fi
 
-  local sum="$(/usr/bin/shasum -p -a "$1" "$2" | cut -d ' ' -f 1)"
+  local sum="$(/usr/bin/shasum -a "$1" "$2" | cut -d ' ' -f 1)"
   printf '%s' "${sum}" | pbcopy
   printf '%s\n' "${sum}"
 }
