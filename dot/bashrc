@@ -1,3 +1,8 @@
+if [[ "$-" != *i* ]]; then
+  # Don't do anything if this isn't an interactive shell
+  return
+fi
+
 readonly DCP="${HOME}/.dcp"
 
 # Set up environment
