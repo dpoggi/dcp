@@ -130,31 +130,40 @@ EOT
 
 if [[ -s "${DCP_CONFIG_DIR}/brew_codesign.sha1" ]]; then
   brew_codesign() {
-    local base="$(basename "$1")"
-    if ! __is_macho_bundle "$1" && ! __is_macho_file "$1"; then
+    local target fingerprint
+
+    target="$1"
+    if __is_command realpath; then
+      target="$(realpath -q "${target}")"
+    fi
+
+    if ! __is_macho_bundle "${target}" && ! __is_macho_file "${target}"; then
       printf >&2 'Error: argument is not a Mach-O bundle or binary file.\n'
       return 1
     fi
 
-    local target_path
-    if command -v realpath >/dev/null; then
-      target_path="$(command realpath -q "$1")"
-    else
-      target_path="$1"
-    fi
+    fingerprint="$(<"${DCP_CONFIG_DIR}/brew_codesign.sha1")"
 
-    /usr/bin/xcrun --sdk macosx \
-      codesign --force --sign "$(<"${DCP_CONFIG_DIR}/brew_codesign.sha1")" "${target_path}"
+    /usr/bin/codesign --force --sign "${fingerprint}" "${target}"
   }
 
   __is_macho_bundle() {
-    local bundle_name="$(basename "$1")"
+    local bundle_name
+
+    bundle_name="$(basename "$1")"
     bundle_name="${bundle_name%%.*}"
-    [[ -d "$1" ]] && { [[ -d "$1/Contents" ]] || __is_macho_file "$1/${bundle_name}"; }
+
+    if [[ ! -d "$1" ]]; then
+      return 1
+    fi
+
+    [[ -d "$1/Contents" ]] || __is_macho_file "$1/${bundle_name}"
   }
 
   __is_macho_file() {
-    [[ "$(/usr/bin/file -b "$1" 2>/dev/null)" = "Mach-O"* ]]
+    local output
+    output="$(file -b "$1" 2>/dev/null)"
+    [[ "${output}" = "Mach-O"* ]]
   }
 fi
 
