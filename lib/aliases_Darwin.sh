@@ -326,13 +326,10 @@ fi
 # `brew services' wrappers for chunkwm, khd, and kwm if installed via Homebrew
 
 if [[ -d "/usr/local/opt/chunkwm" ]]; then
-  chunkwmctl() { __brewctl koekeishiya/formulae/chunkwm "$@"; }
+  chunkwmctl() { __brewctl chunkwm "$@"; }
 fi
 if [[ -d "/usr/local/opt/khd" ]]; then
-  khdctl() { __brewctl koekeishiya/formulae/khd "$@"; }
-fi
-if [[ -d "/usr/local/opt/kwm" ]]; then
-  kwmctl() { __brewctl koekeishiya/formulae/kwm "$@"; }
+  khdctl() { __brewctl khd "$@"; }
 fi
 
 __brewctl() {
