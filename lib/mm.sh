@@ -17,17 +17,23 @@ for tool in "${MM_TOOLS[@]}"; do
   declare +x "MM_DISABLE_${tool_upper}"
 
   if __is_true "MM_DISABLE_${tool_upper}"; then
-    while IFS=$'\n' read -r var_name; do
-      __unexport "${var_name}"
-    done < <(__export_select_re "^${tool_upper}_")
+    if [[ " ${MM_FORCE_LOAD} " != *" ${tool} "* ]]; then
+      while IFS=$'\n' read -r var_name; do
+        __unexport "${var_name}"
+      done < <(__export_select_re "^${tool_upper}_")
 
-    unset var_name
+      unset var_name
 
-    export PATH="$(__path_reject_re "${PATH}" "${tool}")"
+      export PATH="$(__path_reject_re "${PATH}" "${tool}")"
+    else
+      __unexport "MM_DISABLE_${tool_upper}"
+    fi
   fi
 
   . "${DCP}/lib/mm/${tool}.sh"
 done
+
+__unexport MM_FORCE_LOAD
 
 unset tool tool_upper
 

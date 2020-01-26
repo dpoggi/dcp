@@ -177,3 +177,75 @@ mm_off() {
     eval "${DCP_SHELL_EXEC_CMD[*]}"
   fi
 }
+
+__mm_only_usage() {
+  cat >&2 <<EOT
+Usage: mm_only [options] ${MM_TOOLS_FOR_USAGE} ...
+
+OPTIONS:
+  -a, --all                                Enable all tools after shell re-exec
+  -h, --help                               Display this message
+EOT
+}
+
+mm_only() {
+  local -a tools
+  local all_tools="false"
+
+  while (($# > 0)); do
+    case "$1" in
+      -a|--all)   all_tools="true" ;;
+      -h|--help)  __mm_only_usage; return ;;
+      -*)
+        printf 'Unknown option "%s"\n\n' "$1" >&2
+        __mm_only_usage
+        return 1
+        ;;
+      *)
+        if ! __ary_includes "$1" "${MM_TOOLS[@]}"; then
+          printf 'Unknown tool "%s"\n\n' "$1" >&2
+          __mm_only_usage
+          return 1
+        fi
+        tools+=("$1")
+    esac
+
+    shift
+  done
+
+  if "${all_tools}"; then
+    if ((${#tools[@]} == 0)); then
+      tools=("${MM_TOOLS[@]}")
+    else
+      printf 'Explicitly requested tools cannot be combined with -a/--all\n\n' >&2
+      __mm_only_usage
+      return 1
+    fi
+  fi
+
+  local tool tool_upper
+
+  for tool in "${MM_TOOLS[@]}"; do
+    tool_upper="$(__strtoupper "${tool}")"
+
+    if __ary_includes "${tool}" "${tools[@]}"; then
+      __unexport "MM_DISABLE_${tool_upper}"
+
+      if [[ -z "${MM_FORCE_LOAD}" ]]; then
+        MM_FORCE_LOAD="${tool}"
+      else
+        MM_FORCE_LOAD+=" ${tool}"
+      fi
+
+      export MM_FORCE_LOAD
+    else
+      export "MM_DISABLE_${tool_upper}"="true"
+
+      if __is_function "__mm_${tool}_unload" && "__mm_${tool}_is_loaded"; then
+        "__mm_${tool}_unload"
+      fi
+    fi
+  done
+
+  eval "${DCP_SHELL_EXEC_CMD[*]}"
+}
