@@ -82,4 +82,4 @@ we can work things out to your satisfaction.
 
 ## Copyright
 
-Copyright (C) 2011 Dan Poggi. MIT License, see LICENSE for details.
+Copyright (C) 2011&ndash;2020 Dan Poggi. MIT License, see LICENSE for details.
