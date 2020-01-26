@@ -1,14 +1,14 @@
 # MetaMan
 # cli.sh - command-line interface
 #
-# Copyright (C) 2017 Dan Poggi
+# Copyright (C) 2017-2020 Dan Poggi
 #
 # This software may be modified and distributed under the terms
 # of the MIT license. See the LICENSE file for details.
 
 __mm_on_usage() {
-  cat <<EOT
-Usage: mm_on [options] ${MM_TOOLS_STR} ...
+  cat >&2 <<EOT
+Usage: mm_on [options] ${MM_TOOLS_FOR_USAGE} ...
 
 OPTIONS:
   -a, --all                                              Enable all tools
@@ -19,43 +19,49 @@ EOT
 
 mm_on() {
   local -a tools
-  local all="false"
-  local soft="false"
+  local all_tools="false" soft="false"
 
-  while (( $# > 0 )); do
+  while (($# > 0)); do
     case "$1" in
-      -a|--all)   all="true"            ;;
-      -s|--soft)  soft="true"           ;;
+      -a|--all)   all_tools="true" ;;
+      -s|--soft)  soft="true" ;;
       -h|--help)  __mm_on_usage; return ;;
       -*)
-        printf >&2 "Unknown option %s\n\n" "$1"
-        __mm_on_usage >&2
+        printf 'Unknown option "%s"\n\n' "$1" >&2
+        __mm_on_usage
         return 1
         ;;
       *)
         if ! __ary_includes "$1" "${MM_TOOLS[@]}"; then
-          printf >&2 "Invalid tool %s\n\n" "$1"
-          __mm_on_usage >&2
+          printf 'Unknown tool "%s"\n\n' "$1" >&2
+          __mm_on_usage
           return 1
         fi
         tools+=("$1")
     esac
+
     shift
   done
 
-  if "${all}"; then
-    tools=("${MM_TOOLS[@]}")
+  if ((${#tools[@]} > 0)); then
+    if "${all_tools}"; then
+      printf 'Explicitly requested tools cannot be combined with -a/--all\n\n' >&2
+      __mm_on_usage
+      return 1
+    fi
+  else
+    if "${all_tools}"; then
+      tools=("${MM_TOOLS[@]}")
+    else
+      printf 'No tools specified\n\n' >&2
+      __mm_on_usage
+      return 1
+    fi
   fi
-
-  if (( ${#tools[@]} == 0 )); then
-    printf >&2 "Error: no tool specified\n\n"
-    __mm_on_usage >&2
-    return 1
-  fi
-
-  local error_flag="false"
 
   local tool tool_upper exit_status
+  local error_flag="false"
+
   for tool in "${tools[@]}"; do
     tool_upper="$(__strtoupper "${tool}")"
 
@@ -66,20 +72,25 @@ mm_on() {
     if __is_true "MM_DISABLE_${tool_upper}"; then
       continue
     fi
+
     if "__mm_${tool}_is_loaded" && [[ "${tool}" != "cargo" ]]; then
       continue
     fi
+
     if ! "__mm_${tool}_is_installed"; then
-      if ! "${all}"; then
-        printf >&2 "Error: %s is not installed" "${tool}"
+      if ! "${all_tools}"; then
+        printf '%s is not installed' "${tool}" >&2
         error_flag="true"
       fi
+
       continue
     fi
 
     "__mm_${tool}_load"
-    if [[ "$?" -ne "0" ]]; then
-      printf >&2 "Error: unable to load %s" "${tool}"
+    exit_status="$?"
+
+    if ((exit_status != 0)); then
+      printf 'Unable to load %s' "${tool}" >&2
       error_flag="true"
       continue
     fi
@@ -95,8 +106,8 @@ mm_on() {
 }
 
 __mm_off_usage() {
-  cat <<EOT
-Usage: mm_off [options] ${MM_TOOLS_STR} ...
+  cat >&2 <<EOT
+Usage: mm_off [options] ${MM_TOOLS_FOR_USAGE} ...
 
 OPTIONS:
   -a, --all                                                Disable all tools
@@ -106,41 +117,48 @@ EOT
 
 mm_off() {
   local -a tools
-  local all="false"
+  local all_tools="false"
 
-  while (( $# > 0 )); do
+  while (($# > 0)); do
     case "$1" in
-      -a|--all)   all="true"              ;;
-      -h|--help)  __mm_off_usage; return  ;;
+      -a|--all)   all_tools="true" ;;
+      -h|--help)  __mm_off_usage; return ;;
       -*)
-        printf >&2 "Unknown option %s\n\n" "$1"
-        __mm_off_usage >&2
+        printf 'Unknown option "%s"\n\n' "$1" >&2
+        __mm_off_usage
         return 1
         ;;
       *)
         if ! __ary_includes "$1" "${MM_TOOLS[@]}"; then
-          printf >&2 "Invalid tool %s\n\n" "$1"
-          __mm_off_usage >&2
+          printf 'Unknown tool "%s"\n\n' "$1" >&2
+          __mm_off_usage
           return 1
         fi
         tools+=("$1")
     esac
+
     shift
   done
 
-  if "${all}"; then
-    tools=("${MM_TOOLS[@]}")
+  if ((${#tools[@]} > 0)); then
+    if "${all_tools}"; then
+      printf 'Explicitly requested tools cannot be combined with -a/--all\n\n' >&2
+      __mm_off_usage
+      return 1
+    fi
+  else
+    if "${all_tools}"; then
+      tools=("${MM_TOOLS[@]}")
+    else
+      printf 'No tools specified\n\n' >&2
+      __mm_off_usage
+      return 1
+    fi
   fi
-
-  if (( ${#tools[@]} == 0 )); then
-    printf >&2 "Error: no tool specified\n\n"
-    __mm_off_usage >&2
-    return 1
-  fi
-
-  local should_reexec="false"
 
   local tool tool_upper
+  local should_reexec="false"
+
   for tool in "${tools[@]}"; do
     tool_upper="$(__strtoupper "${tool}")"
 
