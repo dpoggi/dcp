@@ -178,9 +178,9 @@ mm_off() {
   fi
 }
 
-__mm_only_usage() {
+__mm_just_usage() {
   cat >&2 <<EOT
-Usage: mm_only [options] ${MM_TOOLS_FOR_USAGE} ...
+Usage: mm_just [options] ${MM_TOOLS_FOR_USAGE} ...
 
 OPTIONS:
   -a, --all                                Enable all tools after shell re-exec
@@ -188,23 +188,23 @@ OPTIONS:
 EOT
 }
 
-mm_only() {
+mm_just() {
   local -a tools
   local all_tools="false"
 
   while (($# > 0)); do
     case "$1" in
       -a|--all)   all_tools="true" ;;
-      -h|--help)  __mm_only_usage; return ;;
+      -h|--help)  __mm_just_usage; return ;;
       -*)
         printf 'Unknown option "%s"\n\n' "$1" >&2
-        __mm_only_usage
+        __mm_just_usage
         return 1
         ;;
       *)
         if ! __ary_includes "$1" "${MM_TOOLS[@]}"; then
           printf 'Unknown tool "%s"\n\n' "$1" >&2
-          __mm_only_usage
+          __mm_just_usage
           return 1
         fi
         tools+=("$1")
@@ -218,7 +218,7 @@ mm_only() {
       tools=("${MM_TOOLS[@]}")
     else
       printf 'Explicitly requested tools cannot be combined with -a/--all\n\n' >&2
-      __mm_only_usage
+      __mm_just_usage
       return 1
     fi
   fi
