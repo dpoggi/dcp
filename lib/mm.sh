@@ -6,36 +6,34 @@
 # This software may be modified and distributed under the terms
 # of the MIT license. See the LICENSE file for details.
 
-MM_TOOLS=(cargo nvm pyenv rvm rbenv)
-MM_TOOLS_FOR_USAGE="($(__ary_join ' | ' "${MM_TOOLS[@]}"))"
+__mm_tools=( cargo nvm pyenv rvm rbenv )
+__mm_usage_tools="$(__ary_join ' | ' "${__mm_tools[@]}")"
 
-readonly MM_TOOLS MM_TOOLS_FOR_USAGE
+readonly __mm_tools __mm_usage_tools
 
-for tool in "${MM_TOOLS[@]}"; do
-  tool_upper="$(__strtoupper "${tool}")"
+for tool in "${__mm_tools[@]}"; do
+  declare +x "__mm_disable_${tool}"
 
-  declare +x "MM_DISABLE_${tool_upper}"
-
-  if __is_true "MM_DISABLE_${tool_upper}"; then
-    if [[ " ${MM_FORCE_LOAD} " != *" ${tool} "* ]]; then
+  if __is_true "__mm_disable_${tool}"; then
+    if [[ " ${__mm_force_load} " != *" ${tool} "* ]]; then
       while IFS=$'\n' read -r var_name; do
         __unexport "${var_name}"
-      done < <(__export_select_re "^${tool_upper}_")
+      done < <(__export_select_re "^$(__strtoupper "${tool}")_")
 
       unset var_name
 
       export PATH="$(__path_reject_re "${PATH}" "${tool}")"
     else
-      __unexport "MM_DISABLE_${tool_upper}"
+      unset "__mm_disable_${tool}"
     fi
   fi
 
   . "${DCP}/lib/mm/${tool}.sh"
 done
 
-__unexport MM_FORCE_LOAD
+unset tool
 
-unset tool tool_upper
+__unexport __mm_force_load
 
 . "${DCP}/lib/mm/meta.sh"
 . "${DCP}/lib/mm/cli.sh"

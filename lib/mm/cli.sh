@@ -8,7 +8,7 @@
 
 __mm_on_usage() {
   cat >&2 <<EOT
-Usage: mm_on [options] ${MM_TOOLS_FOR_USAGE} ...
+Usage: mm_on [options] [${__mm_usage_tools}]...
 
 OPTIONS:
   -a, --all                                              Enable all tools
@@ -32,12 +32,12 @@ mm_on() {
         return 1
         ;;
       *)
-        if ! __ary_includes "$1" "${MM_TOOLS[@]}"; then
+        if ! __ary_includes "$1" "${__mm_tools[@]}"; then
           printf 'Unknown tool "%s"\n\n' "$1" >&2
           __mm_on_usage
           return 1
         fi
-        tools+=("$1")
+        tools+=( "$1" )
     esac
 
     shift
@@ -51,7 +51,7 @@ mm_on() {
     fi
   else
     if "${all_tools}"; then
-      tools=("${MM_TOOLS[@]}")
+      tools=("${__mm_tools[@]}")
     else
       printf 'No tools specified\n\n' >&2
       __mm_on_usage
@@ -59,17 +59,15 @@ mm_on() {
     fi
   fi
 
-  local tool tool_upper exit_status
+  local tool exit_status
   local error_flag="false"
 
   for tool in "${tools[@]}"; do
-    tool_upper="$(__strtoupper "${tool}")"
-
     if [[ "${soft}" = "false" ]]; then
-      unset "MM_DISABLE_${tool_upper}"
+      unset "__mm_disable_${tool}"
     fi
 
-    if __is_true "MM_DISABLE_${tool_upper}"; then
+    if __is_true "__mm_disable_${tool}"; then
       continue
     fi
 
@@ -107,7 +105,7 @@ mm_on() {
 
 __mm_off_usage() {
   cat >&2 <<EOT
-Usage: mm_off [options] ${MM_TOOLS_FOR_USAGE} ...
+Usage: mm_off [options] [${__mm_usage_tools}]...
 
 OPTIONS:
   -a, --all                                                Disable all tools
@@ -129,12 +127,12 @@ mm_off() {
         return 1
         ;;
       *)
-        if ! __ary_includes "$1" "${MM_TOOLS[@]}"; then
+        if ! __ary_includes "$1" "${__mm_tools[@]}"; then
           printf 'Unknown tool "%s"\n\n' "$1" >&2
           __mm_off_usage
           return 1
         fi
-        tools+=("$1")
+        tools+=( "$1" )
     esac
 
     shift
@@ -148,7 +146,7 @@ mm_off() {
     fi
   else
     if "${all_tools}"; then
-      tools=("${MM_TOOLS[@]}")
+      tools=("${__mm_tools[@]}")
     else
       printf 'No tools specified\n\n' >&2
       __mm_off_usage
@@ -156,13 +154,11 @@ mm_off() {
     fi
   fi
 
-  local tool tool_upper
+  local tool
   local should_reexec="false"
 
   for tool in "${tools[@]}"; do
-    tool_upper="$(__strtoupper "${tool}")"
-
-    export "MM_DISABLE_${tool_upper}"="true"
+    export "__mm_disable_${tool}"="true"
 
     if __is_function "__mm_${tool}_unload"; then
       if "__mm_${tool}_is_loaded"; then
@@ -180,7 +176,7 @@ mm_off() {
 
 __mm_just_usage() {
   cat >&2 <<EOT
-Usage: mm_just [options] ${MM_TOOLS_FOR_USAGE} ...
+Usage: mm_just [options] [${__mm_usage_tools}]...
 
 OPTIONS:
   -a, --all                                Enable all tools after shell re-exec
@@ -202,12 +198,12 @@ mm_just() {
         return 1
         ;;
       *)
-        if ! __ary_includes "$1" "${MM_TOOLS[@]}"; then
+        if ! __ary_includes "$1" "${__mm_tools[@]}"; then
           printf 'Unknown tool "%s"\n\n' "$1" >&2
           __mm_just_usage
           return 1
         fi
-        tools+=("$1")
+        tools+=( "$1" )
     esac
 
     shift
@@ -215,7 +211,7 @@ mm_just() {
 
   if "${all_tools}"; then
     if ((${#tools[@]} == 0)); then
-      tools=("${MM_TOOLS[@]}")
+      tools=("${__mm_tools[@]}")
     else
       printf 'Explicitly requested tools cannot be combined with -a/--all\n\n' >&2
       __mm_just_usage
@@ -223,23 +219,21 @@ mm_just() {
     fi
   fi
 
-  local tool tool_upper
+  local tool
 
-  for tool in "${MM_TOOLS[@]}"; do
-    tool_upper="$(__strtoupper "${tool}")"
-
+  for tool in "${__mm_tools[@]}"; do
     if __ary_includes "${tool}" "${tools[@]}"; then
-      __unexport "MM_DISABLE_${tool_upper}"
+      __unexport "__mm_disable_${tool}"
 
-      if [[ -z "${MM_FORCE_LOAD}" ]]; then
-        MM_FORCE_LOAD="${tool}"
+      if [[ -z "${__mm_force_load}" ]]; then
+        __mm_force_load="${tool}"
       else
-        MM_FORCE_LOAD+=" ${tool}"
+        __mm_force_load+=" ${tool}"
       fi
 
-      export MM_FORCE_LOAD
+      export __mm_force_load
     else
-      export "MM_DISABLE_${tool_upper}"="true"
+      export "__mm_disable_${tool}"="true"
 
       if __is_function "__mm_${tool}_unload" && "__mm_${tool}_is_loaded"; then
         "__mm_${tool}_unload"
