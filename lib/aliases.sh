@@ -10,7 +10,7 @@ c() { clear "$@"; }
 ll() { ls -la "$@"; }
 la() { ls -a "$@"; }
 h() { history "$@" | tail -n 32; }
-grep() { grep --color=auto "$@"; }
+grep() { command grep --color=auto "$@"; }
 
 ext_ip() {
   local ip_version="4"
