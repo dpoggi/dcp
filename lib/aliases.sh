@@ -5,12 +5,12 @@
 . "${DCP}/lib/util.sh"
 
 c() { clear "$@"; }
-ll() { ls -la "$@"; }
-la() { ls -a "$@"; }
+ll() { command ls -la "$@"; }
+la() { command ls -a "$@"; }
 h() { history "$@" | tail -n 32; }
 
 if __is_bash; then
-  grep() { grep --color=auto "$@"; }
+  grep() { command grep --color=auto "$@"; }
 fi
 
 ext_ip() {
