@@ -49,16 +49,16 @@ __export_select_re() { env | sed -e 's/=.*$//' -e "/$1/!d"; }
 #
 
 __unexport() { declare +x "$@"; unset "$@"; }
-__unalias() { unalias "$@"; }
-__unfunction() { unset -f "$@"; }
+__unalias() { unalias "$@" 2>/dev/null; }
+__unfunction() { unset -f "$@" 2>/dev/null; }
 
 __uncommand() {
   local cmd
   for cmd in "$@"; do
-    if __is_alias "$1"; then
-      __unalias "$1"
-    elif __is_function "$1"; then
-      __unfunction "$1"
+    if __is_alias "${cmd}"; then
+      __unalias "${cmd}"
+    elif __is_function "${cmd}"; then
+      __unfunction "${cmd}"
     fi
   done
 }
