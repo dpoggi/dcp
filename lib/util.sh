@@ -52,6 +52,17 @@ __unexport() { declare +x "$@"; unset "$@"; }
 __unalias() { unalias "$@"; }
 __unfunction() { unset -f "$@"; }
 
+__uncommand() {
+  local cmd
+  for cmd in "$@"; do
+    if __is_alias "$1"; then
+      __unalias "$1"
+    elif __is_function "$1"; then
+      __unfunction "$1"
+    fi
+  done
+}
+
 #
 # __strtoupper: upcases a string
 # 
