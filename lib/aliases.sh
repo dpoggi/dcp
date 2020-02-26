@@ -4,17 +4,13 @@
 
 . "${DCP}/lib/util.sh"
 
-__uncommand c ll la h
+__uncommand c ll la h grep
 
 c() { clear "$@"; }
 ll() { ls -la "$@"; }
 la() { ls -a "$@"; }
 h() { history "$@" | tail -n 32; }
-
-if __is_bash; then
-  __uncommand grep
-  grep() { grep --color=auto "$@"; }
-fi
+grep() { grep --color=auto "$@"; }
 
 ext_ip() {
   local ip_version="4"
