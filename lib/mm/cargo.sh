@@ -30,19 +30,30 @@ __mm_cargo_is_comp_loaded() {
 }
 
 __mm_cargo_load_comp_zsh() {
-  rustup completions zsh >"${USER_ZSH_FUNCTIONS}/_rustup"
+  local flag="false"
 
-  local toolchain_dir="$(__mm_cargo_get_toolchain_dir)"
-
-  if [[ -d "${toolchain_dir}" ]]; then
-    cp "${toolchain_dir}/share/zsh/site-functions/_cargo" \
-       "${USER_ZSH_FUNCTIONS}/_cargo"
+  if [[ ! -s "${USER_ZSH_FUNCTIONS}/_rustup" ]]; then
+    rustup completions zsh >"${USER_ZSH_FUNCTIONS}/_rustup"
+    flag="true"
   fi
 
-  cat >&2 <<EOT
+  if [[ ! -s "${USER_ZSH_FUNCTIONS}/_cargo" ]]; then
+    local toolchain_dir
+    toolchain_dir="$(__mm_cargo_get_toolchain_dir)"
+
+    if [[ -d "${toolchain_dir}" ]]; then
+      cp "${toolchain_dir}/share/zsh/site-functions/_cargo" \
+         "${USER_ZSH_FUNCTIONS}/_cargo"
+      flag="true"
+    fi
+  fi
+
+  if "${flag}"; then
+    cat >&2 <<EOT
 Completions for cargo and rustup have been installed. To activate, restart the
 current shell: \`${DCP_SHELL_EXEC_CMD[*]}'
 EOT
+  fi
 }
 
 __mm_cargo_load_comp_bash() {
@@ -50,10 +61,9 @@ __mm_cargo_load_comp_bash() {
   . "${BASH_COMPLETION_USER_DIR}/rustup.bash-completion"
 
   local toolchain_dir="$(__mm_cargo_get_toolchain_dir)"
+
   if [[ -d "${toolchain_dir}" ]]; then
-    cp \
-      "${toolchain_dir}/etc/bash_completion.d/cargo" \
-      "${BASH_COMPLETION_USER_DIR}/cargo"
+    cp "${toolchain_dir}/etc/bash_completion.d/cargo" "${BASH_COMPLETION_USER_DIR}/cargo"
 
     . "${BASH_COMPLETION_USER_DIR}/cargo"
   fi
