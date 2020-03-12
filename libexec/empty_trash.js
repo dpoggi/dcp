@@ -26,14 +26,14 @@
         cancelButton: "Cancel",
       }
     );
-  } catch (e) {
+  } catch (_) {
     result = { buttonReturned: "Cancel" };
   }
 
   if (result.buttonReturned === "Empty Trash") {
     try {
       finderApp.empty();
-    } catch (e) {
+    } catch (_) {
     }
   }
 
