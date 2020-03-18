@@ -110,6 +110,7 @@ gn() {
 
 gp() { git push "$@"; }
 gpl() { git pull "$@"; }
+gplff() { git pull --ff-only "$@"; }
 
 gpub() {
   if [[ -z "$1" ]]; then
