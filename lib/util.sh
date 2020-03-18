@@ -153,14 +153,18 @@ __git_get_current_branch() {
 
 # __get_get_merged_branches: prints "fully merged" Git branches
 __git_get_merged_branches() {
-  local current_branch="$(__git_get_current_branch)"
+  local current_branch
+  current_branch="$(__git_get_current_branch)"
 
   if [[ -z "${current_branch}" ]]; then
     return
   fi
 
-  current_branch="$(sed -e 's/\//\\\//g' <<< "${current_branch}")"
+  git branch --merged | awk "$(printf '{
+    branch=substr($0, 3)
 
-  git branch --merged | colrm 1 2 | sed -e '/^master$/d' \
-                                        -e "/^${current_branch}\$/d"
+    if (branch != "master" && branch != "%s") {
+      print branch
+    }
+  }' "${current_branch}")"
 }
