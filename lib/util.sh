@@ -137,18 +137,24 @@ __get_job_num() {
   done < <(jobs -l)
 }
 
-# __git_is_work_tree: returns true if CWD is a Git work tree
-__git_is_work_tree() {
+# __git_is_cwd_worktree: returns true if CWD is a Git worktree
+__git_is_cwd_worktree() {
   git rev-parse --is-inside-work-tree >/dev/null 2>&1
 }
 
 # __git_get_current_branch: prints the current Git branch
 __git_get_current_branch() {
-  if ! __git_is_work_tree; then
+  if ! __git_is_cwd_worktree; then
     return
   fi
 
-  git branch 2>/dev/null | awk '$0 ~ /^\*/ { printf "%s", $2 }'
+  git branch 2>/dev/null | awk '{
+    branch=substr($0, 3)
+
+    if ($1 == "*") {
+      print branch
+    }
+  }'
 }
 
 # __get_get_merged_branches: prints "fully merged" Git branches
@@ -160,7 +166,7 @@ __git_get_merged_branches() {
     return
   fi
 
-  git branch --merged | awk "$(printf '{
+  git branch --merged 2>/dev/null | awk "$(printf '{
     branch=substr($0, 3)
 
     if (branch != "master" && branch != "%s") {

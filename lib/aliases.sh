@@ -100,9 +100,10 @@ gll() { git log --stat --oneline --decorate "$@"; }
 gm() { git merge "$@"; }
 
 gn() {
-  if __git_is_work_tree; then
+  if __git_is_cwd_worktree; then
     return 1
   fi
+
   git init &&
     git add . &&
     git commit -m "Initial commit"
@@ -116,6 +117,7 @@ gpub() {
   if [[ -z "$1" ]]; then
     return 1
   fi
+
   git push origin "${1}:refs/heads/$1" &&
     git fetch origin &&
     git config "branch.${1}.remote" origin &&
