@@ -31,7 +31,7 @@ if [[ "${DCP_LOG_COLOR}" = "always" ]] || { [[ "${DCP_LOG_COLOR}" = "auto" ]] &&
     local level_color="$1"; shift
     local format="$1"; shift
 
-    __dcp_printf "\\033[2;39;49m%s %b%s \\033[0;35m%s \\033[2;39m: \\033[0m${format}\\n" \
+    __dcp_printf '\033[2;39;49m%s %b%s \033[0;35m%s \033[2;39m: \033[0m'"${format}"'\n' \
                  "$(date '+%F %T')" "${level_color}" "${level}" "$$" "$@"
   }
 
@@ -43,7 +43,7 @@ else
     local level="$1"; shift; shift
     local format="$1"; shift
 
-    __dcp_printf "%s [%s] %s : ${format}\\n" \
+    __dcp_printf '%s [%s] %s : '"${format}"'\n' \
                  "$(date '+%F %T')" "${level}" "$$" "$@"
   }
 
@@ -53,22 +53,22 @@ else
 fi
 
 if __dcp_contains "${DCP_LOG_LEVEL}" debug; then
-  log_debug() { __dcp_log 'DEBUG' '\033[0;32m' "$@"; }
+  log_debug() { __dcp_log "DEBUG" '\033[0;32m' "$@"; }
 else
   log_debug() { :; }
 fi
 if __dcp_contains "${DCP_LOG_LEVEL}" debug info; then
-  log_info() { __dcp_log ' INFO' '\033[0;34m' "$@"; }
+  log_info() { __dcp_log " INFO" '\033[0;34m' "$@"; }
 else
   log_info() { :; }
 fi
 if __dcp_contains "${DCP_LOG_LEVEL}" debug info warn; then
-  log_warn() { __dcp_log ' WARN' '\033[0;33m' "$@"; }
+  log_warn() { __dcp_log " WARN" '\033[0;33m' "$@"; }
 else
   log_warn() { :; }
 fi
 if __dcp_contains "${DCP_LOG_LEVEL}" debug info warn error; then
-  log_error() { __dcp_log 'ERROR' '\033[0;31m' "$@"; }
+  log_error() { __dcp_log "ERROR" '\033[0;31m' "$@"; }
 else
   log_error() { :; }
 fi
