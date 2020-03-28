@@ -21,13 +21,13 @@ declare -rx DCP_LOG_COLOR DCP_LOG_LEVEL
 
 if { printf '' >&3; } 2>/dev/null; then
   __dcp_printf() { printf "$@" >&3; }
-  __dcp_printf_tty() { [[ -t 3 ]]; }
+  __dcp_printf_isatty() { [[ -t 3 ]]; }
 else
   __dcp_printf() { printf "$@" >&2; }
-  __dcp_printf_tty() { [[ -t 2 ]]; }
+  __dcp_printf_isatty() { [[ -t 2 ]]; }
 fi
 
-if [[ "${DCP_LOG_COLOR}" = "always" ]] || { [[ "${DCP_LOG_COLOR}" = "auto" ]] && __dcp_printf_tty; }; then
+if [[ "${DCP_LOG_COLOR}" = "always" ]] || { [[ "${DCP_LOG_COLOR}" = "auto" ]] && __dcp_printf_isatty; }; then
   __dcp_log() {
     local level="$1"; shift
     local level_color="$1"; shift
@@ -98,4 +98,4 @@ log_cmd() {
   "$@"
 }
 
-unset -f __dcp_contains __dcp_printf_tty
+unset -f __dcp_contains __dcp_printf_isatty
