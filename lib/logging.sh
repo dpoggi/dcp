@@ -17,8 +17,6 @@ if ! __dcp_contains "${DCP_LOG_LEVEL}" debug info warn error hush none off quiet
   DCP_LOG_LEVEL="info"
 fi
 
-declare -rx DCP_LOG_COLOR DCP_LOG_LEVEL
-
 if { printf '' >&3; } 2>/dev/null; then
   __dcp_printf() { printf "$@" >&3; }
   __dcp_printf_isatty() { [[ -t 3 ]]; }
