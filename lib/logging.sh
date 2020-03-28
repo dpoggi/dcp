@@ -76,7 +76,7 @@ else
 fi
 
 log_cmd() {
-  (($# > 0)) || return
+  [[ -n "$1" ]] || return
 
   local arg program_name args=() quote="'\\''"
   for arg in "$@"; do
