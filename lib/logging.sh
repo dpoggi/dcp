@@ -80,7 +80,7 @@ log_cmd() {
 
   local arg program_name args=() quote="'\\''"
   for arg in "$@"; do
-    if [[ "${arg}" =~ [{}!\$\`\'\"\\[:space:]] ]]; then
+    if [[ "${arg}" =~ [{}!\$\*\`\'\"\\[:space:]] ]]; then
       arg="'${arg//\'/${quote}}'"
     fi
 
