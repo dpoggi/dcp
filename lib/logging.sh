@@ -35,7 +35,7 @@ if [[ "${DCP_LOG_COLOR}" = "always" ]] || { [[ "${DCP_LOG_COLOR}" = "auto" ]] &&
                  "$(date '+%F %T')" "${level_color}" "${level}" "$$" "$@"
   }
 
-  __dcp_log_program_name() {
+  __dcp_log_cmd_name() {
     __dcp_printf '\033[2;39;49m+ \033[0;36m%s\033[0m' "$1"
   }
 else
@@ -47,7 +47,7 @@ else
                  "$(date '+%F %T')" "${level}" "$$" "$@"
   }
 
-  __dcp_log_program_name() {
+  __dcp_log_cmd_name() {
     __dcp_printf '+ %s' "$1"
   }
 fi
@@ -76,20 +76,20 @@ fi
 log_cmd() {
   [[ -z "$1" ]] && return || :
 
-  local arg program_name args=() quote="'\\''"
+  local arg cmd_name args=() quote="'\\''"
   for arg in "$@"; do
     if [[ "${arg}" =~ [!%\$\*\|\\[:space:]] || "${arg}" =~ [\`\'\"\(\)\[\]\<\>{}] ]]; then
       arg="'${arg//\'/${quote}}'"
     fi
 
-    if [[ -z "${program_name}" ]]; then
-      program_name="${arg}"
+    if [[ -z "${cmd_name}" ]]; then
+      cmd_name="${arg}"
     else
       args+=("${arg}")
     fi
   done
 
-  __dcp_log_program_name "${program_name}"
+  __dcp_log_cmd_name "${cmd_name}"
   __dcp_printf '%s' "${args[@]/#/ }"
   __dcp_printf '\n'
 
