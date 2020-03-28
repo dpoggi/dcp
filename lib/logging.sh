@@ -38,7 +38,7 @@ if [[ "${DCP_LOG_COLOR}" = "always" ]] || { [[ "${DCP_LOG_COLOR}" = "auto" ]] &&
   }
 
   __dcp_log_program_name() {
-    __dcp_printf '\033[2;39;49m+ \033[0;35m%s\033[0m' "$1"
+    __dcp_printf '\033[2;39;49m+ \033[0;36m%s\033[0m' "$1"
   }
 else
   __dcp_log() {
