@@ -10,12 +10,12 @@ clone_repo() {
   local name="$(basename "$1")"
   name="${name%.*}"
 
-  infofln "Cloning %s into %s..." "${name}" "$2"
+  log_info "Cloning %s into %s..." "${name}" "$2"
 
   export GIT_DIR="$(basename "$2")/.git"
   git clone --quiet --recursive "$1" "$2" 2>/dev/null
 
-  infofln "Finished cloning %s." "${name}"
+  log_info "Finished cloning %s." "${name}"
   printf "\n"
 }
 
@@ -26,14 +26,14 @@ main() {
   fi
 
   if [[ -e "$1" ]]; then
-    errorfln "%s already exists" "$1"
+    log_error "%s already exists" "$1"
     return 1
   fi
 
   local tmp_dir="$(mktemp -q -d /tmp/dcp-shrinkwrap-XXXXXX)"
 
   if [[ -z "${tmp_dir}" ]]; then
-    errorfln "Unable to create temp directory"
+    log_error "Unable to create temp directory"
     return 1
   fi
 
@@ -46,7 +46,7 @@ main() {
   clone_repo "https://github.com/zsh-users/zsh-syntax-highlighting.git" \
              "${tmp_dir}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
 
-  infofln "Updating submodules for dotvim..."
+  log_info "Updating submodules for dotvim..."
 
   pushd "${tmp_dir}/.vim" >/dev/null
 
@@ -58,32 +58,32 @@ main() {
   make clean
   popd >/dev/null
 
-  infofln "Finished."
+  log_info "Finished."
   printf "\n"
 
   popd >/dev/null # back to original CWD
 
-  infofln "Checking out latest release of zsh-syntax-highlighting..."
+  log_info "Checking out latest release of zsh-syntax-highlighting..."
 
   pushd "${tmp_dir}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" >/dev/null
   export GIT_DIR=".git"
   git checkout --quiet --force "$(git describe --tags --abbrev=0)"
   popd >/dev/null
 
-  infofln "Finished."
+  log_info "Finished."
   printf "\n"
 
-  infofln "Removing .git directories..."
+  log_info "Removing .git directories..."
 
   local dotgit_dir
   while IFS='' read -d '' -r dotgit_dir; do
     rm -rf "${dotgit_dir}"
   done < <(find "${tmp_dir}" -type d -name .git -print0)
 
-  infofln "Finished."
+  log_info "Finished."
   printf "\n"
 
-  infofln "Compressing archive..."
+  log_info "Compressing archive..."
 
   local archive_name="$(basename "$1")"
 
@@ -91,17 +91,17 @@ main() {
   tar -cJf "${archive_name}" ".oh-my-zsh" ".dcp" ".vim"
   popd >/dev/null
 
-  infofln "Moving archive..."
+  log_info "Moving archive..."
 
   mv "${tmp_dir}/${archive_name}" "$1"
 
-  infofln "Cleaning up..."
+  log_info "Cleaning up..."
 
   if [[ -d "${tmp_dir}" ]]; then
     rm -rf "${tmp_dir}"
   fi
 
-  infofln "Done."
+  log_info "Done."
 }
 
 main "$@"

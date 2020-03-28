@@ -23,7 +23,7 @@ EOT
 
 write_config() {
   if [[ -s "${CONFIG_PATH}" ]]; then
-    errorfln "%s already exists" "${CONFIG_PATH}"
+    log_error "%s already exists" "${CONFIG_PATH}"
     return 1
   fi
 
@@ -31,7 +31,7 @@ write_config() {
     mkdir -p "${CONFIG_DIR}"
   fi
 
-  infofln "Writing default configuration to %s" "${CONFIG_PATH}"
+  log_info "Writing default configuration to %s" "${CONFIG_PATH}"
 
   cat > "${CONFIG_PATH}" <<EOF
 uid = nobody
@@ -57,7 +57,7 @@ interrupt() {
 
 start_rsyncd() {
   if [[ ! -s "${CONFIG_PATH}" ]]; then
-    warnfln "%s does not exist\n" "${CONFIG_PATH}"
+    log_warn "%s does not exist\n" "${CONFIG_PATH}"
     write_config
     printf "\n"
   fi
@@ -93,7 +93,7 @@ main() {
         return
         ;;
       *)
-        errorfln "Unknown option %s\n" "$1"
+        log_error "Unknown option %s\n" "$1"
         print_usage
         return 1
         ;;

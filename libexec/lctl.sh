@@ -2,6 +2,8 @@
 
 set -eo pipefail
 
+exec 3>&2
+
 . "${HOME}/.dcp/lib/logging.sh"
 
 readonly LAUNCHCTL="$(command -v launchctl)"
@@ -46,7 +48,7 @@ __log_action() {
   esac
 
   if [[ -n "${participle}" ]]; then
-    infofln "%s %s ..." "${participle}" "${SERVICE_TARGET}"
+    log_info "%s %s ..." "${participle}" "${SERVICE_TARGET}"
   fi
 }
 
@@ -55,12 +57,12 @@ launchctl() {
 
   if [[ "${action}" = "stop" ]]; then
     if ! launchctl blame >/dev/null; then
-      warnfln "%s is not running" "${SERVICE_TARGET}"
+      log_warn "%s is not running" "${SERVICE_TARGET}"
       return 1
     fi
   elif [[ "${action}" = "bootstrap" ]]; then
     if launchctl blame >/dev/null; then
-      warnfln "%s is already running" "${SERVICE_TARGET}"
+      log_warn "%s is already running" "${SERVICE_TARGET}"
       return 1
     fi
   fi
@@ -99,10 +101,10 @@ launchctl_status() {
       *)  service_status="Stopped"
   esac
 
-  infofln "%s" "${SERVICE_TARGET}"
-  infofln "%s" "$(seq -f '=' -s '' 1 "${#SERVICE_TARGET}")"
-  infofln "Status: %s" "${service_status}"
-  infofln "Reason: %s" "${reason}"
+  log_info "%s" "${SERVICE_TARGET}"
+  log_info "%s" "$(seq -f '=' -s '' 1 "${#SERVICE_TARGET}")"
+  log_info "Status: %s" "${service_status}"
+  log_info "Reason: %s" "${reason}"
 }
 
 __is_domain_target_global() { [[ "$1" != gui* && "$1" != user* ]]; }
@@ -164,12 +166,12 @@ main() {
     enable)     launchctl enable;;
     disable)    launchctl disable;;
     unstoppable)
-      errorfln >&2 "%s cannot be stopped" "${SERVICE_TARGET}"
+      log_error "%s cannot be stopped" "${SERVICE_TARGET}"
       return 1
       ;;
     *)
-      errorfln >&2 "'%s' is not a valid action\n" "${action}"
-      print_usage >&2
+      log_error "'%s' is not a valid action\n" "${action}"
+      print_usage >&3
       return 1
   esac
 }

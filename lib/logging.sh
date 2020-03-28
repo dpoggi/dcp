@@ -1,8 +1,10 @@
 __dcp_contains() {
   local search="$1"; shift
+
   while (($# > 0)); do
     [[ "$1" = "${search}" ]] && return || shift
   done
+
   return 1
 }
 
@@ -24,83 +26,72 @@ else
 fi
 
 if [[ "${DCP_LOG_COLOR}" = "always" ]] || [[ "${DCP_LOG_COLOR}" = "auto" && -t 2 ]]; then
-  __dcp_logf() {
+  __dcp_log() {
     local level="$1"; shift
     local level_color="$1"; shift
     local format="$1"; shift
 
-    __dcp_printf "\\033[2;39;49m%s %b%s \\033[0;35m%s \\033[2;39m: \\033[0m${format}" \
+    __dcp_printf "\\033[2;39;49m%s %b%s \\033[0;35m%s \\033[2;39m: \\033[0m${format}\\n" \
                  "$(date '+%F %T')" "${level_color}" "${level}" "$$" "$@"
   }
 
-  __dcp_log_cmd() {
-    local first="$1"; shift
-
-    __dcp_printf '\033[2;39;49m+ \033[0;35m%s\033[0m' "${first}"
-    __dcp_printf '%s' "${@/#/ }"
-    __dcp_printf '\n'
+  __dcp_log_program_name() {
+    __dcp_printf '\033[2;39;49m+ \033[0;35m%s\033[0m' "$1"
   }
 else
-  __dcp_logf() {
+  __dcp_log() {
     local level="$1"; shift; shift
     local format="$1"; shift
 
-    __dcp_printf "%s [%s] %s : ${format}" \
+    __dcp_printf "%s [%s] %s : ${format}\\n" \
                  "$(date '+%F %T')" "${level}" "$$" "$@"
   }
 
-  __dcp_log_cmd() {
-    local first="$1"; shift
-
-    __dcp_printf '+ %s' "${first}"
-    __dcp_printf '%s' "${@/#/ }"
-    __dcp_printf '\n'
+  __dcp_log_program_name() {
+    __dcp_printf '+ %s' "$1"
   }
 fi
 
 if __dcp_contains "${DCP_LOG_LEVEL}" debug; then
-  debugf() { __dcp_logf "DEBUG" '\033[0;32m' "$@"; }
-  debugfln() { debugf "$@"; __dcp_printf '\n'; }
+  log_debug() { __dcp_log "DEBUG" '\033[0;32m' "$@"; }
 else
-  debugf() { :; }
-  debugfln() { :; }
+  log_debug() { :; }
 fi
-
 if __dcp_contains "${DCP_LOG_LEVEL}" debug info; then
-  infof() { __dcp_logf " INFO" '\033[0;34m' "$@"; }
-  infofln() { infof "$@"; __dcp_printf '\n'; }
+  log_info() { __dcp_log " INFO" '\033[0;34m' "$@"; }
 else
-  infof() { :; }
-  infofln() { :; }
+  log_info() { :; }
 fi
-
 if __dcp_contains "${DCP_LOG_LEVEL}" debug info warn; then
-  warnf() { __dcp_logf " WARN" '\033[0;33m' "$@"; }
-  warnfln() { warnf "$@"; __dcp_printf '\n'; }
+  log_warn() { __dcp_log " WARN" '\033[0;33m' "$@"; }
 else
-  warnf() { :; }
-  warnfln() { :; }
+  log_warn() { :; }
 fi
-
 if __dcp_contains "${DCP_LOG_LEVEL}" debug info warn error; then
-  errorf() { __dcp_logf "ERROR" '\033[0;31m' "$@"; }
-  errorfln() { errorf "$@"; __dcp_printf '\n'; }
+  log_error() { __dcp_log "ERROR" '\033[0;31m' "$@"; }
 else
-  errorf() { :; }
-  errorfln() { :; }
+  log_error() { :; }
 fi
 
 log_cmd() {
   (($# > 0)) || return
 
-  local arg cmd=() quote="'\\''"
+  local arg program_name args=() quote="'\\''"
   for arg in "$@"; do
-    [[ "${arg}" =~ [!{}\`\'\"\ \\] ]] &&
-      cmd+=("'${arg//\'/${quote}}'") ||
-      cmd+=("${arg}")
+    if [[ "${arg}" =~ [!{}\`\'\"\ \\] ]]; then
+      arg="'${arg//\'/${quote}}'"
+    fi
+
+    if [[ -z "${program_name}" ]]; then
+      program_name="${arg}"
+    else
+      args+=("${arg}")
+    fi
   done
 
-  __dcp_log_cmd "${cmd[@]}"
+  __dcp_log_program_name "${program_name}"
+  __dcp_printf '%s' "${args[@]/#/ }"
+  __dcp_printf '\n'
 
   "$@"
 }

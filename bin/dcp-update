@@ -12,7 +12,7 @@ checkout_tag() {
   fi
 
   if [[ -n "${tag}" ]]; then
-    infofln "Checking out tag for latest version of %s..." "$2"
+    log_info "Checking out tag for latest version of %s..." "$2"
     git checkout --quiet --force "${tag}"
   fi
 
@@ -30,21 +30,21 @@ update_repo() {
   pushd "${repo}" >/dev/null
   local name="$(basename "$(git remote get-url origin 2>/dev/null)" .git)"
   name="${name%.*}"
-  infofln "Updating %s..." "${name}"
+  log_info "Updating %s..." "${name}"
 
-  infofln "Fetching origin..."
+  log_info "Fetching origin..."
 
   local initial_branch="$(git symbolic-ref --short HEAD 2>/dev/null)"
 
 
   if ! git fetch --quiet --force \
                  origin "refs/heads/master:refs/remotes/origin/master"; then
-    errorfln "Unable to fetch origin."
+    log_error "Unable to fetch origin."
     exit 1
   fi
 
   if [[ -n "$(git status --porcelain --ignore-submodules --untracked-files=all 2>/dev/null)" ]]; then
-    infofln "Attempting to stash uncommitted changes:"
+    log_info "Attempting to stash uncommitted changes:"
     git status --short --ignore-submodules --untracked-files=all
     git merge --abort > /dev/null 2>&1
     git -c "user.name=dcp update" \
@@ -56,7 +56,7 @@ update_repo() {
   fi
 
   if [[ "${initial_branch}" != "master" ]]; then
-    infofln "Checking out master..."
+    log_info "Checking out master..."
     if git merge-base --is-ancestor master origin/master > /dev/null 2>&1; then
       git checkout --quiet --force master
     else
@@ -64,16 +64,16 @@ update_repo() {
     fi
   fi
 
-  infofln "Updating master..."
+  log_info "Updating master..."
   git merge --quiet --ff-only --no-edit origin/master \
             --strategy=recursive \
             --strategy-option=ours \
             --strategy-option=ignore-all-space
   if [[ "$?" != "0" ]]; then
-    infofln "Unable to update master using a fast-forward, forcing a new checkout..."
+    log_info "Unable to update master using a fast-forward, forcing a new checkout..."
 
     if ! git checkout --quiet --force -B master origin/master; then
-      errorfln "Unable to force a new checkout of origin/master."
+      log_error "Unable to force a new checkout of origin/master."
       exit 1
     fi
   fi
@@ -83,7 +83,7 @@ update_repo() {
   fi
 
   if [[ -s ".gitmodules" ]]; then
-    infofln "Updating submodules..."
+    log_info "Updating submodules..."
     git submodule update --quiet --init --recursive
   fi
   if [[ "${name}" = "dotvim" ]]; then
@@ -92,8 +92,8 @@ update_repo() {
     [[ -x "${hook_script}" ]] && "${hook_script}"
   fi
 
-  infofln "Finished updating %s." "${name}"
-  infofln ""
+  log_info "Finished updating %s." "${name}"
+  log_info ""
   popd >/dev/null
 }
 
@@ -112,13 +112,13 @@ done < <(find "${plugins_dir}" -maxdepth 1 \
                                -type d \
                                -print0 2> /dev/null | tail -n +2)
 
-infofln "Updating symlinks..."
+log_info "Updating symlinks..."
 "${HOME}/.dcp/bin/dcp-install-links"
-infofln "Done."
+log_info "Done."
 
 if [[ -n "${stashed}" ]]; then
-  infofln ""
-  infofln "You may want to restore stashed changes to:"
-  infofln "%s" "${stashed}"
-  infofln "Use \`git stash pop' to do so."
+  log_info ""
+  log_info "You may want to restore stashed changes to:"
+  log_info "%s" "${stashed}"
+  log_info "Use \`git stash pop' to do so."
 fi
