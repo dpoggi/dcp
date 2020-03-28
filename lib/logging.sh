@@ -36,7 +36,7 @@ if [[ "${DCP_LOG_COLOR}" = "always" ]] || [[ "${DCP_LOG_COLOR}" = "auto" && -t 2
   __dcp_log_cmd() {
     local first="$1"; shift
 
-    __dcp_printf '\033[2;39;49m+ \033[0;32m%s\033[0m' "${first}"
+    __dcp_printf '\033[2;39;49m+ \033[0;35m%s\033[0m' "${first}"
     __dcp_printf '%s' "${@/#/ }"
     __dcp_printf '\n'
   }
