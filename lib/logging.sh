@@ -74,12 +74,14 @@ else
 fi
 
 log_cmd() {
-  [[ -z "$1" ]] && return || :
+  (($# == 0)) && return || :
 
   local arg cmd_name args=() quote="'\\''"
   for arg in "$@"; do
     if [[ -z "${arg}" ]] || [[ "${arg}" =~ [!%\$\*\|\\[:space:]] || "${arg}" =~ [\`\'\"\(\)\[\]\<\>{}] ]]; then
       arg="'${arg//\'/${quote}}'"
+    else
+      arg="${arg//${HOME}/~}"
     fi
 
     if [[ -z "${cmd_name}" ]]; then
