@@ -78,7 +78,7 @@ log_cmd() {
 
   local arg cmd_name args=() quote="'\\''"
   for arg in "$@"; do
-    if [[ "${arg}" =~ [!%\$\*\|\\[:space:]] || "${arg}" =~ [\`\'\"\(\)\[\]\<\>{}] ]]; then
+    if [[ -z "${arg}" ]] || [[ "${arg}" =~ [!%\$\*\|\\[:space:]] || "${arg}" =~ [\`\'\"\(\)\[\]\<\>{}] ]]; then
       arg="'${arg//\'/${quote}}'"
     fi
 
