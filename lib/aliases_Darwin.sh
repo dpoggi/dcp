@@ -207,15 +207,21 @@ fi
 # System-level resets... these come in handy.
 #
 
-# Set hostname on (at least) Mojave and up
-set_hostname() {
-  if [[ -z "$1" ]]; then
-    return 1
-  fi
+# Set computer name, hostname, and Bonjour hostname
+set_computer_name() {
+  [[ -z "$1" ]] && return 1 || :
 
-  sudo -H scutil --set ComputerName "$1"
-  sudo -H scutil --set LocalHostName "$1"
-  sudo -H scutil --set HostName "$1"
+  # Remove single quotes, replace spaces with hyphens
+  local hostname="$1"
+  hostname="${hostname//\'/}"
+  hostname="${hostname// /-}"
+
+  printf 'Setting ComputerName to "%s"...\n' "$1" >&2
+  sudo scutil --set ComputerName "$1"
+
+  printf 'Setting HostName and LocalHostName to "%s"...\n' "${hostname}" >&2
+  sudo scutil --set HostName "${hostname}"
+  sudo scutil --set LocalHostName "${hostname}"
 }
 
 # Reset "Open With..." menus after connecting a drive with applications on it
