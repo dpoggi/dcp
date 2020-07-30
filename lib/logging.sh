@@ -27,6 +27,8 @@ fi
 
 if [[ "${DCP_LOG_COLOR}" = "always" ]] || { [[ "${DCP_LOG_COLOR}" = "auto" ]] && __dcp_printf_isatty; }; then
   __dcp_log() {
+    (($# < 3)) && return 1 || :
+
     local level="$1"; shift
     local level_color="$1"; shift
     local format="$1"; shift
@@ -40,6 +42,8 @@ if [[ "${DCP_LOG_COLOR}" = "always" ]] || { [[ "${DCP_LOG_COLOR}" = "auto" ]] &&
   }
 else
   __dcp_log() {
+    (($# < 3)) && return 1 || :
+
     local level="$1"; shift; shift
     local format="$1"; shift
 
@@ -75,8 +79,10 @@ fi
 
 log_cmd() {
   (($# == 0)) && return || :
+  [[ -z "$1" ]] && return 127 || :
 
-  local arg cmd_name args=() quote="'\\''" tilde="~"
+  local arg cmd_name
+  local args=() quote="'\\''" tilde="~"
   for arg in "$@"; do
     if [[ -z "${arg}" ]] || [[ "${arg}" =~ [!%\$\*\|\\[:space:]] || "${arg}" =~ [\`\'\"\(\)\[\]\<\>{}] ]]; then
       arg="'${arg//\'/${quote}}'"
