@@ -224,3 +224,11 @@ if __is_command mvn; then
   mvncp() { mvn clean package "$@"; }
   mvncv() { mvn clean verify "$@"; }
 fi
+
+# Make database
+
+if __is_command make && __is_command bat; then
+  show_make_db() {
+    make -p -f /dev/null | bat -l make
+  }
+fi
