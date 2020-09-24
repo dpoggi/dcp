@@ -3,75 +3,82 @@
 set -eo pipefail
 
 readonly OS="$(uname -s)"
+readonly DCP_CONFIG_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/dcp"
+readonly WARNING_SHOWN_FLAG_PATH="${DCP_CONFIG_DIR}/symlink-warning-shown"
+
 readonly NON_DCP_DOTFILES=(
   ".bash_login"
   ".profile"
   ".zlogin"
 )
-readonly DCP_CONFIG_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/dcp"
-readonly WARNING_SHOWN_FLAG_PATH="${DCP_CONFIG_DIR}/symlink-warning-shown"
+
 readonly PATH_MIGRATIONS=(
 	"${HOME}/.dcp/conf/plugins:${DCP_CONFIG_DIR}/plugins.lst"
 	"${HOME}/.dcp/conf/theme:${DCP_CONFIG_DIR}/zsh-theme"
 )
 
-warnfln() {
-  local fmt="$1"; shift
-  printf >&2 "\033[0;33m[WARN]:\033[0m ${fmt}\n" "$@"
+log_warn() {
+  printf '\033[2;39;49m%s %b%5s \033[0;35m%s \033[2;39m: \033[0m%s\n' \
+         "$(date '+%F %T')" '\033[0;33m' "WARN" "$$" "$1" >&2
 }
 
 __ary_join() {
   local sep="$1"; shift
-  printf "%s" "$1"; shift
-  printf "%s" "${@/#/${sep}}"
+  printf '%s' "$1"; shift
+  printf '%s' "${@/#/${sep}}"
 }
 
 __ln_snfv() {
   # Solaris' and OpenBSD's ln(1) don't have -v
-  printf >&2 "%s -> %s\n" "$2" "$1"
+  printf '%s -> %s\n' "$2" "$1" >&2
 
   # Solaris' doesn't have -n (or its equivalent -h)
-  if [[ -h "$2" ]]; then
-    rm -f "$2"
-  fi
+  [[ -h "$2" ]] && rm -f "$2" || :
 
   ln -sf "$1" "$2"
 }
 
+find_dotfiles() {
+  local path="$1"; shift
+  find "${path}" -mindepth 1 "$@" -print0 2>/dev/null | sort -z
+}
+
 __link_dotfile() {
-  local dotfile="$(basename "$1")"
+  local dotfile="${2:$((${#1} + 1))}"
   local link="${HOME}/.${dotfile}"
+  local parent="$(dirname "${link}")"
+
+  if [[ ! -d "${parent}" ]]; then
+    mkdir -p "${parent}"
+  fi
 
   if [[ ! -h "${link}" ]] && [[ -d "${link}" || -s "${link}" ]]; then
-    warnfln "~/.%s is a directory or file of non-zero size, skipping" \
-            "${dotfile}"
+    log_warn "~/.${dotfile} is a directory or file of non-zero size, skipping"
   else
-    __ln_snfv "$1" "${link}"
+    __ln_snfv "$2" "${link}"
   fi
 }
 
-if [[ "${OS}" = "Darwin" ]]; then
-  link_dotfile() {
+link_dotfile() {
+  if [[ "${OS}" = "Darwin" ]]; then
     __link_dotfile "$@"
-  }
-else
-  link_dotfile() {
+  else
     case "$(basename "$1")" in
-      chunkwmrc|khdrc|macos)
-        :
-        ;;
-      *)
-        __link_dotfile "$@"
+      chunkwmrc|khdrc|macos)  : ;;
+      *)                      __link_dotfile "$@"
     esac
-  }
-fi
+  fi
+}
 
 standard_cleanup() {
-  if [[ "${OS}" = "Darwin" && ! -e "${HOME}/.hushlogin" ]]; then
-    touch "${HOME}/.hushlogin"
-  fi
-  if [[ "${OS}" != "Darwin" && -h "${HOME}/.macos" ]]; then
-    rm -f "${HOME}/.macos"
+  if [[ "${OS}" = "Darwin" ]]; then
+    if [[ ! -e "${HOME}/.hushlogin" ]]; then
+      touch "${HOME}/.hushlogin"
+    fi
+  else
+    if [[ -h "${HOME}/.macos" ]]; then
+      rm -f "${HOME}/.macos"
+    fi
   fi
 
   local dotfile
@@ -83,41 +90,41 @@ standard_cleanup() {
 }
 
 perform_migrations() {
-  local performed_migration="false"
   local migration old_path new_path
+  local performed_migration="false"
 
   for migration in "${PATH_MIGRATIONS[@]}"; do
     IFS=':' read -r old_path new_path <<< "${migration}"
 
     if [[ -e "${old_path}" ]]; then
       if ! "${performed_migration}"; then
-        warnfln "The ~/.dcp/conf directory is deprecated and will be removed soon."
+        log_warn "The ~/.dcp/conf directory is deprecated and will be removed soon."
         performed_migration="true"
       fi
 
-      warnfln "Moving %s -> %s" "${old_path}" "${new_path}"
+      log_warn "Moving ${old_path} -> ${new_path}"
       mv "${old_path}" "${new_path}"
     fi
   done
 
   if "${performed_migration}"; then
-    printf >&2 "\n"
+    printf '\n' >&2
   fi
 }
 
 check_non_dcp() {
-  local result="false"
   local dotfile
+  local result="false"
 
   for dotfile in "${NON_DCP_DOTFILES[@]}"; do
     if [[ -e "${HOME}/${dotfile}" ]]; then
       if ! "${result}"; then
-        printf >&2 "\n"
+        printf '\n' >&2
       fi
 
       result="true"
 
-      warnfln "~/%s exists but is not provided by ~/.dcp" "${dotfile}"
+      log_warn "~/${dotfile} exists but is not provided by ~/.dcp"
     fi
   done
 
@@ -151,19 +158,21 @@ configure_git() {
     __maybe_git_config "diff.utf16.textconv" "iconv -f utf-16 -t utf-8"
 
     if ! grep -q '^\*\.mobileprovision' "${HOME}/.gitattributes"; then
-      printf "*.mobileprovision diff=mobileprovision\n" >>"${HOME}/.gitattributes"
+      printf '*.mobileprovision diff=mobileprovision\n' >>"${HOME}/.gitattributes"
     fi
     if ! grep -q '^\*\.plist' "${HOME}/.gitattributes"; then
-      printf "*.plist diff=plist\n" >>"${HOME}/.gitattributes"
+      printf '*.plist diff=plist\n' >>"${HOME}/.gitattributes"
     fi
     if ! grep -q '^\*\.strings' "${HOME}/.gitattributes"; then
-      printf "*.strings diff=utf16\n" >>"${HOME}/.gitattributes"
+      printf '*.strings diff=utf16\n' >>"${HOME}/.gitattributes"
     fi
   fi
 }
 
 print_warning() {
-  local dotfiles="$(__ary_join ", " "${NON_DCP_DOTFILES[@]}")"
+  local dotfiles
+  dotfiles="$(__ary_join ", " "${NON_DCP_DOTFILES[@]}")"
+
   cat >&2 <<EOT
 
 Having any of [${dotfiles}] should (in theory) be harmless.
@@ -186,9 +195,20 @@ main() {
   perform_migrations
 
   local dotfile
-  for dotfile in "${HOME}/.dcp/dot"/* "${HOME}/.vim"/*vimrc; do
-    link_dotfile "${dotfile}"
-  done
+
+  while IFS='' read -d '' -r dotfile; do
+    link_dotfile "${HOME}/.dcp/dot" "${dotfile}"
+  done < <(
+    find_dotfiles "${HOME}/.dcp/dot" -type f
+  )
+
+  printf '\n' >&2
+
+  while IFS='' read -d '' -r dotfile; do
+    link_dotfile "${HOME}/.vim" "${dotfile}"
+  done < <(
+    find_dotfiles "${HOME}/.vim" -maxdepth 1 -type f -name '*vimrc'
+  )
 
   if ! check_non_dcp; then
     rm -f "${WARNING_SHOWN_FLAG_PATH}"
