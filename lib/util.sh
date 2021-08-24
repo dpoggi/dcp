@@ -144,33 +144,26 @@ __git_is_cwd_worktree() {
 
 # __git_get_current_branch: prints the current Git branch
 __git_get_current_branch() {
-  if ! __git_is_cwd_worktree; then
-    return
+  if __git_is_cwd_worktree; then
+    git branch 2>/dev/null | awk '$1 == "*" { print substr($0, 3) }'
+  else
+    return 1
   fi
-
-  git branch 2>/dev/null | awk '{
-    branch=substr($0, 3)
-
-    if ($1 == "*") {
-      print branch
-    }
-  }'
 }
 
 # __get_get_merged_branches: prints "fully merged" Git branches
 __git_get_merged_branches() {
   local current_branch
-  current_branch="$(__git_get_current_branch)"
 
-  if [[ -z "${current_branch}" ]]; then
-    return
+  if ! current_branch="$(__git_get_current_branch)"; then
+    return 1
   fi
 
-  git branch --merged 2>/dev/null | awk "$(printf '{
+  git branch --merged 2>/dev/null | awk '{
     branch=substr($0, 3)
 
-    if (branch != "master" && branch != "%s") {
+    if (branch != "master" && branch != "'"${current_branch}"'") {
       print branch
     }
-  }' "${current_branch}")"
+  }'
 }
