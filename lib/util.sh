@@ -65,31 +65,38 @@ __uncommand() {
   done
 }
 
-#
 # __strtoupper: upcases a string
-# 
-# __strtolower: downcases a string
-#
+__strtoupper() {
+  while (($# > 0)); do
+    awk '{ print toupper($0) }' <<<"$1"
+    shift
+  done
+}
 
-__strtoupper() { awk '{ print toupper($0) }' <<<"$1"; }
-__strtolower() { awk '{ print tolower($0) }' <<<"$1"; }
+# __strtolower: downcases a string
+__strtolower() {
+  while (($# > 0)); do
+    awk '{ print tolower($0) }' <<<"$1"
+    shift
+  done
+}
 
 # __strtoarg: surrounds a string with single quotes, escaping any quotes inside
 __strtoarg() {
   local quote="'\\''"
 
-  if (($# > 0)); then
-    printf "'%s'"'\n' "${1//\'/${quote}}"
-  else
-    printf '\n'
-  fi
+  while (($# > 0)); do
+    printf "'%s'\\n" "${1//\'/${quote}}"
+    shift
+  done
 }
 
 # __ary_join: converts an array to a string separated by the first argument
 __ary_join() {
-  local sep="$1"; shift
-  printf "%s" "$1"; shift
-  printf "%s" "${@/#/${sep}}"
+  local separator="$1"; shift
+  local first="$1"; shift
+  printf '%s' "${first}"
+  printf '%s' "${@/#/${separator}}"
 }
 
 # __ary_includes: returns true if the first argument is included in the array
@@ -113,8 +120,9 @@ __ary_includes() {
 
 if __is_command perl; then
   __path_select() {
-    printf "%s" "$1" \
-      | perl -e "print join(':', grep { $2 } split(/:/, scalar <>))"
+    perl -e '
+      print join(":", grep { '"$2"' } split(/:/, scalar <>))
+    ' <<<"$1"
   }
 else
   __path_select() { printf "%s" "$1"; }
