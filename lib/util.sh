@@ -6,7 +6,6 @@
 
 if __is_zsh; then
   __valueof() { printf "%s" "${(P)1}"; }
-
   __typeof() {
     whence -w "$@" | sed -e 's/^.*:[[:space:]]*//' \
                          -e 's/^command$/file/' \
@@ -16,16 +15,19 @@ if __is_zsh; then
   }
 elif __is_bash; then
   __valueof() { printf "%s" "${!1}"; }
-
   __typeof() { type -t "$@"; }
 fi
 
+#
 # Convenience wrappers for __valueof
+#
 
 __is_true() { [[ "$(__valueof "$1")" = "true" ]]; }
 __is_false() { [[ "$(__valueof "$1")" = "false" ]]; }
 
+#
 # Convenience wrappers for __typeof
+#
 
 __is_command() {
   local type="$(__typeof "$1")"
@@ -69,8 +71,19 @@ __uncommand() {
 # __strtolower: downcases a string
 #
 
-__strtoupper() { printf "%s" "$1" | tr '[:lower:]' '[:upper:]'; }
-__strtolower() { printf "%s" "$1" | tr '[:upper:]' '[:lower:]'; }
+__strtoupper() { awk '{ print toupper($0) }' <<<"$1"; }
+__strtolower() { awk '{ print tolower($0) }' <<<"$1"; }
+
+# __strtoarg: surrounds a string with single quotes, escaping any quotes inside
+__strtoarg() {
+  local quote="'\\''"
+
+  if (($# > 0)); then
+    printf "'%s'"'\n' "${1//\'/${quote}}"
+  else
+    printf '\n'
+  fi
+}
 
 # __ary_join: converts an array to a string separated by the first argument
 __ary_join() {
@@ -119,7 +132,6 @@ __path_reject_re() { __path_select "$1" "\$_ !~ /$2/"; }
 # __path_distinct: __path_select wrapper which deduplicates to the earliest
 # distinct elements, thereby avoiding any change in behavior
 #
-
 __path_distinct() { __path_select "$1" '!$seen{$_}++ && $_ ne "\$PATH"'; }
 
 # __get_job_num: returns the job number of the given PID
