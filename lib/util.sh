@@ -1,20 +1,29 @@
 #
 # __valueof: dereference a variable by name
-#
 # __typeof: prints the type of command the given name is hashed as
 #
 
 if __is_zsh; then
-  __valueof() { printf "%s" "${(P)1}"; }
+  __valueof() { printf '%s\n' "${(P)1}"; }
   __typeof() {
-    whence -w "$@" | sed -e 's/^.*:[[:space:]]*//' \
-                         -e 's/^command$/file/' \
-                         -e 's/^hashed$/file/' \
-                         -e 's/^reserved$/keyword/' \
-                         -e '/^none$/d'
+    local name type
+
+    for name in "$@"; do
+      type="$(whence -w "${name}")"
+      type="${type#*: }"
+      type="${type/command/file}"
+      type="${type/hashed/file}"
+      type="${type/reserved/keyword}"
+
+      if [[ "${type}" != "none" ]]; then
+        printf '%s\n' "${type}"
+      elif (($# == 1)); then
+        return 1
+      fi
+    done
   }
 elif __is_bash; then
-  __valueof() { printf "%s" "${!1}"; }
+  __valueof() { printf '%s\n' "${!1}"; }
   __typeof() { type -t "$@"; }
 fi
 
@@ -55,17 +64,17 @@ __unalias() { unalias "$@" 2>/dev/null; }
 __unfunction() { unset -f "$@" 2>/dev/null; }
 
 __uncommand() {
-  local cmd
-  for cmd in "$@"; do
-    if __is_alias "${cmd}"; then
-      __unalias "${cmd}"
-    elif __is_function "${cmd}"; then
-      __unfunction "${cmd}"
+  while (($# > 0)); do
+    if __is_alias "$1"; then
+      __unalias "$1"
+    elif __is_function "$1"; then
+      __unfunction "$1"
     fi
+    shift
   done
 }
 
-# __strtoupper: upcases a string
+# __strtoupper: upcases strings
 __strtoupper() {
   while (($# > 0)); do
     awk '{ print toupper($0) }' <<<"$1"
@@ -73,7 +82,7 @@ __strtoupper() {
   done
 }
 
-# __strtolower: downcases a string
+# __strtolower: downcases strings
 __strtolower() {
   while (($# > 0)); do
     awk '{ print tolower($0) }' <<<"$1"
@@ -81,7 +90,7 @@ __strtolower() {
   done
 }
 
-# __strtoarg: surrounds a string with single quotes, escaping any quotes inside
+# __strtoarg: surrounds strings with single quotes, escaping any quotes inside
 __strtoarg() {
   local quote="'\\''"
 
@@ -103,11 +112,11 @@ __ary_join() {
 __ary_includes() {
   local search="$1"; shift
 
-  local element
-  for element in "$@"; do
-    if [[ "${element}" = "${search}" ]]; then
+  while (($# > 0)); do
+    if [[ "$1" = "${search}" ]]; then
       return
     fi
+    shift
   done
 
   return 1
@@ -125,7 +134,7 @@ if __is_command perl; then
     ' <<<"$1"
   }
 else
-  __path_select() { printf "%s" "$1"; }
+  __path_select() { printf '%s\n' "$1"; }
 fi
 
 # Convenience wrappers for __path_select 
@@ -151,7 +160,7 @@ __get_job_num() {
 
     if [[ "${pid}" = "$1" ]]; then
       local job_num="${job%%]*}"
-      printf "%s" "${job_num:1}"
+      printf '%s\n' "${job_num:1}"
       return
     fi
   done < <(jobs -l)
