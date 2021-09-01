@@ -2,7 +2,7 @@ DCP_SHELL_EXEC_CMD=(exec)
 
 if [[ -n "${ZSH_NAME}" ]]; then
   readonly DCP_SHELL="zsh"
-  readonly DCP_SHELL_RETURN="EXIT"
+  readonly DCP_SHELL_RET_SIGNAL="EXIT"
 
   __is_bash() { false; }
   __is_zsh() { true; }
@@ -14,7 +14,7 @@ if [[ -n "${ZSH_NAME}" ]]; then
   fi
 else
   readonly DCP_SHELL="bash"
-  readonly DCP_SHELL_RETURN="RETURN"
+  readonly DCP_SHELL_RET_SIGNAL="RETURN"
 
   __is_bash() { true; }
   __is_zsh() { false; }
