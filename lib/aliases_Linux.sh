@@ -2,54 +2,88 @@
 # Network admin things
 #
 
-__net_open_things() {
+__net_things() {
   if ! command -v netstat >/dev/null; then
     printf 'netstat not found\n' >&2
     return 1
   fi
 
-  printf '%s\n%s\n' "$1" "$(sudo -H netstat -planW | awk "$2" | sort -g)" \
-    | column -t -o '    ' \
-    | sed -r -e 's/^([0-9]+)(\s+)(\w+):(\w+) (.*)$/\1\2\3: \4\5/'
+  local columns script args=()
+  while (($# > 0)); do
+    case "$1" in
+      -c) columns="$2"; shift ;;
+      -s) script="$2"; shift ;;
+      -i) args+=(--protocol=inet,inet6) ;;
+      -u) args+=(--protocol=unix) ;;
+      *)  return 1
+    esac
+    shift
+  done
+
+  local column separator
+  while IFS='' read -d ' ' -r column; do
+    if [[ -n "${separator}" ]]; then
+      separator+=" "
+    fi
+
+    local i
+    for ((i=0; i < ${#column}; i++)); do
+      separator+="="
+    done
+  done <<<"${columns} "
+
+  local output
+  output="$(
+    sudo -H netstat -lnpW "${args[@]}" | awk -F '  +' "${script}" | sort -g
+  )"
+
+  printf '%s\n%s\n%s\n' "${columns}" "${separator}" "${output}" \
+    | column -t -o '    '
 }
 
-# List open TCP/UDP ports
+net_ports() {
+  __net_things                                    \
+    -i                                            \
+    -c "PID Program_Name Protocol Bound_Address"  \
+    -s '
+      {
+        pid_name=""
+      }
 
-net_open_ports() {
-  sudo -H true
+      $1 ~ /^tcp6?$/ {
+        pid_name=$6
+      }
 
-  printf '======== Open TCP/UDP Ports ========\n'
+      $1 ~ /^udp6?$/ {
+        pid_name=$5
+      }
 
-  __net_open_things "PID ProgramName Protocol BoundAddress" '{
-    if ($1 ~ /(tcp)6?/ && $6 == "LISTEN") {
-      sub("/", " ", $7)
-      print $7 $8, $1, $4
-    } else if ($1 ~ /(udp)6?/ && $6 != "ESTABLISHED") {
-      sub("/", " ", $6)
-      print $6, $1, $4
-    }
-  }'
+      length(pid_name) > 0 {
+        sub(/:.*$/, "", pid_name)
+        sub("/", " ", pid_name)
+        sub(/^0 /, "", $3)
+
+        print pid_name, $1, $3
+      }
+    '
 }
 
-# List open Unix sockets
+net_sockets() {
+  __net_things                        \
+    -u                                \
+    -c "PID Program_Name Socket_Path" \
+    -s '
+      $1 == "unix" {
+        sub(/:.*$/, "", $7)
+        sub("/", " ", $7)
 
-net_open_sockets() {
-  sudo -H true
-
-  printf '======== Open Unix Sockets ========\n'
-
-  __net_open_things "PID ProgramName Path" '{
-    if ($1 == "unix" && $7 == "LISTENING") {
-      sub("/", " ", $9)
-      print $9, $10
-    }
-  }'
+        print $7, $8
+      }
+    '
 }
 
-# List all of it. List it all.
-
-net_open_all() {
-  net_open_ports
+net_all() {
+  net_ports
   printf '\n'
-  net_open_sockets
+  net_sockets
 }
