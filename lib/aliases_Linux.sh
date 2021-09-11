@@ -20,13 +20,12 @@ __net_things() {
     shift
   done
 
-  local column separator
+  local i column separator
   while IFS='' read -d ' ' -r column; do
     if [[ -n "${separator}" ]]; then
       separator+=" "
     fi
 
-    local i
     for ((i=0; i < ${#column}; i++)); do
       separator+="="
     done
