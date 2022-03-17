@@ -90,9 +90,11 @@ __extract_to_mkv() {
   __assert_output_path "$2"
   ffmpeg -v warning \
          -i "$1" \
+         -map_metadata -1 \
+         -sn \
+         -dn \
          -c:v copy \
          -an \
-         -sn \
          "$2"
 }
 
@@ -101,9 +103,11 @@ __source_to_wav() {
   __assert_output_path "$2"
   ffmpeg -v warning \
          -i "$1" \
+         -map_metadata -1 \
+         -sn \
+         -dn \
          -vn \
          -c:a pcm_s16le \
-         -sn \
          -ac 2 \
          "$2"
 }
@@ -138,10 +142,12 @@ __merge_to_mp4() {
   ffmpeg -v warning \
          -i "$1" \
          -i "$2" \
-         -movflags faststart \
+         -map_metadata -1 \
+         -sn \
+         -dn \
          -c:v copy \
          -c:a copy \
-         -sn \
+         -movflags +faststart \
          "$3"
 }
 
