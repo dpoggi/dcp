@@ -62,6 +62,26 @@ gcm() { git commit -m "$@"; }
 gco() { git checkout "$@"; }
 gd() { git diff "$@"; }
 gds() { git diff --staged "$@"; }
+
+gdpb() {
+  local commitish
+  if command -v pbpaste >/dev/null; then
+    commitish="$(pbpaste)"
+  elif command -v xsel >/dev/null; then
+    commitish="$(xsel --clipboard --output)"
+  else
+    printf 'Neither pbpaste nor xsel found\n' >&2
+    return 1
+  fi
+
+  if (( ${#commitish} == 0 || ${#commitish} > 40 )); then
+    printf 'Pasteboard contents don'\''t look like a commit-ish\n' >&2
+    return 1
+  fi
+
+  git diff "${commitish}~1" "${commitish}"
+}
+
 gdt() { git describe --tags --abbrev=0 "$@"; }
 gf() { git fetch "$@"; }
 
