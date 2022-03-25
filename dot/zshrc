@@ -10,7 +10,7 @@ if [[ " ${TERM} " = *256color* ]]; then
   plugins+=( emoji )
 fi
 if [[ "${DCP_OS}" = "Darwin" ]]; then
-  plugins+=( osx )
+  plugins+=( macos )
 fi
 
 # User-specified plugins
