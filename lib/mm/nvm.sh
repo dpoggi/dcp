@@ -11,7 +11,8 @@ __mm_nvm_is_loaded() {
 }
 
 __mm_nvm_is_installed() {
-  [[ -r "${NVM_DIR:-${HOME}/.nvm}/nvm.sh" || -r "/usr/local/opt/nvm/nvm.sh" ]]
+  [[ -r "${NVM_DIR:-${HOME}/.nvm}/nvm.sh" ]] ||
+    [[ -r "/opt/homebrew/opt/nvm/nvm.sh" || -r "/usr/local/opt/nvm/nvm.sh" ]]
 }
 
 __mm_nvm_load() {
@@ -19,6 +20,8 @@ __mm_nvm_load() {
 
   if [[ -r "${NVM_DIR}/nvm.sh" ]]; then
     . "${NVM_DIR}/nvm.sh"
+  elif [[ -r "/opt/homebrew/opt/nvm/nvm.sh" ]]; then
+    . "/opt/homebrew/opt/nvm/nvm.sh"
   elif [[ -r "/usr/local/opt/nvm/nvm.sh" ]]; then
     . "/usr/local/opt/nvm/nvm.sh"
   fi
@@ -39,6 +42,8 @@ __mm_nvm_load_comp() {
     fi
 
     . "${NVM_DIR}/bash_completion"
+  elif [[ -r "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ]]; then
+    . /opt/homebrew/opt/nvm/etc/bash_completion.d/nvm
   elif [[ -r "/usr/local/opt/nvm/etc/bash_completion.d/nvm" ]]; then
     . /usr/local/opt/nvm/etc/bash_completion.d/nvm
   fi
