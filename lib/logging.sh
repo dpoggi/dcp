@@ -84,7 +84,7 @@ log_cmd() {
   local arg cmd_name
   local args=() quote="'\\''" tilde="~"
   for arg in "$@"; do
-    if [[ -z "${arg}" ]] || [[ "${arg}" =~ [!%\$\*\|\\[:space:]] || "${arg}" =~ [\`\'\"\(\)\<\>{}] ]]; then
+    if [[ -z "${arg}" ]] || [[ "${arg}" =~ [?!%\$\*\|\\[:space:]] || "${arg}" =~ [\`\'\"\(\)=\<\>{}] ]]; then
       arg="'${arg//\'/${quote}}'"
     else
       arg="${arg//${HOME}/${tilde}}"
