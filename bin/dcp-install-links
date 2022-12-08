@@ -163,9 +163,6 @@ configure_git() {
     if ! grep -q '^\*\.plist' "${HOME}/.gitattributes"; then
       printf '*.plist diff=plist\n' >>"${HOME}/.gitattributes"
     fi
-    if ! grep -q '^\*\.strings' "${HOME}/.gitattributes"; then
-      printf '*.strings diff=utf16\n' >>"${HOME}/.gitattributes"
-    fi
   fi
 }
 
