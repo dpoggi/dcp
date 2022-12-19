@@ -3,30 +3,33 @@
 #
 
 # Standard plugins
-plugins=( history jsontools zsh-syntax-highlighting )
+plugins=(history jsontools zsh-syntax-highlighting)
 
 # Conditional plugins
-if [[ " ${TERM} " = *256color* ]]; then
-  plugins+=( emoji )
+if [[ " ${TERM} " = *"256color"* ]]; then
+  plugins+=(emoji)
 fi
 if [[ "${DCP_OS}" = "Darwin" ]]; then
-  plugins+=( macos )
+  plugins+=(macos)
 fi
 
 # User-specified plugins
 if [[ -s "${DCP_CONFIG_DIR}/plugins.lst" ]]; then
-  while IFS='' read -r user_plugin; do
-    plugins+=( "${user_plugin}" )
+  while IFS='' read -r; do
+    plugins+=("${REPLY}")
   done <"${DCP_CONFIG_DIR}/plugins.lst"
-  unset user_plugin
 fi
 
 # Load most of dcp
 . "${DCP}/lib/init.sh"
 
 # Remove broken Homebrew Git completions before they cause a problem
-if [[ "${DCP_OS}" = "Darwin" && -h "/usr/local/share/zsh/site-functions/_git" ]]; then
-  rm -f "/usr/local/share/zsh/site-functions/_git"
+if [[ "${DCP_OS}" = "Darwin" ]]; then
+  if [[ -h "/usr/local/share/zsh/site-functions/_git" ]]; then
+    rm -f "/usr/local/share/zsh/site-functions/_git"
+  elif [[ -h "/opt/homebrew/share/zsh/site-functions/_git" ]]; then
+    rm -f "/opt/homebrew/share/zsh/site-functions/_git"
+  fi
 fi
 
 # Load oh-my-zsh

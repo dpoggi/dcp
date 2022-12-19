@@ -19,11 +19,19 @@ if [[ ! -e "${USER_ZSH_FUNCTIONS}" ]]; then
   mkdir -p "${USER_ZSH_FUNCTIONS}"
 fi
 
-fpath=("${USER_ZSH_FUNCTIONS}" "${DCP}/share/zsh/site-functions" "${fpath[@]}")
+__fpath_prepend=("${USER_ZSH_FUNCTIONS}" "${DCP}/share/zsh/site-functions")
+
+if [[ -d "/opt/homebrew/share/zsh/site-functions" ]]; then
+  __fpath_prepend+=("/opt/homebrew/share/zsh/site-functions")
+fi
+
+fpath=("${__fpath_prepend[@]}" "${fpath[@]}")
+
+unset __fpath_prepend
 
 # Set oh-my-zsh theme
 if [[ -s "${DCP_CONFIG_DIR}/zsh-theme" ]]; then
-  ZSH_THEME="$(cat "${DCP_CONFIG_DIR}/zsh-theme")"
+  ZSH_THEME="$(<"${DCP_CONFIG_DIR}/zsh-theme")"
 else
   ZSH_THEME="dpoggi"
 fi
