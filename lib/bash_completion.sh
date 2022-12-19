@@ -1,4 +1,5 @@
 COMP_LOAD_PATHS=(
+  "/opt/homebrew/etc/profile.d/bash_completion.sh"
   "/usr/local/etc/profile.d/bash_completion.sh"
   "/usr/local/etc/bash_completion"
   "/etc/bash_completion"
