@@ -130,11 +130,16 @@ __ary_includes() {
 if __is_command perl; then
   __path_select() {
     perl -e '
-      print join(":", grep { '"$2"' } split(/:/, scalar <>))
+      my @dirs = split(/:/, scalar <>);
+      chomp(@dirs);
+      my $pathlist = join(":", grep { '"$2"' } @dirs);
+      print $pathlist;
     ' <<<"$1"
   }
 else
-  __path_select() { printf '%s\n' "$1"; }
+  __path_select() {
+    printf '%s\n' "$1"
+  }
 fi
 
 # Convenience wrappers for __path_select 
@@ -149,7 +154,9 @@ __path_reject_re() { __path_select "$1" "\$_ !~ /$2/"; }
 # __path_distinct: __path_select wrapper which deduplicates to the earliest
 # distinct elements, thereby avoiding any change in behavior
 #
-__path_distinct() { __path_select "$1" '!$seen{$_}++ && $_ ne "\$PATH"'; }
+__path_distinct() {
+  __path_select "$1" '!$seen{$_}++ && length $_ && $_ ne "\$PATH"'
+}
 
 # __get_job_num: returns the job number of the given PID
 __get_job_num() {
@@ -191,7 +198,7 @@ __git_get_merged_branches() {
   git branch --merged 2>/dev/null | awk '{
     branch=substr($0, 3)
 
-    if (branch != "master" && branch != "'"${current_branch}"'") {
+    if (branch != "master" && branch != "main" && branch != "'"${current_branch}"'") {
       print branch
     }
   }'
