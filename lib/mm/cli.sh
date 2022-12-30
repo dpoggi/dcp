@@ -63,7 +63,7 @@ mm_on() {
   local error_flag="false"
 
   for tool in "${tools[@]}"; do
-    if [[ "${soft}" = "false" ]]; then
+    if ! "${soft}"; then
       unset "__mm_disable_${tool}"
     fi
 

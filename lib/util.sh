@@ -22,9 +22,13 @@ if __is_zsh; then
       fi
     done
   }
+  __is_alias() { [[ "$(whence -w "$1")" = *": alias" ]]; }
+  __is_function() { [[ "$(whence -w "$1")" = *": function" ]]; }
 elif __is_bash; then
   __valueof() { printf '%s\n' "${!1}"; }
   __typeof() { type -t "$@"; }
+  __is_alias() { [[ "$(type -t "$1")" = "alias" ]]; }
+  __is_function() { [[ "$(type -t "$1")" = "function" ]]; }
 fi
 
 #
@@ -43,9 +47,9 @@ __is_command() {
   [[ -n "${type}" && "${type}" != "keyword" ]]
 }
 
-__is_alias() { [[ "$(__typeof "$1")" = "alias" ]]; }
-__is_function() { [[ "$(__typeof "$1")" = "function" ]]; }
-__is_file() { [[ "$(__typeof "$1")" = "file" ]]; }
+__is_file() {
+  [[ "$(__typeof "$1")" = "file" ]]
+}
 
 #
 # __export_select_re: selects the names of exports matching the given regular
@@ -64,14 +68,8 @@ __unalias() { unalias "$@" 2>/dev/null; }
 __unfunction() { unset -f "$@" 2>/dev/null; }
 
 __uncommand() {
-  while (($# > 0)); do
-    if __is_alias "$1"; then
-      __unalias "$1"
-    elif __is_function "$1"; then
-      __unfunction "$1"
-    fi
-    shift
-  done
+  __unalias "$@" || :
+  __unfunction "$@" || :
 }
 
 # __strtoupper: upcases strings
