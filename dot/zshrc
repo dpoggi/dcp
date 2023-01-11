@@ -20,6 +20,11 @@ if [[ -s "${DCP_CONFIG_DIR}/plugins.lst" ]]; then
   done <"${DCP_CONFIG_DIR}/plugins.lst"
 fi
 
+# Conditionally initialize Homebrew
+if [[ "${DCP_OS}" = "Darwin" ]]; then
+  . "${DCP}/lib/brew.sh"
+fi
+
 # Load most of dcp
 . "${DCP}/lib/init.sh"
 

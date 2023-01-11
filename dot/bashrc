@@ -8,6 +8,11 @@ readonly DCP="${HOME}/.dcp"
 # Set up environment
 . "${DCP}/lib/env.sh"
 
+# Conditionally initialize Homebrew
+if [[ "${DCP_OS}" = "Darwin" ]]; then
+  . "${DCP}/lib/brew.sh"
+fi
+
 # Set up completion
 . "${DCP}/lib/bash_completion.sh"
 

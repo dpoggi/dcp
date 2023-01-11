@@ -28,3 +28,11 @@ fi
 
 # PATH deduplication
 export PATH="$(__path_distinct "${PATH}")"
+
+if [[ -n "${INFOPATH}" ]]; then
+  export INFOPATH="$(__path_distinct "${INFOPATH}"):"
+fi
+
+if [[ -n "${MANPATH}" ]]; then
+  export MANPATH="$(__path_distinct "${MANPATH}"):"
+fi
