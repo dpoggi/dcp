@@ -25,6 +25,9 @@ readonly DCP_RESET="\033[0;39;49m"
 # Detect shell + invocation (approximately close enough)
 . "${DCP}/lib/detect_shell.sh"
 
+# Un-comment to load benchmarking tools
+#. "${DCP}/lib/benchmark.sh"
+
 # Local environment
 if [[ -s "${DCP}/localenv" ]]; then
   . "${DCP}/localenv"
