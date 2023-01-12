@@ -2,8 +2,12 @@ __dcp_bench_name=()
 __dcp_bench_start=()
 
 __dcp_monotime=""
-if ! __dcp_monotime="$(command -v monotime)" && [[ -x "${HOME}/.local/bin/monotime" ]]; then
-  __dcp_monotime="${HOME}/.local/bin/monotime"
+if ! __dcp_monotime="$(command -v monotime)"; then
+  if [[ -x "${HOME}/.local/bin/monotime" ]]; then
+    __dcp_monotime="${HOME}/.local/bin/monotime"
+  elif [[ -x "/usr/local/bin/monotime" ]]; then
+    __dcp_monotime="/usr/local/bin/monotime"
+  fi
 fi
 
 __bench_start() {
