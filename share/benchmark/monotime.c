@@ -9,8 +9,8 @@
 
 #include <Windows.h>
 #elif (defined(__APPLE__) && defined(__MACH__)) || defined(__GLIBC__)
-// Only macOS and Linux supported in this branch - CLOCK_MONOTONIC_RAW
-// and ignoring the return value of clock_gettime are non-standard
+// Only macOS and Linux+glibc supported in this branch - CLOCK_MONOTONIC_RAW and
+// ignoring the possibility of EOVERFLOW in clock_gettime are non-standard
 #include <time.h>
 #else
 #error Unsupported runtime
