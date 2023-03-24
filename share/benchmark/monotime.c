@@ -8,8 +8,9 @@
 #include <time.h>
 #endif  // _WIN32
 
-// Check because CLOCK_MONOTONIC_RAW is a non-standard extension
-#if !(defined(__APPLE__) || defined(__GLIBC__) || defined(_WIN32))
+// Check because CLOCK_MONOTONIC_RAW and ignoring the return value of
+// clock_gettime are non-standard
+#if !(defined(__GLIBC__) || defined(__MACH__) || defined(_WIN32))
 #error Unsupported runtime
 #endif
 
