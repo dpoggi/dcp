@@ -5,9 +5,13 @@
 #ifdef _WIN32
 #include <Windows.h>
 #else
-#include <stdlib.h>
 #include <time.h>
 #endif  // _WIN32
+
+// Check because CLOCK_MONOTONIC_RAW is a non-standard extension
+#if !(defined(__APPLE__) || defined(__GLIBC__) || defined(_WIN32))
+#error Unsupported runtime
+#endif
 
 int main(void)
 {
@@ -19,10 +23,7 @@ int main(void)
     timestamp = (uint64_t)GetTickCount();
 #else
     struct timespec tp;
-    if (clock_gettime(CLOCK_MONOTONIC, &tp) != 0) {
-        perror("clock_gettime");
-        exit(EXIT_FAILURE);
-    }
+    (void)clock_gettime(CLOCK_MONOTONIC_RAW, &tp);
 
     timestamp =
         ((uint64_t)tp.tv_sec * UINT64_C(1000)) +
