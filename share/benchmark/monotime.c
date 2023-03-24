@@ -8,13 +8,15 @@
 #endif
 
 #include <Windows.h>
-#elif (defined(__APPLE__) && defined(__MACH__)) || defined(__GLIBC__)
-// Only macOS and Linux+glibc supported in this branch - CLOCK_MONOTONIC_RAW and
-// ignoring the possibility of EOVERFLOW in clock_gettime are non-standard
-#include <time.h>
 #else
+#include <stdlib.h>
+#include <time.h>
+
+// CLOCK_MONOTONIC_RAW must be defined on non-Windows systems
+#ifndef CLOCK_MONOTONIC_RAW
 #error Unsupported runtime
 #endif
+#endif  // defined(_MSC_VER) || defined(__MINGW64__)
 
 int main(void)
 {
@@ -26,11 +28,14 @@ int main(void)
     timestamp = (uint64_t)GetTickCount();
 #else
     struct timespec tp;
-    (void)clock_gettime(CLOCK_MONOTONIC_RAW, &tp);
+    if (clock_gettime(CLOCK_MONOTONIC_RAW, &tp) != 0) {
+        perror("clock_gettime");
+        exit(EXIT_FAILURE);
+    }
 
     timestamp =
-        ((uint64_t)tp.tv_sec * UINT64_C(1000)) +
-        ((uint64_t)tp.tv_nsec / UINT64_C(1000000));
+        (uint64_t)tp.tv_sec * UINT64_C(1000) +
+        (uint64_t)tp.tv_nsec / UINT64_C(1000000);
 #endif
 
     printf("%" PRIu64 "\n", timestamp);
