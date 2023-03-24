@@ -2,15 +2,17 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#ifdef _WIN32
-#include <Windows.h>
-#else
-#include <time.h>
-#endif  // _WIN32
+#if defined(_MSC_VER) || defined(__MINGW64__)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 
-// Check because CLOCK_MONOTONIC_RAW and ignoring the return value of
-// clock_gettime are non-standard
-#if !(defined(__GLIBC__) || defined(__MACH__) || defined(_WIN32))
+#include <Windows.h>
+#elif (defined(__APPLE__) && defined(__MACH__)) || defined(__GLIBC__)
+// Only macOS and Linux supported in this branch - CLOCK_MONOTONIC_RAW
+// and ignoring the return value of clock_gettime are non-standard
+#include <time.h>
+#else
 #error Unsupported runtime
 #endif
 
