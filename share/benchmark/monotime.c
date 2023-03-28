@@ -12,8 +12,13 @@
 #include <stdlib.h>
 #include <time.h>
 
-// CLOCK_MONOTONIC_RAW must be defined on non-Windows systems
-#ifndef CLOCK_MONOTONIC_RAW
+// CLOCK_MONOTONIC_RAW or CLOCK_MONOTONIC must be defined on non-Windows systems
+#if defined(CLOCK_MONOTONIC_RAW)
+#define MONOCLOCK CLOCK_MONOTONIC_RAW
+#elif defined(CLOCK_MONOTONIC)
+#define MONOCLOCK CLOCK_MONOTONIC
+#warning CLOCK_MONOTONIC_RAW unavailable, falling back to CLOCK_MONOTONIC
+#else
 #error Unsupported runtime
 #endif
 #endif  // defined(_MSC_VER) || defined(__MINGW64__)
@@ -28,7 +33,7 @@ int main(void)
     timestamp = (uint64_t)GetTickCount();
 #else
     struct timespec tp;
-    if (clock_gettime(CLOCK_MONOTONIC_RAW, &tp) != 0) {
+    if (clock_gettime(MONOCLOCK, &tp) != 0) {
         perror("clock_gettime");
         exit(EXIT_FAILURE);
     }
