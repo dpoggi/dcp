@@ -152,6 +152,15 @@ gsa() { git stash apply "$@"; }
 gsl() { git stash list "$@"; }
 gst() { git stash "$@"; }
 
+gupstream() {
+  local branch
+  if ! branch="$(__git_get_current_branch)"; then
+    return 1
+  fi
+
+  git branch --set-upstream-to="origin/${branch}" "${branch}"
+}
+
 gitignore() {
   if [[ -z "$1" ]]; then
     return 1
