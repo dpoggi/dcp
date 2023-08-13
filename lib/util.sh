@@ -24,11 +24,15 @@ if __is_zsh; then
   }
   __is_alias() { [[ "$(whence -w "$1")" = *": alias" ]]; }
   __is_function() { [[ "$(whence -w "$1")" = *": function" ]]; }
+  __strtoupper() { printf '%s\n' "${(U)1}"; }
+  __strtolower() { printf '%s\n' "${(L)1}"; }
 elif __is_bash; then
   __valueof() { printf '%s\n' "${!1}"; }
   __typeof() { type -t "$@"; }
   __is_alias() { [[ "$(type -t "$1")" = "alias" ]]; }
   __is_function() { [[ "$(type -t "$1")" = "function" ]]; }
+  __strtoupper() { tr '[:lower:]' '[:upper:]' <<<"$1"; }
+  __strtolower() { tr '[:upper:]' '[:lower:]' <<<"$1"; }
 fi
 
 #
@@ -70,22 +74,6 @@ __unfunction() { unset -f "$@" 2>/dev/null; }
 __uncommand() {
   __unalias "$@" || :
   __unfunction "$@" || :
-}
-
-# __strtoupper: upcases strings
-__strtoupper() {
-  while (($# > 0)); do
-    awk '{ print toupper($0) }' <<<"$1"
-    shift
-  done
-}
-
-# __strtolower: downcases strings
-__strtolower() {
-  while (($# > 0)); do
-    awk '{ print tolower($0) }' <<<"$1"
-    shift
-  done
 }
 
 # __strtoarg: surrounds strings with single quotes, escaping any quotes inside
