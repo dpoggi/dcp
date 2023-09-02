@@ -6,7 +6,6 @@
 #define NOMINMAX
 #define VC_EXTRALEAN
 #define WIN32_LEAN_AND_MEAN
-
 #include <Windows.h>
 #else
 #include <stdlib.h>
@@ -20,7 +19,7 @@
 #warning CLOCK_MONOTONIC_RAW unavailable, falling back to CLOCK_MONOTONIC
 #else
 #error Unsupported runtime
-#endif
+#endif  // defined(CLOCK_MONOTONIC_RAW), defined(CLOCK_MONOTONIC)
 #endif  // defined(_MSC_VER) || defined(__MINGW64__)
 
 int main(void)
@@ -37,10 +36,7 @@ int main(void)
         perror("clock_gettime");
         exit(EXIT_FAILURE);
     }
-
-    timestamp =
-        (uint64_t)tp.tv_sec * UINT64_C(1000) +
-        (uint64_t)tp.tv_nsec / UINT64_C(1000000);
+    timestamp = ((uint64_t)tp.tv_sec * 1000U) + ((uint64_t)tp.tv_nsec / 1000000U);
 #endif
 
     printf("%" PRIu64 "\n", timestamp);
