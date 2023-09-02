@@ -1,6 +1,13 @@
-INSTALL		?= install
+INSTALL		?= install -p
 MKDIR		?= mkdir -p
-STRIP		?= strip -p -s
+
+ifeq ($(shell uname -s),Darwin)
+CODESIGN        ?= codesign -f -v
+IDENTITY        ?= $(shell echo $${EXPANDED_CODE_SIGN_IDENTITY:-$${CODE_SIGN_IDENTITY}})
+STRIP		?= strip -rSTx
+else
+STRIP		?= strip -ps
+endif
 
 ifeq ($(shell id -u),0)
 PREFIX		?= /usr/local
@@ -29,3 +36,8 @@ install:
 	$(MKDIR) $(PREFIX)/bin
 	$(INSTALL) $(TARGET) $(PREFIX)/bin
 	$(STRIP) $(PREFIX)/bin/$(TARGET)
+ifeq ($(shell uname -s),Darwin)
+ifneq ($(IDENTITY),)
+	$(CODESIGN) -s $(IDENTITY) $(PREFIX)/bin/$(TARGET)
+endif
+endif
