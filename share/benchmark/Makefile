@@ -2,7 +2,7 @@ INSTALL		?= install -p
 MKDIR		?= mkdir -p
 
 ifeq ($(shell uname -s),Darwin)
-CODESIGN        ?= codesign -f -v
+CODESIGN        ?= codesign -v
 IDENTITY        ?= $(shell echo $${EXPANDED_CODE_SIGN_IDENTITY:-$${CODE_SIGN_IDENTITY}})
 STRIP		?= strip -rSTx
 else
@@ -38,6 +38,6 @@ install:
 	$(STRIP) $(PREFIX)/bin/$(TARGET)
 ifeq ($(shell uname -s),Darwin)
 ifneq ($(IDENTITY),)
-	$(CODESIGN) -s $(IDENTITY) $(PREFIX)/bin/$(TARGET)
+	$(CODESIGN) -s "$(IDENTITY)" $(PREFIX)/bin/$(TARGET)
 endif
 endif
