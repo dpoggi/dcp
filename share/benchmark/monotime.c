@@ -1,5 +1,3 @@
-#include <inttypes.h>
-#include <stdint.h>
 #include <stdio.h>
 
 #if defined(_MSC_VER) || defined(__MINGW64__)
@@ -19,20 +17,20 @@
 
 int main(void)
 {
-    uint64_t timestamp;
+    unsigned long long timestamp;
 
 #if defined(_WIN64)
-    timestamp = (uint64_t)GetTickCount64();
+    timestamp = (unsigned long long)GetTickCount64();
 #elif defined(_WIN32)
-    timestamp = (uint64_t)GetTickCount();
+    timestamp = (unsigned long long)GetTickCount();
 #else
     struct timespec tp;
     if (clock_gettime(CLOCK_MONOTONIC, &tp) != 0) {
         perror("clock_gettime");
         exit(EXIT_FAILURE);
     }
-    timestamp = ((uint64_t)tp.tv_sec * 1000U) + ((uint64_t)tp.tv_nsec / 1000000U);
+    timestamp = ((unsigned long long)tp.tv_sec * 1000ULL) + ((unsigned long long)tp.tv_nsec / 1000000ULL);
 #endif
 
-    printf("%" PRIu64 "\n", timestamp);
+    printf("%llu\n", timestamp);
 }
