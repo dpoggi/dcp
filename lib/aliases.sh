@@ -230,9 +230,8 @@ datestamp() {
 # virtualenv-independent pip
 
 if [[ "${PIP_REQUIRE_VIRTUALENV}" = "true" ]]; then
-  gpip() { PIP_REQUIRE_VIRTUALENV="" command pip "$@"; }
-  gpip2() { PIP_REQUIRE_VIRTUALENV="" command pip2 "$@"; }
-  gpip3() { PIP_REQUIRE_VIRTUALENV="" command pip3 "$@"; }
+  gpip() { PIP_REQUIRE_VIRTUALENV="" python -m pip "$@"; }
+  gpip3() { PIP_REQUIRE_VIRTUALENV="" python3 -m pip "$@"; }
 fi
 
 # Gradle aliases
