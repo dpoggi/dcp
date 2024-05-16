@@ -40,6 +40,9 @@ fi
 # Load oh-my-zsh
 . "${ZSH}/oh-my-zsh.sh"
 
+# Hate this
+unsetopt AUTO_CD
+
 # Zap uninstall function (why make it this easy to run?)
 unset -f uninstall_oh_my_zsh 2>/dev/null || :
 
