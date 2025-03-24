@@ -153,7 +153,7 @@ configure_git() {
 
   if [[ "${OS}" = "Darwin" ]]; then
     __maybe_git_config "core.trustctime" "false"
-    __maybe_git_config "diff.mobileprovision.textconv" "openssl smime -inform der -verify -in"
+    __maybe_git_config "diff.mobileprovision.textconv" "openssl smime -inform der -verify -noverify -in 2>/dev/null"
     __maybe_git_config "diff.plist.textconv" "plutil -convert xml1 -o -"
     __maybe_git_config "diff.utf16.textconv" "iconv -f utf-16 -t utf-8"
 
