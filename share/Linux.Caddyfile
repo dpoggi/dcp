@@ -1,0 +1,9 @@
+{
+	admin off
+}
+
+:8080 {
+	file_server browse {
+		hide Caddyfile .git
+	}
+}

@@ -86,3 +86,10 @@ net_all() {
   printf '\n'
   net_sockets
 }
+
+# Caddy
+if __is_command caddy; then
+  caddyfs() {
+    caddy run --config "${DCP}/share/Linux.Caddyfile" "$@"
+  }
+fi

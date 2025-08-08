@@ -203,6 +203,13 @@ if __is_zsh && [[ -x "/usr/local/opt/coreutils/bin/gdu" ]]; then
   du() { /usr/local/opt/coreutils/bin/gdu "$@"; }
 fi
 
+# Caddy
+if __is_command caddy; then
+  caddyfs() {
+    caddy run --config "${DCP}/share/Darwin.Caddyfile" "$@"
+  }
+fi
+
 #
 # System-level resets... these come in handy.
 #
