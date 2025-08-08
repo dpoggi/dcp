@@ -184,8 +184,13 @@ __git_get_merged_branches() {
   git branch --merged 2>/dev/null | awk '{
     branch=substr($0, 3)
 
-    if (branch != "master" && branch != "main" && branch != "'"${current_branch}"'") {
-      print branch
+    if (branch == "main" || branch == "master" || branch ~ /^master-/) {
+      next
     }
+    if (branch == "'"${current_branch}"'") {
+      next
+    }
+
+    print branch
   }'
 }
